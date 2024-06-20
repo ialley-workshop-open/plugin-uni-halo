@@ -1,0 +1,316 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: plugin-uni-halo-settings
+spec:
+  forms:
+    - group: startConfig
+      label: 启动配置
+      formSchema:
+        - $formkit: select
+          name: enable
+          id: startConfigEnable
+          label: 是否开启启动页面
+          value: true
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          help: 开启启动页面后，用户访问应用时将显示启动页面
+        - $formkit: text
+          if: "$get(startConfigEnable).value === true"
+          validation: required
+          name: title
+          label: 应用名称
+          value: "uni-halo 2.0"
+        - $formkit: text
+          if: "$get(startConfigEnable).value === true"
+          name: bg
+          label: 背景图片
+          value: ""
+          help: 支持图片地址和颜色值
+        - $formkit: attachment
+          if: "$get(startConfigEnable).value === true"
+          validation: required
+          name: logo
+          label: 应用图标
+          value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+        - $formkit: text
+          if: "$get(startConfigEnable).value === true"
+          validation: required
+          name: desc1
+          label: 文本1
+          value: "新触动 新感受 新体验"
+        - $formkit: text
+          if: "$get(startConfigEnable).value === true"
+          validation: required
+          name: desc2
+          label: 文本2
+          value: "准备好了吗，即刻就出发"
+        - $formkit: text
+          if: "$get(startConfigEnable).value === true"
+          validation: required
+          name: btnText
+          label: 按钮文本
+          value: "立即体验"
+    - group: authorConfig
+      label: 我的配置
+      formSchema:
+        - $formkit: group
+          name: authorInfo
+          label: 作者信息
+          value:
+            isAuto: true
+            nickname: ""
+            avatar: ""
+            email: ""
+            description: ""
+          children:
+            - $formkit: select
+              name: isAuto
+              id: authorInfoIsAuto
+              label: 是否自动获取
+              value: true
+              options:
+                - label: 自动
+                  value: true
+                - label: 自定义
+                  value: false
+              help: 设置为自动获取后，或自动读取博客原本的作者信息
+            - $formkit: text
+              if: "$get(authorInfoIsAuto).value === true"
+              validation: required
+              name: nickname
+              label: 昵称
+              value: "uni-halo"
+            - $formkit: attachment
+              if: "$get(authorInfoIsAuto).value === true"
+              validation: required
+              name: avatar
+              label: 头像
+              value: ""
+            - $formkit: text
+              if: "$get(authorInfoIsAuto).value === true"
+              validation: required
+              name: email
+              label: 邮箱
+              value: ""
+            - $formkit: text
+              if: "$get(authorInfoIsAuto).value === true"
+              validation: required
+              name: description
+              label: 签名
+              value: ""
+        - $formkit: group
+          name: social
+          label: 社交信息
+          value:
+            qq: ""
+            wechat: ""
+            weibo: ""
+            email: ""
+            juejin: ""
+            bilibili: ""
+            gitee: ""
+            github: ""
+            csdn: ""
+          children:
+            - $formkit: text
+              name: qq
+              label: QQ号
+              value: ""
+            - $formkit: text
+              name: wechat
+              label: 微信号
+              value: ""
+            - $formkit: text
+              name: weibo
+              label: 微博地址
+              value: ""
+            - $formkit: text
+              name: email
+              label: 邮箱
+              value: ""
+            - $formkit: text
+              name: 博客
+              label: blog
+              value: ""
+            - $formkit: text
+              name: bilibili
+              label: B站
+              value: ""
+            - $formkit: text
+              name: juejin
+              label: 掘金B站
+              value: ""
+            - $formkit: text
+              name: csdn
+              label: CSDN
+              value: ""
+            - $formkit: text
+              name: gitee
+              label: Gitee
+              value: ""
+            - $formkit: text
+              name: github
+              label: Github
+              value: ""
+          help: 我的社交信息页面显示的内容
+    - group: imagesConfig
+      label: 图片配置
+      formSchema:
+        - $formkit: attachment
+          name: miniCodeImageUrl
+          label: 小程序码图片
+          value: ""
+          validation: required
+          help: 微信小程序二维码的图片地址，用于海报生成
+        - $formkit: attachment
+          name: aboutProfileImageUrl
+          label: 关于页面背景图
+          value: ""
+          validation: required
+          help: 底部导航栏关于页面中的资料卡背景图
+        - $formkit: attachment
+          name: waveImageUrl
+          label: 关于页面波浪图
+          value: ""
+          validation: required
+          help: 底部导航栏关于页面中的资料卡波浪图
+        - $formkit: attachment
+          name: defaultImageUrl
+          label: 默认图片
+          value: ""
+          validation: required
+          help: 默认图片，当图片加载失败或者无图的时候显示，支持静态图片和随机图api
+        - $formkit: attachment
+          name: defaultThumbnailUrl
+          label: 文章默认封面
+          value: ""
+          validation: required
+          help: 文章默认封面图片，支持静态图片和随机图api
+        - $formkit: attachment
+          name: defaultStaticThumbnailUrl
+          label: 文章默认静态封面
+          value: ""
+          validation: required
+          help: 文章默认封面图片，只支持静态图片
+        - $formkit: attachment
+          name: defaultAvatarUrl
+          label: 默认头像地址
+          value: ""
+          validation: required
+          help: 默认头像地址，用于评论/文章作者无头像显示，支持静态图片和随机图api
+        - $formkit: attachment
+          name: loadingGifUrl
+          label: 加载中的图片
+          value: ""
+          validation: required
+          help: 图片正在加载中的图片资源，请选择较小的gif图片
+        - $formkit: attachment
+          name: loadingErrUrl
+          label: 加载失败图片
+          value: ""
+          validation: required
+          help: 图片资源加载失败后显示的图片，请选择较小的图片
+        - $formkit: attachment
+          name: loadingEmptyUrl
+          label: 空图片
+          value: ""
+          validation: required
+          help: 图片资源为空时显示的图片，请选择较小的图片
+    - group: loveConfig
+      label: 恋爱配置
+      formSchema:
+        - $formkit: select
+          name: loveEnabled
+          id: loveEnabled
+          label: 是否启用
+          value: false
+          options:
+            - label: 启用
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
+          help: 启用恋爱日记功能后，可以在我的页面导航找到相关入口
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: loveInfo
+          label: 恋人信息
+          value:
+            boyNickname: ""
+            boyAvatar: ""
+            girlNickname: ""
+            girlAvatar: ""
+            loveDate: ""
+          children:
+            - $formkit: text
+              name: boyNickname
+              label: 男生昵称
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: boyAvatar
+              label: 男生头像
+              value: ""
+              validation: required
+            - $formkit: text
+              name: girlNickname
+              label: 女生昵称
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: girlAvatar
+              label: 女生头像
+              value: ""
+              validation: required
+            - $formkit: date
+              name: loveDate
+              label: 恋爱纪念日
+              value: ""
+              validation: required
+              help: 恋爱纪念日，用于计算恋爱天数，同时这可是一个非常重要的节日呢，可不能忘记哦~
+        - $formkit: code
+          if: "$get(loveEnabled).value === true"
+          name: loveContent
+          label: 我们俩的故事
+          value: ""
+          language: html
+          height: 200px
+          help: 可以写下彼此的恋爱经过哦，支持 html 语法。
+        - $formkit: repeater
+          if: "$get(loveEnabled).value === true"
+          name: loveList
+          label: 恋爱清单
+          value: [ ]
+          children:
+            - $formkit: text
+              name: loveListTitle
+              label: 标题
+              value: ""
+              validation: required
+            - $formkit: text
+              name: loveListContent
+              label: 内容
+              value: ""
+              validation: required
+            - $formkit: select
+              name: loveListStatus
+              label: 状态
+              value: wait
+              options:
+                - label: 未开始
+                  value: wait
+                - label: 进行中
+                  value: doing
+                - label: 已完成
+                  value: complete
+              validation: required
+            - $formkit: date
+              if: "$value.loveListStatus === 'complete'"
+              name: loveListDate
+              label: 完成时间
+              value: ""
+              validation: required

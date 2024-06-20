@@ -5,7 +5,7 @@ plugins {
     id "run.halo.plugin.devtools" version "0.0.9"
 }
 
-group 'run.halo.starter'
+group 'pro.uhalo.uni'
 sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
@@ -52,5 +52,5 @@ build {
 }
 
 halo {
-    version = '2.11'
+    version = '2.15'
 }

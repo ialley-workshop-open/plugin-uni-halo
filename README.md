@@ -1,6 +1,6 @@
-# plugin-starter
+# UniHalo 配置插件
 
-Halo 2.0 插件开发快速开始模板。
+uni-halo v2.0 版本的配置插件。
 
 ## 开发环境
 
@@ -74,3 +74,8 @@ halo:
 ```
 
 最后重启 Halo 项目即可。
+
+
+## 参考项目
+[plugin-moments](https://github.com/halo-sigs/plugin-moments)
+[halo-dev图标库](https://icon-sets.iconify.design/)

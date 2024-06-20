@@ -1,0 +1,16 @@
+apiVersion: v1alpha1
+kind: Role
+metadata:
+  name: plugin-uni-halo-anonymous-role-view-config
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-anonymous: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "UniHalo 配置管理"
+    rbac.authorization.halo.run/display-name: "配置管理（UniHalo)"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:plugin-uni-halo:config:view"]
+rules:
+  - apiGroups: [ "api.uni.uhalo.pro" ]
+    resources: [ "plugins/getConfigs","plugins/getConfigs/*" ]
+    verbs: [ "get", "list" ]
