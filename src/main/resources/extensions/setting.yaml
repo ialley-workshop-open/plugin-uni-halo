@@ -79,25 +79,25 @@ spec:
                   value: false
               help: 设置为自动获取后，或自动读取博客原本的作者信息
             - $formkit: text
-              if: "$get(authorInfoIsAuto).value === true"
+              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: nickname
               label: 昵称
               value: "uni-halo"
             - $formkit: attachment
-              if: "$get(authorInfoIsAuto).value === true"
+              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: avatar
               label: 头像
               value: ""
             - $formkit: text
-              if: "$get(authorInfoIsAuto).value === true"
+              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: email
               label: 邮箱
               value: ""
             - $formkit: text
-              if: "$get(authorInfoIsAuto).value === true"
+              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: description
               label: 签名
@@ -133,8 +133,8 @@ spec:
               label: 邮箱
               value: ""
             - $formkit: text
-              name: 博客
-              label: blog
+              name: blog
+              label: 博客
               value: ""
             - $formkit: text
               name: bilibili
