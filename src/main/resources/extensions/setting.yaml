@@ -41,7 +41,6 @@ spec:
             copyrightAuthor: ""
             copyrightDesc: ""
             copyrightViolation: ""
-            disclaimers: ""
           children:
           - $formkit: select
             name: showComment
@@ -84,15 +83,6 @@ spec:
             label: 文章侵权说明
             value: ""
             validation: required
-          - $formkit: code
-            if: "$get(postDetailCopyrightEnabled).value === true"
-            name: disclaimers
-            label: 免责声明
-            value: ""
-            language: html
-            height: 200px
-            validation: required
-            help: 免责声明页面内容，支持 html 语法。
         - $formkit: select
           name: showAboutSystem
           label: 显示关于项目页面
@@ -104,6 +94,33 @@ spec:
               value: false
           validation: required
           help: 说明：该页面入口在【关于】导航页面的【关于项目】入口，主要用于介绍该开源项目。
+        - $formkit: group
+          name: disclaimers
+          label: 免责声明
+          value:
+            enabled: true
+            content: ""
+          children:
+            - $formkit: select
+              name: enabled
+              id: disclaimersEnabled
+              label: 是否启用
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+            - $formkit: code
+              if: "$get(disclaimersEnabled).value === true"
+              name: content
+              label: 声明内容
+              value: ""
+              language: html
+              height: 200px
+              validation: required
+              help: 免责声明页面内容，支持 html 语法。
     - group: startConfig
       label: 启动配置
       formSchema:
