@@ -1,6 +1,6 @@
-package pro.uhalo.uni.service.impl;
+package pro.uhalo.uni.services.impl;
 
-import pro.uhalo.uni.service.UniHaloService;
+import pro.uhalo.uni.services.UniHaloService;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,7 +20,6 @@ public class UniHaloServiceImpl implements UniHaloService {
 
     private final ReactiveExtensionClient client;
     private final ReactiveSettingFetcher settingFetcher;
-
 
     /**
      * 获取移动端的所有配置

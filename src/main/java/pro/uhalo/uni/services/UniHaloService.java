@@ -1,4 +1,4 @@
-package pro.uhalo.uni.service;
+package pro.uhalo.uni.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Mono;

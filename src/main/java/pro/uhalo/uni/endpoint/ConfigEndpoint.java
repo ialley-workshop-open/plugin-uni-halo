@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import pro.uhalo.uni.constants.Constants;
-import pro.uhalo.uni.service.UniHaloService;
+import pro.uhalo.uni.services.UniHaloService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;

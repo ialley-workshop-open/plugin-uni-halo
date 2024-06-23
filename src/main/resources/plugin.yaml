@@ -10,6 +10,7 @@ spec:
     website: https://www.925i.cn/
   logo: logo.png
   homepage: https://github.com/ialley-workshop-open/plugin-uni-halo
+  repo: https://github.com/ialley-workshop-open/plugin-uni-halo
   displayName: "UniHalo 配置"
   description: "为 uni-halo v2.0 提供配置管理。"
   settingName: plugin-uni-halo-settings

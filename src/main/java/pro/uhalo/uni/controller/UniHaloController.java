@@ -1,7 +1,7 @@
 package pro.uhalo.uni.controller;
 
 import pro.uhalo.uni.constants.Constants;
-import pro.uhalo.uni.service.UniHaloService;
+import pro.uhalo.uni.services.UniHaloService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

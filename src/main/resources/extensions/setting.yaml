@@ -4,32 +4,132 @@ metadata:
   name: plugin-uni-halo-settings
 spec:
   forms:
+    - group: basicConfig
+      label: 基本配置
+      formSchema:
+        - $formkit: group
+          name: copyrightConfig
+          label: 页面版权配置
+          value:
+            enabled: true
+            content: "「 2022 uni-halo 丨 开源项目@小莫唐尼 」"
+          help: 说明：是否显示页面底部的版权信息（uni-halo 版权），只在【关于】页面中。
+          children:
+          - $formkit: select
+            name: enabled
+            id: copyrightEnabled
+            label: 显示版权信息
+            value: true
+            options:
+              - label: 是
+                value: true
+              - label: 否
+                value: false
+            validation: required
+          - $formkit: text
+            if: "$get(copyrightEnabled).value === true"
+            name: content
+            label: 版权内容
+            value: ""
+            validation: required
+        - $formkit: group
+          name: postDetailConfig
+          label: 文章详情页配置
+          value:
+            showComment: true
+            copyrightEnabled: true
+            copyrightAuthor: ""
+            copyrightDesc: ""
+            copyrightViolation: ""
+            disclaimers: ""
+          children:
+          - $formkit: select
+            name: showComment
+            label: 是否显示评论相关
+            value: true
+            options:
+              - label: 是
+                value: true
+              - label: 否
+                value: false
+            validation: required
+            help: 说明：直接关闭评论区（不显示数据）和评论按钮，优先级高于系统设置的评论开关。
+          - $formkit: select
+            name: copyrightEnabled
+            id: postDetailCopyrightEnabled
+            label: 是否使用文章版权
+            value: true
+            options:
+              - label: 是
+                value: true
+              - label: 否
+                value: false
+            validation: required
+            help: 说明：文章详情页面中，显示关于文章版权相关的说明信息。
+          - $formkit: text
+            if: "$get(postDetailCopyrightEnabled).value === true"
+            name: copyrightAuthor
+            label: 文章版权作者
+            value: ""
+            validation: required
+          - $formkit: text
+            if: "$get(postDetailCopyrightEnabled).value === true"
+            name: copyrightDesc
+            label: 文章版权描述
+            value: ""
+            validation: required
+          - $formkit: text
+            if: "$get(postDetailCopyrightEnabled).value === true"
+            name: copyrightViolation
+            label: 文章侵权说明
+            value: ""
+            validation: required
+          - $formkit: code
+            if: "$get(postDetailCopyrightEnabled).value === true"
+            name: disclaimers
+            label: 免责声明
+            value: ""
+            language: html
+            height: 200px
+            validation: required
+            help: 免责声明页面内容，支持 html 语法。
+        - $formkit: select
+          name: showAboutSystem
+          label: 显示关于项目页面
+          value: true
+          options:
+            - label: 是
+              value: true
+            - label: 否
+              value: false
+          validation: required
+          help: 说明：该页面入口在【关于】导航页面的【关于项目】入口，主要用于介绍该开源项目。
     - group: startConfig
       label: 启动配置
       formSchema:
         - $formkit: select
-          name: enable
+          name: enabled
           id: startConfigEnable
-          label: 是否开启启动页面
+          label: 是否使用启动页面
           value: true
           options:
-            - label: 开启
+            - label: 是
               value: true
-            - label: 关闭
+            - label: 否
               value: false
-          help: 开启启动页面后，用户访问应用时将显示启动页面
+          help: 使用启动页面后，用户访问应用时将优先显示启动页面
         - $formkit: text
           if: "$get(startConfigEnable).value === true"
           validation: required
           name: title
           label: 应用名称
           value: "uni-halo 2.0"
-        - $formkit: text
+        - $formkit: attachment
           if: "$get(startConfigEnable).value === true"
           name: bg
           label: 背景图片
-          value: ""
-          help: 支持图片地址和颜色值
+          value: "bg-gradient-blue-lighten-b"
+          help: 支持图片地址和颜色值，不填写使用默认的蓝色渐变背景（bg-gradient-blue-lighten-b）
         - $formkit: attachment
           if: "$get(startConfigEnable).value === true"
           validation: required
@@ -59,45 +159,29 @@ spec:
       formSchema:
         - $formkit: group
           name: authorInfo
-          label: 作者信息
+          label: 博主信息
           value:
-            isAuto: true
             nickname: ""
             avatar: ""
             email: ""
             description: ""
           children:
-            - $formkit: select
-              name: isAuto
-              id: authorInfoIsAuto
-              label: 是否自动获取
-              value: true
-              options:
-                - label: 自动
-                  value: true
-                - label: 自定义
-                  value: false
-              help: 设置为自动获取后，或自动读取博客原本的作者信息
             - $formkit: text
-              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: nickname
               label: 昵称
               value: "uni-halo"
             - $formkit: attachment
-              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: avatar
               label: 头像
               value: ""
             - $formkit: text
-              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: email
               label: 邮箱
               value: ""
             - $formkit: text
-              if: "$get(authorInfoIsAuto).value === false"
               validation: required
               name: description
               label: 签名
@@ -235,6 +319,43 @@ spec:
               value: false
           validation: required
           help: 启用恋爱日记功能后，可以在我的页面导航找到相关入口
+        - $formkit: text
+          if: "$get(loveEnabled).value === true"
+          name: timeTitle
+          label: 纪念日标题
+          value: 这是我们一起走过的
+          validation: required
+        - $formkit: date
+          if: "$get(loveEnabled).value === true"
+          name: loveDate
+          label: 恋爱纪念日
+          value: ""
+          validation: required
+          help: 恋爱纪念日，用于计算恋爱天数，同时这可是一个非常重要的节日呢，可不能忘记哦~
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: pageImages
+          label: 图片配置
+          value:
+            bgImageUrl: ""
+            waveImageUrl: ""
+            heartImageUrl: ""
+          children:
+            - $formkit: attachment
+              name: bgImageUrl
+              label: 背景图片
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: waveImageUrl
+              label: 波浪图片
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: heartImageUrl
+              label: 爱心图片
+              value: ""
+              validation: required
         - $formkit: group
           if: "$get(loveEnabled).value === true"
           name: loveInfo
@@ -266,51 +387,200 @@ spec:
               label: 女生头像
               value: ""
               validation: required
-            - $formkit: date
-              name: loveDate
-              label: 恋爱纪念日
-              value: ""
-              validation: required
-              help: 恋爱纪念日，用于计算恋爱天数，同时这可是一个非常重要的节日呢，可不能忘记哦~
-        - $formkit: code
+        - $formkit: group
           if: "$get(loveEnabled).value === true"
-          name: loveContent
-          label: 我们俩的故事
-          value: ""
-          language: html
-          height: 200px
-          help: 可以写下彼此的恋爱经过哦，支持 html 语法。
-        - $formkit: repeater
-          if: "$get(loveEnabled).value === true"
-          name: loveList
-          label: 恋爱清单
-          value: [ ]
+          name: ourStory
+          label: 我们的故事
+          value:
+            enabled: true
+            content: ""
           children:
-            - $formkit: text
-              name: loveListTitle
-              label: 标题
-              value: ""
-              validation: required
-            - $formkit: text
-              name: loveListContent
-              label: 内容
-              value: ""
-              validation: required
             - $formkit: select
-              name: loveListStatus
-              label: 状态
-              value: wait
+              name: enabled
+              id: ourStoryEnabled
+              label: 是否启用
+              value: false
               options:
-                - label: 未开始
-                  value: wait
-                - label: 进行中
-                  value: doing
-                - label: 已完成
-                  value: complete
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
               validation: required
-            - $formkit: date
-              if: "$value.loveListStatus === 'complete'"
-              name: loveListDate
-              label: 完成时间
+            - $formkit: code
+              if: "$get(ourStoryEnabled).value === true"
+              name: loveContent
+              label: 故事经历
+              value: ""
+              language: html
+              height: 200px
+              help: 可以写下彼此的恋爱经过哦，支持 html 语法。
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: lovePhoto
+          label: 恋爱相册
+          value:
+            enabled: false
+            groupName: ""
+          children:
+            - $formkit: select
+              name: enabled
+              id: lovePhotoEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+              help: 启用恋爱相册后，可以在恋爱日记中查看恋爱相册
+            - $formkit: text
+              if: "$get(lovePhotoEnabled).value === true"
+              name: groupName
+              label: 相册标识
               value: ""
               validation: required
+              help: 相册标识（从图库中获取），具体获取方式请参考 uni-halo（v2） 官方文档。
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: loveDaily
+          label: 恋爱清单
+          value:
+            enabled: false
+            list: []
+          children:
+            - $formkit: select
+              name: enabled
+              id: loveListEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: repeater
+              if: "$get(loveListEnabled).value === true"
+              name: list
+              label: 恋爱清单
+              value: [ ]
+              children:
+                - $formkit: text
+                  name: title
+                  label: 标题
+                  value: ""
+                  validation: required
+                - $formkit: text
+                  name: content
+                  label: 内容
+                  value: ""
+                - $formkit: select
+                  name: status
+                  label: 状态
+                  value: wait
+                  options:
+                    - label: 未开始
+                      value: wait
+                    - label: 进行中
+                      value: doing
+                    - label: 已完成
+                      value: complete
+                  validation: required
+                - $formkit: date
+                  if: "$value.status === 'complete'"
+                  name: completeDate
+                  label: 完成时间
+                  value: ""
+                  validation: required
+    - group: pluginConfig
+      label: 插件配置
+      formSchema:
+        - $formkit: group
+          name: submitLink
+          label: 友链提交插件
+          value:
+            enabled: false
+            pluginId: ""
+            blogName: ""
+            blogDesc: ""
+            blogLogo: ""
+            blogUrl: ""
+          help: 说明：来自【作者：柳意无情】的友链自动提交插件，用于用于支持小程序内主动提交友链。
+          children:
+            - $formkit: select
+              name: enabled
+              id: submitLinkEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: ""
+              validation: required
+              help: 请在插件市场搜索「友链提交」插件，然后复制插件 ID
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogName
+              label: 博客名称
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogDesc
+              label: 博客描述
+              value: ""
+              validation: required
+            - $formkit: attachment
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogLogo
+              label: 博客Logo
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogUrl
+              label: 博客地址
+              value: ""
+              validation: required
+        - $formkit: group
+          name: toolsPlugin
+          label: 工具箱插件
+          value:
+            enabled: false
+            pluginId: ""
+            Authorization: ""
+          help: 说明：来自【作者：柳意无情】的工具箱插件，用于开启支持文章加密访问。
+          children:
+            - $formkit: select
+              name: enabled
+              id: toolsPluginEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(toolsPluginEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: ""
+              validation: required
+              help: 请在插件市场搜索「工具箱」插件，然后复制插件 ID
+            - $formkit: text
+              if: "$get(toolsPluginEnabled).value === true"
+              name: Authorization
+              label: 授权Token
+              value: ""
+              validation: required
+              help: Tools工具箱插件设置的认证token
