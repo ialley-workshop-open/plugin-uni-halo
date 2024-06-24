@@ -15,74 +15,74 @@ spec:
             content: "「 2022 uni-halo 丨 开源项目@小莫唐尼 」"
           help: 说明：是否显示页面底部的版权信息（uni-halo 版权），只在【关于】页面中。
           children:
-          - $formkit: select
-            name: enabled
-            id: copyrightEnabled
-            label: 显示版权信息
-            value: true
-            options:
-              - label: 是
-                value: true
-              - label: 否
-                value: false
-            validation: required
-          - $formkit: text
-            if: "$get(copyrightEnabled).value === true"
-            name: content
-            label: 版权内容
-            value: ""
-            validation: required
+            - $formkit: select
+              name: enabled
+              id: copyrightEnabled
+              label: 显示版权信息
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(copyrightEnabled).value === true"
+              name: content
+              label: 版权内容
+              value: ""
+              validation: required
         - $formkit: group
           name: postDetailConfig
           label: 文章详情页配置
           value:
             showComment: true
             copyrightEnabled: true
-            copyrightAuthor: ""
-            copyrightDesc: ""
-            copyrightViolation: ""
+            copyrightAuthor: "uni-halo"
+            copyrightDesc: "使用《非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)》协议授权，文章来源于网上收集或者原创，若未在文章内说明的均为原创文章"
+            copyrightViolation: "若侵害到您的权利，请您及时联系我，在收到通知后第一时间处理，邮箱：xxxx@xx.com"
           children:
-          - $formkit: select
-            name: showComment
-            label: 是否显示评论相关
-            value: true
-            options:
-              - label: 是
-                value: true
-              - label: 否
-                value: false
-            validation: required
-            help: 说明：直接关闭评论区（不显示数据）和评论按钮，优先级高于系统设置的评论开关。
-          - $formkit: select
-            name: copyrightEnabled
-            id: postDetailCopyrightEnabled
-            label: 是否使用文章版权
-            value: true
-            options:
-              - label: 是
-                value: true
-              - label: 否
-                value: false
-            validation: required
-            help: 说明：文章详情页面中，显示关于文章版权相关的说明信息。
-          - $formkit: text
-            if: "$get(postDetailCopyrightEnabled).value === true"
-            name: copyrightAuthor
-            label: 文章版权作者
-            value: ""
-            validation: required
-          - $formkit: text
-            if: "$get(postDetailCopyrightEnabled).value === true"
-            name: copyrightDesc
-            label: 文章版权描述
-            value: ""
-            validation: required
-          - $formkit: text
-            if: "$get(postDetailCopyrightEnabled).value === true"
-            name: copyrightViolation
-            label: 文章侵权说明
-            value: ""
-            validation: required
+            - $formkit: select
+              name: showComment
+              label: 是否显示评论相关
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+              help: 说明：直接关闭评论区（不显示数据）和评论按钮，优先级高于系统设置的评论开关。
+            - $formkit: select
+              name: copyrightEnabled
+              id: postDetailCopyrightEnabled
+              label: 是否使用文章版权
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+              help: 说明：文章详情页面中，显示关于文章版权相关的说明信息。
+            - $formkit: text
+              if: "$get(postDetailCopyrightEnabled).value === true"
+              name: copyrightAuthor
+              label: 文章版权作者
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(postDetailCopyrightEnabled).value === true"
+              name: copyrightDesc
+              label: 文章版权描述
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(postDetailCopyrightEnabled).value === true"
+              name: copyrightViolation
+              label: 文章侵权说明
+              value: ""
+              validation: required
         - $formkit: select
           name: showAboutSystem
           label: 显示关于项目页面
@@ -175,7 +175,7 @@ spec:
       label: 我的配置
       formSchema:
         - $formkit: group
-          name: authorInfo
+          name: blogger
           label: 博主信息
           value:
             nickname: ""
@@ -264,31 +264,31 @@ spec:
         - $formkit: attachment
           name: miniCodeImageUrl
           label: 小程序码图片
-          value: ""
+          value: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
           validation: required
           help: 微信小程序二维码的图片地址，用于海报生成
         - $formkit: attachment
           name: aboutProfileImageUrl
           label: 关于页面背景图
-          value: ""
+          value: "https://b.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
           validation: required
           help: 底部导航栏关于页面中的资料卡背景图
         - $formkit: attachment
           name: waveImageUrl
           label: 关于页面波浪图
-          value: ""
+          value: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
           validation: required
           help: 底部导航栏关于页面中的资料卡波浪图
         - $formkit: attachment
           name: defaultImageUrl
           label: 默认图片
-          value: ""
+          value: "https://api.7trees.cn/img"
           validation: required
           help: 默认图片，当图片加载失败或者无图的时候显示，支持静态图片和随机图api
         - $formkit: attachment
           name: defaultThumbnailUrl
           label: 文章默认封面
-          value: ""
+          value: "https://tenapi.cn/v2/acg"
           validation: required
           help: 文章默认封面图片，支持静态图片和随机图api
         - $formkit: attachment
@@ -300,26 +300,25 @@ spec:
         - $formkit: attachment
           name: defaultAvatarUrl
           label: 默认头像地址
-          value: ""
+          value: "https://api.qjqq.cn/api/MiYouShe"
           validation: required
           help: 默认头像地址，用于评论/文章作者无头像显示，支持静态图片和随机图api
         - $formkit: attachment
           name: loadingGifUrl
           label: 加载中的图片
-          value: ""
+          value: "https://b.925i.cn/uni_halo/uni_halo_img_lazyload.gif"
           validation: required
           help: 图片正在加载中的图片资源，请选择较小的gif图片
         - $formkit: attachment
           name: loadingErrUrl
           label: 加载失败图片
-          value: ""
+          value: "https://b.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif"
           validation: required
           help: 图片资源加载失败后显示的图片，请选择较小的图片
         - $formkit: attachment
           name: loadingEmptyUrl
           label: 空图片
           value: ""
-          validation: required
           help: 图片资源为空时显示的图片，请选择较小的图片
     - group: loveConfig
       label: 恋爱配置
@@ -330,15 +329,15 @@ spec:
           label: 是否启用
           value: false
           options:
-            - label: 启用
+            - label: 是
               value: true
-            - label: 关闭
+            - label: 否
               value: false
           validation: required
           help: 启用恋爱日记功能后，可以在我的页面导航找到相关入口
         - $formkit: text
           if: "$get(loveEnabled).value === true"
-          name: timeTitle
+          name: loveDateTitle
           label: 纪念日标题
           value: 这是我们一起走过的
           validation: required
@@ -354,9 +353,9 @@ spec:
           name: pageImages
           label: 图片配置
           value:
-            bgImageUrl: ""
-            waveImageUrl: ""
-            heartImageUrl: ""
+            bgImageUrl: "https://b.925i.cn/uni_halo_love/love_bg1.png"
+            waveImageUrl: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
+            heartImageUrl: "https://b.925i.cn/uni_halo_love/like.png"
           children:
             - $formkit: attachment
               name: bgImageUrl
@@ -425,7 +424,7 @@ spec:
               validation: required
             - $formkit: code
               if: "$get(ourStoryEnabled).value === true"
-              name: loveContent
+              name: content
               label: 故事经历
               value: ""
               language: html
@@ -464,7 +463,7 @@ spec:
           label: 恋爱清单
           value:
             enabled: false
-            list: []
+            list: [ ]
           children:
             - $formkit: select
               name: enabled
@@ -601,3 +600,42 @@ spec:
               value: ""
               validation: required
               help: Tools工具箱插件设置的认证token
+    - group: shareConfig
+      label: 分享配置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 标题
+          value: "uni-halo 2.0"
+          validation: required
+        - $formkit: text
+          name: desc
+          label: 描述
+          value: "一款免费开源可多端编译的微信小程序博客应用。"
+          validation: required
+        - $formkit: attachment
+          name: imageUrl
+          label: 封面
+          value: "https://uni-halo.925i.cn/logo.png"
+          validation: required
+        - $formkit: text
+          name: path
+          label: 页面路径
+          value: "/pages/index/index"
+          validation: required
+          help: 页面路径，如：/pages/index/index（一般默认就行）
+        - $formkit: text
+          name: copyLink
+          label: 复制链接
+          value: "/pages/index/index"
+          validation: required
+          help: 复制链接，如：/pages/index/index（一般默认就行）
+    - group: adConfig
+      label: 广告配置
+      formSchema:
+        - $formkit: text
+          name: rewardedVideoAdId
+          label: 视频广告ID
+          value: ""
+          validation: required
+          help: 激励视频广告ID，请在 uniapp 广告管理中获取
