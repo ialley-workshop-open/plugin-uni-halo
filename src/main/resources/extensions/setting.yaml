@@ -164,6 +164,7 @@ spec:
                   value: false
               help: 使用启动页面后，用户访问应用时将优先显示启动页面
             - $formkit: select
+              if: "$get(startConfigEnabled).value === true"
               name: alwaysShow
               label: 是否每次显示
               value: true
