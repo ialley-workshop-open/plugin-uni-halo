@@ -113,64 +113,102 @@ spec:
                   value: false
               validation: required
             - $formkit: code
-              if: "$get(disclaimersEnabled).value === true"
               name: content
               label: 声明内容
               value: ""
               language: html
               height: 200px
-              validation: required
-              help: 免责声明页面内容，支持 html 语法。
-    - group: startConfig
-      label: 启动配置
+              help: 免责声明页面内容，不填写的话使用默认模板，支持 html 语法。
+    - group: appConfig
+      label: 应用配置
       formSchema:
-        - $formkit: select
-          name: enabled
-          id: startConfigEnable
-          label: 是否使用启动页面
-          value: true
-          options:
-            - label: 是
+        - $formkit: group
+          name: appInfo
+          label: 应用信息
+          value:
+            name: "uni-halo v2.0"
+            logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+          children:
+            - $formkit: text
+              name: name
+              label: 应用名称
+              value: "uni-halo v2.0"
+              validation: required
+            - $formkit: attachment
+              name: logo
+              label: 应用图标
+              value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+              validation: required
+        - $formkit: group
+          name: startConfig
+          label: 启动页配置
+          value:
+            enabled: true
+            alwaysShow: true
+            title: "uni-halo 2.0"
+            bg: "bg-gradient-blue-lighten-b"
+            logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+            desc1: "新触动 新感受 新体验"
+            desc2: "准备好了吗，即刻就出发"
+            btnText: "立即体验"
+          children:
+            - $formkit: select
+              name: enabled
+              id: startConfigEnabled
+              label: 是否使用启动页面
               value: true
-            - label: 否
-              value: false
-          help: 使用启动页面后，用户访问应用时将优先显示启动页面
-        - $formkit: text
-          if: "$get(startConfigEnable).value === true"
-          validation: required
-          name: title
-          label: 应用名称
-          value: "uni-halo 2.0"
-        - $formkit: attachment
-          if: "$get(startConfigEnable).value === true"
-          name: bg
-          label: 背景图片
-          value: "bg-gradient-blue-lighten-b"
-          help: 支持图片地址和颜色值，不填写使用默认的蓝色渐变背景（bg-gradient-blue-lighten-b）
-        - $formkit: attachment
-          if: "$get(startConfigEnable).value === true"
-          validation: required
-          name: logo
-          label: 应用图标
-          value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
-        - $formkit: text
-          if: "$get(startConfigEnable).value === true"
-          validation: required
-          name: desc1
-          label: 文本1
-          value: "新触动 新感受 新体验"
-        - $formkit: text
-          if: "$get(startConfigEnable).value === true"
-          validation: required
-          name: desc2
-          label: 文本2
-          value: "准备好了吗，即刻就出发"
-        - $formkit: text
-          if: "$get(startConfigEnable).value === true"
-          validation: required
-          name: btnText
-          label: 按钮文本
-          value: "立即体验"
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 使用启动页面后，用户访问应用时将优先显示启动页面
+            - $formkit: select
+              name: alwaysShow
+              label: 是否每次显示
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否每次打开应用时都显示启动页面
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              validation: required
+              name: title
+              label: 启动标题
+              value: "uni-halo 2.0"
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true"
+              name: bg
+              label: 背景图片
+              value: "bg-gradient-blue-lighten-b"
+              help: 支持图片地址和颜色值，不填写使用默认的蓝色渐变背景（bg-gradient-blue-lighten-b）
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true"
+              validation: required
+              name: logo
+              label: 启动图标
+              value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              validation: required
+              name: desc1
+              label: 文本1
+              value: "新触动 新感受 新体验"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              validation: required
+              name: desc2
+              label: 文本2
+              value: "准备好了吗，即刻就出发"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              validation: required
+              name: btnText
+              label: 按钮文本
+              value: "立即体验"
     - group: authorConfig
       label: 我的配置
       formSchema:
