@@ -240,12 +240,13 @@ spec:
             - $formkit: text
               validation: required
               name: description
-              label: 签名
+              label: 简介
               value: ""
         - $formkit: group
           name: social
           label: 社交信息
           value:
+            enabled: true
             qq: ""
             wechat: ""
             weibo: ""
@@ -255,48 +256,69 @@ spec:
             gitee: ""
             github: ""
             csdn: ""
+          help: 我的社交信息页面显示的内容
           children:
+            - $formkit: select
+              name: enabled
+              id: socialEnabled
+              label: 是否启用
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否启用社交信息页面
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: qq
               label: QQ号
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: wechat
               label: 微信号
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: weibo
               label: 微博地址
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: email
               label: 邮箱
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: blog
               label: 博客
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: bilibili
               label: B站
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: juejin
               label: 掘金B站
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: csdn
               label: CSDN
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: gitee
               label: Gitee
               value: ""
             - $formkit: text
+              if: "$get(socialEnabled).value === true"
               name: github
               label: Github
               value: ""
-          help: 我的社交信息页面显示的内容
     - group: imagesConfig
       label: 图片配置
       formSchema:
@@ -612,6 +634,7 @@ spec:
             enabled: false
             pluginId: ""
             Authorization: ""
+            rewardedVideoAdId: ""
           help: 说明：来自【作者：柳意无情】的工具箱插件，用于开启支持文章加密访问。
           children:
             - $formkit: select
@@ -639,6 +662,13 @@ spec:
               value: ""
               validation: required
               help: Tools工具箱插件设置的认证token
+            - $formkit: text
+              if: "$get(toolsPluginEnabled).value === true"
+              name: rewardedVideoAdId
+              label: 视频广告ID
+              value: ""
+              validation: required
+              help: 广告ID，请在 UniApp 广告管理中获取。
     - group: shareConfig
       label: 分享配置
       formSchema:
@@ -669,12 +699,3 @@ spec:
           value: "/pages/index/index"
           validation: required
           help: 复制链接，如：/pages/index/index（一般默认就行）
-    - group: adConfig
-      label: 广告配置
-      formSchema:
-        - $formkit: text
-          name: rewardedVideoAdId
-          label: 视频广告ID
-          value: ""
-          validation: required
-          help: 激励视频广告ID，请在 uniapp 广告管理中获取

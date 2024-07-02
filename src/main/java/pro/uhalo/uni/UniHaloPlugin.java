@@ -1,6 +1,5 @@
 package pro.uhalo.uni;
 
-import pro.uhalo.uni.extension.AuthApp;
 import org.springframework.stereotype.Component;
 import run.halo.app.extension.SchemeManager;
 import run.halo.app.plugin.BasePlugin;
@@ -22,8 +21,8 @@ public class UniHaloPlugin extends BasePlugin {
     @Override
     public void start() {
 
-        // 插件启动时注册自定义模型
-        schemeManager.register(AuthApp.class);
+        // todo:插件启动时注册自定义模型
+        // schemeManager.unregister(schemeManager.get(XXX.class));
 
         System.out.println("logs : [ Plugin Start ]，插件启动成功！");
     }
@@ -31,8 +30,8 @@ public class UniHaloPlugin extends BasePlugin {
     @Override
     public void stop() {
 
-        // 插件停用时取消注册自定义模型
-        schemeManager.unregister(schemeManager.get(AuthApp.class));
+        // todo:插件停用时取消注册自定义模型
+        // schemeManager.unregister(schemeManager.get(XXX.class));
 
         System.out.println("logs : [ Plugin Stop ]，插件停止！");
     }

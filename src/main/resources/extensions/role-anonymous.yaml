@@ -12,5 +12,5 @@ metadata:
       ["plugin:plugin-uni-halo:config:view"]
 rules:
   - apiGroups: [ "api.uni.uhalo.pro" ]
-    resources: [ "plugins/*" ,"plugins/getConfigs","plugins/getConfigs/*","plugins/getUserInfoByName","plugins/getUserInfoByName/*" ]
+    resources: [ "plugins/*" ,"plugins/getConfigs","plugins/getConfigs/*"]
     verbs: [ "get", "list" ]
