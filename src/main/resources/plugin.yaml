@@ -9,7 +9,7 @@ spec:
     name: 小莫唐尼
     website: https://www.925i.cn/
   logo: logo.png
-  homepage: https://github.com/ialley-workshop-open/plugin-uni-halo
+  homepage: https://uni-halo.925i.cn/
   repo: https://github.com/ialley-workshop-open/plugin-uni-halo
   displayName: "UniHalo 配置"
   description: "为 uni-halo v2.0 小程序提供配置管理。"
