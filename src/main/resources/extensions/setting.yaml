@@ -128,6 +128,7 @@ spec:
           value:
             name: "uni-halo v2.0"
             logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+            qrCodeImageUrl: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
           children:
             - $formkit: text
               name: name
@@ -139,6 +140,12 @@ spec:
               label: 应用图标
               value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
               validation: required
+            - $formkit: attachment
+              name: qrCodeImageUrl
+              label: 小程序码图片
+              value: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
+              validation: required
+              help: 微信小程序二维码的图片地址，用于海报生成
         - $formkit: group
           name: startConfig
           label: 启动页配置
@@ -210,6 +217,78 @@ spec:
               name: btnText
               label: 按钮文本
               value: "立即体验"
+    - group: pageConfig
+      label: 页面配置
+      formSchema:
+        - $formkit: group
+          name: homeConfig
+          label: 首页配置
+          value:
+            pageTitle: "首页"
+            useCategory: true
+          children:
+            - $formkit: text
+              validation: required
+              name: pageTitle
+              label: 页面标题
+              value: "首页"
+            - $formkit: select
+              name: useCategory
+              label: 是否显示分类
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否显示精品文章分类
+        - $formkit: group
+          name: galleyConfig
+          label: 图库配置
+          value:
+            pageTitle: "图库"
+            useWaterfall: true
+          children:
+            - $formkit: text
+              validation: required
+              name: pageTitle
+              label: 页面标题
+              value: "图库"
+            - $formkit: select
+              name: useWaterfall
+              label: 是否使用瀑布流
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否使用瀑布流布局，否则使用列表布局
+        - $formkit: group
+          name: aboutConfig
+          label: 关于配置
+          value:
+            pageTitle: "关于博主"
+            bgImageUrl: "https://b.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
+            waveImageUrl: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
+          children:
+            - $formkit: text
+              validation: required
+              name: pageTitle
+              label: 页面标题
+              value: "关于博主"
+            - $formkit: attachment
+              name: bgImageUrl
+              label: 页面背景图
+              value: "https://b.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
+              validation: required
+              help: 资料卡背景图
+            - $formkit: attachment
+              name: waveImageUrl
+              label: 页面波浪图
+              value: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
+              validation: required
+              help: 资料卡波浪图
     - group: authorConfig
       label: 我的配置
       formSchema:
@@ -322,24 +401,6 @@ spec:
     - group: imagesConfig
       label: 图片配置
       formSchema:
-        - $formkit: attachment
-          name: miniCodeImageUrl
-          label: 小程序码图片
-          value: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
-          validation: required
-          help: 微信小程序二维码的图片地址，用于海报生成
-        - $formkit: attachment
-          name: aboutProfileImageUrl
-          label: 关于页面背景图
-          value: "https://b.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
-          validation: required
-          help: 底部导航栏关于页面中的资料卡背景图
-        - $formkit: attachment
-          name: waveImageUrl
-          label: 关于页面波浪图
-          value: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
-          validation: required
-          help: 底部导航栏关于页面中的资料卡波浪图
         - $formkit: attachment
           name: defaultImageUrl
           label: 默认图片
