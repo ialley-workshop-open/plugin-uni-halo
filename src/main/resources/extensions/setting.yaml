@@ -243,7 +243,7 @@ spec:
                   value: false
               help: 是否显示精品文章分类
         - $formkit: group
-          name: galleyConfig
+          name: galleryConfig
           label: 图库配置
           value:
             pageTitle: "图库"
