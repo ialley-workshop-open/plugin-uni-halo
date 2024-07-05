@@ -7,7 +7,7 @@
 * 小程序官方文档：https://uni-halo.925i.cn/
 * 小程序源码仓库：https://github.com/ialley-workshop-open/uni-halo
 * 插件源码仓库：https://github.com/ialley-workshop-open/plugin-uni-halo
-* Halo插件市场：https://www.xiaoxiaomo.cn/
+* Halo插件市场：https://www.halo.run/store/apps/app-ryemX
 
 
 ### 支持我
