@@ -1,52 +1,16 @@
 # UniHalo 配置插件
 
-> 为免费开源的 `uni-halo v2.0` 微信小程序提供配套的配置插件， 
+> 为免费开源的 `uni-halo v2.0` 微信小程序提供配套的配置插件。
 
-* 小程序文档：https://uni-halo.925i.cn/
-* 小程序仓库：https://github.com/ialley-workshop-open/uni-halo
-* 插件仓库：https://github.com/ialley-workshop-open/plugin-uni-halo
-
-### 😘 1、功能说明
-该插件仅为 `uni-halo v2.0` 提供配套的配置，目前支持以下配置：
-
-- 基本配置：文章详情版权、评论开关、页面显示、免责声明
-- 应用配置：应用信息、启动页面配置
-- 我的配置：配置博主信息、社交信息
-- 图片配置：配置默认的图片地址
-- 恋爱配置：恋人信息、恋爱清单、恋爱相册、我们的故事
-- 插件配置：一些独立支持的插件配置
-- 分享配置：页面分享配置
-- 广告配置：广告ID相关配置
-
-### 😘 2、配置预览
-
-![预览](https://img.925i.cn/file/0a550a70a42b62a92e042.png) 
-
-![基本配置](https://img.925i.cn/file/a2753f4614e257bb4ceb8.png)
-
-![应用配置](https://img.925i.cn/file/ebfa18e67ebd105bf250a.png)
-
-![我的配置](https://img.925i.cn/file/f2baabe2590db060e69e0.png)
-
-![图片配置](https://img.925i.cn/file/39977d2f8e213be449990.png)
-
-![恋爱配置](https://img.925i.cn/file/4923977f46d484a2fee71.png)
-
-![插件配置](https://img.925i.cn/file/65903d5ae26f09410ddd3.png)
-
-![分享配置](https://img.925i.cn/file/c10ae8a6fbb7bb65e3521.png)
-
-![广告配置](https://img.925i.cn/file/0acd12f2b430d3026540a.png)
+* 作者主页：https://www.xiaoxiaomo.cn/
+* 作者博客：https://blog.925i.cn/ 
+* 小程序官方文档：https://uni-halo.925i.cn/
+* 小程序源码仓库：https://github.com/ialley-workshop-open/uni-halo
+* 插件源码仓库：https://github.com/ialley-workshop-open/plugin-uni-halo
+* Halo插件市场：https://www.xiaoxiaomo.cn/
 
 
-### 😘 3、使用方式
-
-- 1、下载 `uni-halo v2.0` 小程序源码，参考：https://uni-halo.925i.cn/payload/introduction.html 部署指南将项目在本地运行起来。
-- 2、在 Halo 插件市场搜索 `UniHalo 配置` 插件下载安装，或者通过 `github` 仓库 [点这里](https://github.com/ialley-workshop-open/plugin-uni-halo/releases) 找到发布包下载安装。
-- 3、安装完成并且启动插件，进入插件配置页面，配置相关参数即可。
-
-
-### 😘 4、赞赏和支持
+### 支持我
 
 如果您觉得这个项目对您有帮助，可以帮作者买杯饮料鼓励鼓励，同时为了项目能够持续发展，可以根据您的喜好支持一下本项目哦，非常感谢您的支持，作者也会更有动力持续维护和更新新的功能哦~
 
@@ -54,6 +18,98 @@
 |:----------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
 | ![支付宝赞赏](https://b.925i.cn/skm/zf_zfb_skm.png) | ![微信赞赏](https://b.925i.cn/skm/zf_wx_zsm.png)	 | ![QQ赞赏](https://b.925i.cn/skm/zf_qq_skm.png)	 |
 
+
+### 交流群
+
+![QQ交流群](https://blog.925i.cn/upload/qun.png)
+
+
+## 一、uni-halo 小程序
+
+### 1、应用简介
+
+基于 Halo 2.x 提供的 API 接口，为微信小程序提供的一套开源的博客应用。
+
+- 完全免费开源，包括程序源码、插件源码
+- 页面支持插件配置
+- 使用最新流行的技术栈 
+- 支持特色功能，恋爱日记
+- 理论支持编译为 小程序（推荐）、APP
+
+### 2、在线预览
+
+微信内容扫描下方二维码，即可在线预览小程序。
+
+![QQ交流群](https://blog.925i.cn/upload/xiaochengxu.gif)
+
+
+
+### 3、页面截图
+
+以下为部分页面截图，更多功能页面请扫码预览体验。
+
+|首页|分类|图库|
+|:--:|:--:|:--:|
+|![首页](https://blog.925i.cn/upload/39789CF4434C9CD6A6289D7209AF6EEF.jpg)|![分类](https://blog.925i.cn/upload/19CB6B66F40200045B6F572A9C28C5E8.jpg)|![图库](https://blog.925i.cn/upload/464F22FDB216CE802653A5F03BE34351.jpg)|
+
+|瞬间|我的|
+|:--:|:--:|
+|![瞬间](https://blog.925i.cn/upload/41EE8ADBFAE709A483A6E5F814C6A6E4.jpg)|![我的](https://blog.925i.cn/upload/9AEFE8DA4671A3C7F20F76FF3F9D15C9.jpg)|
+
+
+##### 📱 恋爱日记
+
+说明：以下仅为部分截图
+
+|主页|恋爱清单|
+|:--:|:--:|
+|![主页](https://uni-halo.925i.cn/assets/love_001.6bf8b4e9.jpg)|![恋爱清单](https://uni-halo.925i.cn/assets/love_002.a08bd8d6.jpg)|
+<br/>
+
+## 二、uni-halo 配置插件
+
+###  1、关于插件
+该插件仅为 `uni-halo v2.0` 提供配套的配置，目前支持以下配置：
+
+- 基本配置：文章详情版权、评论开关、页面显示、免责声明
+- 应用配置：应用信息、启动页面配置
+- 页面配置：特定页面信息和展示内容配置
+- 我的配置：配置博主信息、社交信息
+- 图片配置：配置默认的图片地址
+- 恋爱配置：恋人信息、恋爱清单、恋爱相册、我们的故事
+- 插件配置：一些独立支持的插件配置
+
+### 2、插件预览
+
+插件信息
+![预览](https://blog.925i.cn/upload/uni-halo-p-1.png)
+
+基本配置
+![基本配置](https://blog.925i.cn/upload/uni-halo-p-2.png)
+
+应用配置
+![应用配置](https://blog.925i.cn/upload/uni-halo-p-3.png)
+
+页面配置
+![页面配置](https://blog.925i.cn/upload/uni-halo-p-4.png)
+
+我的配置
+![我的配置](https://blog.925i.cn/upload/uni-halo-p-5.png)
+
+图片配置
+![图片配置](https://blog.925i.cn/upload/uni-halo-p-6.png)
+
+恋爱配置
+![恋爱配置](https://blog.925i.cn/upload/uni-halo-p-7.png)
+
+插件配置
+![插件配置](https://blog.925i.cn/upload/uni-halo-p-8.png)
+
+### 3、使用方式
+
+- 1、下载 `uni-halo v2.0` 小程序源码，参考：https://uni-halo.925i.cn/payload/introduction.html 部署指南将项目在本地运行起来。
+- 2、在 Halo 插件市场搜索 `UniHalo 配置` 插件下载安装，或者通过 `github` 仓库 [点这里](https://github.com/ialley-workshop-open/plugin-uni-halo/releases) 找到发布包下载安装。
+- 3、安装完成并且启动插件，进入插件配置页面，配置相关参数即可。
 
 
 ---
