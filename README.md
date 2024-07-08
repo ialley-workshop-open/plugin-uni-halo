@@ -40,8 +40,7 @@
 
 微信内容扫描下方二维码，即可在线预览小程序。
 
-![QQ交流群](https://blog.925i.cn/upload/xiaochengxu.gif)
-
+![在线体验](https://blog.925i.cn/upload/xiaochengxu.gif)
 
 
 ### 3、页面截图
@@ -81,28 +80,36 @@
 
 ### 2、插件预览
 
-插件信息
+#### 2.1 插件预览
+
 ![预览](https://blog.925i.cn/upload/uni-halo-p-1.png)
 
-基本配置
+#### 2.2 基本配置
+
 ![基本配置](https://blog.925i.cn/upload/uni-halo-p-2.png)
 
-应用配置
+#### 2.3 应用配置
+
 ![应用配置](https://blog.925i.cn/upload/uni-halo-p-3.png)
 
-页面配置
+#### 2.4 页面配置
+
 ![页面配置](https://blog.925i.cn/upload/uni-halo-p-4.png)
 
-我的配置
+#### 2.5 我的配置
+
 ![我的配置](https://blog.925i.cn/upload/uni-halo-p-5.png)
 
-图片配置
+#### 2.6 图片配置
+
 ![图片配置](https://blog.925i.cn/upload/uni-halo-p-6.png)
 
-恋爱配置
+#### 2.7 恋爱配置
+
 ![恋爱配置](https://blog.925i.cn/upload/uni-halo-p-7.png)
 
-插件配置
+#### 2.8 插件配置
+
 ![插件配置](https://blog.925i.cn/upload/uni-halo-p-8.png)
 
 ### 3、使用方式
@@ -185,9 +192,4 @@ halo:
       - "/path/to/plugin-starter"
 ```
 
-最后重启 Halo 项目即可。
-
-
-## 参考项目
-[plugin-moments](https://github.com/halo-sigs/plugin-moments)
-[halo-dev图标库](https://icon-sets.iconify.design/)
+最后重启 Halo 项目即可。 
