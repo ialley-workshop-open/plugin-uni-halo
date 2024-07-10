@@ -153,11 +153,17 @@ spec:
             enabled: true
             alwaysShow: true
             title: "uni-halo 2.0"
+            titleStyle: "color:#ffffff;"
             bg: "bg-gradient-blue-lighten-b"
+            useVideoBackground: false
             logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
             desc1: "新触动 新感受 新体验"
             desc2: "准备好了吗，即刻就出发"
+            descStyle: "color:#ffffff;"
             btnText: "立即体验"
+            btnClass: ""
+            btnStyle: ""
+            useWave: true
           children:
             - $formkit: select
               name: enabled
@@ -183,40 +189,83 @@ spec:
               help: 是否每次打开应用时都显示启动页面
             - $formkit: text
               if: "$get(startConfigEnabled).value === true"
-              validation: required
               name: title
               label: 启动标题
               value: "uni-halo 2.0"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: titleStyle
+              label: 标题样式
+              value: "color:#ffffff;"
+              help: 用于自定义样式，标准的css样式写法
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true"
+              name: useVideoBackground
+              label: 启用视频背景
+              value: false
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 使用视频背景后，启动页面将显示视频背景，视频背景的宽高比推荐为 9:16
             - $formkit: attachment
               if: "$get(startConfigEnabled).value === true"
               name: bg
-              label: 背景图片
+              label: 背景地址
               value: "bg-gradient-blue-lighten-b"
-              help: 支持图片地址和颜色值，不填写使用默认的蓝色渐变背景（bg-gradient-blue-lighten-b）
+              help: 支持视频、图片地址和颜色类（组件库内置样式），不填写使用默认的蓝色渐变背景（bg-gradient-blue-lighten-b）
             - $formkit: attachment
               if: "$get(startConfigEnabled).value === true"
-              validation: required
               name: logo
               label: 启动图标
               value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
             - $formkit: text
               if: "$get(startConfigEnabled).value === true"
-              validation: required
               name: desc1
               label: 文本1
               value: "新触动 新感受 新体验"
             - $formkit: text
               if: "$get(startConfigEnabled).value === true"
-              validation: required
               name: desc2
               label: 文本2
               value: "准备好了吗，即刻就出发"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: descStyle
+              label: 文本样式
+              value: "color:#ffffff;"
+              help: 用于自定义样式，标准的css样式写法
             - $formkit: text
               if: "$get(startConfigEnabled).value === true"
               validation: required
               name: btnText
               label: 按钮文本
               value: "立即体验"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: btnClass
+              label: 按钮类名
+              value: ""
+              help: 按钮类名（仅支持组件内部样式类），用于自定义按钮样式
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: btnStyle
+              label: 按钮样式
+              value: "color:#ffffff;"
+              help: 用于自定义样式，标准的css样式写法
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true"
+              name: useWave
+              label: 启用波浪效果
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 底部的波浪效果
+          help: 配置项中，提到的内置 类样式 相关的内容，请查阅 https://uni-halo.925i.cn/ 相关文档
     - group: pageConfig
       label: 页面配置
       formSchema:
