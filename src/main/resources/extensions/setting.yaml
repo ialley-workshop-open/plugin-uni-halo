@@ -155,7 +155,9 @@ spec:
             title: "uni-halo 2.0"
             titleStyle: "color:#ffffff;"
             bg: "bg-gradient-blue-lighten-b"
-            useVideoBackground: false
+            bgImage: ""
+            bgVideo: ""
+            backgroundType: "color"
             logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
             desc1: "新触动 新感受 新体验"
             desc2: "准备好了吗，即刻就出发"
@@ -168,7 +170,7 @@ spec:
             - $formkit: select
               name: enabled
               id: startConfigEnabled
-              label: 是否使用启动页面
+              label: 开启启动页面
               value: true
               options:
                 - label: 是
@@ -179,12 +181,12 @@ spec:
             - $formkit: select
               if: "$get(startConfigEnabled).value === true"
               name: alwaysShow
-              label: 是否每次显示
+              label: 启动显示频率
               value: true
               options:
-                - label: 是
+                - label: 每次显示
                   value: true
-                - label: 否
+                - label: 显示一次
                   value: false
               help: 是否每次打开应用时都显示启动页面
             - $formkit: text
@@ -200,21 +202,67 @@ spec:
               help: 用于自定义样式，标准的css样式写法
             - $formkit: select
               if: "$get(startConfigEnabled).value === true"
-              name: useVideoBackground
-              label: 启用视频背景
-              value: false
+              name: backgroundType
+              id: backgroundTypeId
+              label: 背景类型
+              value: "color"
               options:
-                - label: 是
-                  value: true
-                - label: 否
-                  value: false
+                - label: 颜色
+                  value: "color"
+                - label: 视频
+                  value: "video"
+                - label: 图片
+                  value: "image"
               help: 使用视频背景后，启动页面将显示视频背景，视频背景的宽高比推荐为 9:16
-            - $formkit: attachment
-              if: "$get(startConfigEnabled).value === true"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'color'"
+              key: bg
               name: bg
-              label: 背景地址
+              label: 背景颜色类名
               value: "bg-gradient-blue-lighten-b"
-              help: 支持视频、图片地址和颜色类（组件库内置样式），不填写使用默认的蓝色渐变背景（bg-gradient-blue-lighten-b）
+              help: 背景颜色类名（仅支持组件内部样式类），用于自定义背景颜色
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'image'"
+              key: bgImage
+              name: bgImage
+              label: 背景图片地址
+              value: ""
+              help: 背景图片地址，支持网络图片地址
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'image'"
+              key: bgImageFit
+              name: bgImageFit
+              label: 图片裁剪模式
+              value: "cover"
+              options:
+                - label: 100%
+                  value: "100% 100%"
+                - label: fill
+                  value: "initial"
+                - label: cover
+                  value: "cover"
+                - label: contain
+                  value: "contain"
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'video'"
+              key: bgVideo
+              name: bgVideo
+              label: 背景视频地址
+              value: ""
+              help: 背景视频地址，支持网络图片地址，宽高比推荐为 9:16
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'video'"
+              key: bgVideoFit
+              name: bgVideoFit
+              label: 视频裁剪模式
+              value: "cover"
+              options:
+                - label: cover
+                  value: "cover"
+                - label: fill
+                  value: "fill"
+                - label: contain
+                  value: "contain"
             - $formkit: attachment
               if: "$get(startConfigEnabled).value === true"
               name: logo
