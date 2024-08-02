@@ -1,13 +1,19 @@
 package pro.uhalo.uni;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import pro.uhalo.uni.scheme.QRCodeInfo;
 import run.halo.app.extension.SchemeManager;
+import run.halo.app.extension.index.IndexSpec;
 import run.halo.app.plugin.BasePlugin;
 import run.halo.app.plugin.PluginContext;
+
+import static run.halo.app.extension.index.IndexAttributeFactory.simpleAttribute;
 
 /**
  * @author 小莫唐尼
  */
+@Slf4j
 @Component
 public class UniHaloPlugin extends BasePlugin {
 
@@ -21,18 +27,27 @@ public class UniHaloPlugin extends BasePlugin {
     @Override
     public void start() {
 
-        // todo:插件启动时注册自定义模型
-        // schemeManager.unregister(schemeManager.get(XXX.class));
+        schemeManager.register(QRCodeInfo.class, indexSpecs -> {
+            indexSpecs.add(new IndexSpec()
+                    .setName("key")
+                    .setIndexFunc(
+                            simpleAttribute(QRCodeInfo.class,
+                                    QRCodeInfo::getKey)));
+            indexSpecs.add(new IndexSpec()
+                    .setName("postId")
+                    .setIndexFunc(
+                            simpleAttribute(QRCodeInfo.class,
+                                    QRCodeInfo::getPostId)));
+        });
 
-        System.out.println("logs : [ Plugin Start ]，插件启动成功！");
+        log.info("【UniHalo】插件启动成功！");
     }
 
     @Override
     public void stop() {
 
-        // todo:插件停用时取消注册自定义模型
-        // schemeManager.unregister(schemeManager.get(XXX.class));
+        schemeManager.unregister(schemeManager.get(QRCodeInfo.class));
 
-        System.out.println("logs : [ Plugin Stop ]，插件停止！");
+        log.info("【UniHalo】插件停止！");
     }
 }

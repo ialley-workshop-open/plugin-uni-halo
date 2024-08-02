@@ -4,7 +4,7 @@ metadata:
   name: plugin-uni-halo
 spec:
   enabled: true
-  requires: ">=2.11.0"
+  requires: ">=2.17.0"
   author:
     name: 小莫唐尼
     website: https://www.925i.cn/
