@@ -1,7 +1,5 @@
 package pro.uhalo.uni.endpoint;
 
-import static org.springdoc.core.fn.builders.parameter.Builder.parameterBuilder;
-
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import org.springdoc.webflux.core.fn.SpringdocRouteBuilder;
 import org.springframework.stereotype.Component;
@@ -14,6 +12,8 @@ import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
 import run.halo.app.extension.ReactiveExtensionClient;
+
+import static org.springdoc.core.fn.builders.parameter.Builder.parameterBuilder;
 
 @Component
 public class ConfigEndpoint implements CustomEndpoint {
@@ -55,6 +55,18 @@ public class ConfigEndpoint implements CustomEndpoint {
                             .implementation(String.class)
                         );
                 })
+            .GET(Constants.END_POINT_API_BASE_PATH + "/getQRCodeImg/{postId}", uniHaloService::getQRCodeImg,
+                    builder -> {
+                        builder.operationId("getQRCodeImg")
+                                .description("getQRCodeImg")
+                                .tag(ApiTag);
+                    })
+            .GET(Constants.END_POINT_API_BASE_PATH + "/getQRCodeInfo/{key}", uniHaloService::getQRCodeInfo,
+                    builder -> {
+                        builder.operationId("getQRCodeInfo")
+                                .description("getQRCodeInfo")
+                                .tag(ApiTag);
+                    })
             .build();
     }
 

@@ -140,8 +140,52 @@ spec:
               label: 应用图标
               value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
               validation: required
+            - $formkit: radio
+              id: useDynamicQRCode
+              name: useDynamicQRCode
+              label: 是否启用动态小程序码
+              value: false
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 启用后，生成的海报将显示动态的小程序码，实现扫描海报跳转文章详情页。
+            - $formkit: text
+              if: "$get(useDynamicQRCode).value === true"
+              name: appId
+              key: appId
+              label: 小程序APP_ID
+              value: ""
+              validation: required
+              help: 小程序的APP_ID，到微信公众平台获取
+            - $formkit: text
+              if: "$get(useDynamicQRCode).value === true"
+              name: appSecret
+              key: appSecret
+              label: 小程序APP_SECRET
+              value: ""
+              validation: required
+              help: 小程序的APP_SECRET，到微信公众平台获取
+            - $formkit: attachmentPolicySelect
+              if: "$get(useDynamicQRCode).value === true"
+              name: policyName
+              key: policyName
+              label: 存储策略
+              help: 存储策略
+              value: "default-policy"
+              validation: required
+            - $formkit: attachmentGroupSelect
+              if: "$get(useDynamicQRCode).value === true"
+              name: fileGroupName
+              key: fileGroupName
+              label: 附件分组
+              help: 附件分组
+              value: ""
             - $formkit: attachment
+              if: "$get(useDynamicQRCode).value === false"
               name: qrCodeImageUrl
+              key: qrCodeImageUrl
               label: 小程序码图片
               value: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
               validation: required
@@ -758,7 +802,7 @@ spec:
               if: "$get(submitLinkEnabled).value === true"
               name: pluginId
               label: 插件ID
-              value: ""
+              value: "LinksSubmit"
               validation: required
               help: 请在插件市场搜索「友链提交」插件，然后复制插件 ID
             - $formkit: text
@@ -810,7 +854,7 @@ spec:
               if: "$get(toolsPluginEnabled).value === true"
               name: pluginId
               label: 插件ID
-              value: ""
+              value: "PluginTools"
               validation: required
               help: 请在插件市场搜索「工具箱」插件，然后复制插件 ID
             - $formkit: text
@@ -825,7 +869,6 @@ spec:
               name: rewardedVideoAdId
               label: 视频广告ID
               value: ""
-              validation: required
               help: 广告ID，请在 UniApp 广告管理中获取。
     - group: shareConfig
       label: 分享配置

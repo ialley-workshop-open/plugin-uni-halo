@@ -12,5 +12,5 @@ metadata:
       ["plugin:plugin-uni-halo:config:view"]
 rules:
   - apiGroups: [ "api.uni.uhalo.pro" ]
-    resources: [ "plugins/*" ,"plugins/getConfigs","plugins/getConfigs/*"]
+    resources: [ "plugins/*" ,"plugins/getConfigs","plugins/getConfigs/*","plugins/getQRCodeImg","plugins/getQRCodeImg/*","plugins/getQRCodeInfo","plugins/getQRCodeInfo/*"]
     verbs: [ "get", "list" ]
