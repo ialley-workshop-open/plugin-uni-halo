@@ -7,6 +7,17 @@ spec:
     - group: basicConfig
       label: 基本配置
       formSchema:
+        - $formkit: radio
+          name: auditModeEnabled
+          label: 是否开启审核模式
+          help: 开启审核模式，关闭小程序部分数据展示，小程序提交审核使建议开启，审核后关闭。
+          value: false
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
         - $formkit: group
           name: copyrightConfig
           label: 页面版权配置
