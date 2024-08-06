@@ -7,7 +7,7 @@ spec:
   requires: ">=2.17.0"
   author:
     name: 小莫唐尼
-    website: https://www.925i.cn/
+    website: https://www.xiaoxiaomo.cn/
   logo: logo.png
   homepage: https://uni-halo.925i.cn/
   repo: https://github.com/ialley-workshop-open/plugin-uni-halo
