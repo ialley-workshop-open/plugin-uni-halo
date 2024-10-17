@@ -683,6 +683,7 @@ spec:
           label: 我们的故事
           value:
             enabled: true
+            iconUrl: ""
             content: ""
           children:
             - $formkit: select
@@ -696,6 +697,12 @@ spec:
                 - label: 否
                   value: false
               validation: required
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
             - $formkit: code
               if: "$get(ourStoryEnabled).value === true"
               name: content
@@ -710,6 +717,7 @@ spec:
           label: 恋爱相册
           value:
             enabled: false
+            iconUrl: ""
             groupName: ""
           children:
             - $formkit: select
@@ -724,6 +732,12 @@ spec:
                   value: false
               validation: required
               help: 启用恋爱相册后，可以在恋爱日记中查看恋爱相册
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
             - $formkit: text
               if: "$get(lovePhotoEnabled).value === true"
               name: groupName
@@ -737,6 +751,7 @@ spec:
           label: 恋爱清单
           value:
             enabled: false
+            iconUrl: ""
             list: [ ]
           children:
             - $formkit: select
@@ -750,6 +765,12 @@ spec:
                 - label: 关闭
                   value: false
               validation: required
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
             - $formkit: repeater
               if: "$get(loveListEnabled).value === true"
               name: list
