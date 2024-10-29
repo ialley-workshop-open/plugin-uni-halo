@@ -9,6 +9,7 @@ spec:
       formSchema:
         - $formkit: radio
           name: auditModeEnabled
+          id: auditModeEnabled
           label: 是否开启审核模式
           help: 开启审核模式，关闭小程序部分数据展示，小程序提交审核使建议开启，审核后关闭。
           value: false
@@ -18,6 +19,13 @@ spec:
             - label: 关闭
               value: false
           validation: required
+        - $formkit: text
+          if: "$get(auditModeEnabled).value === true"
+          name: auditModeMockUrl
+          label: 模拟数据地址
+          value: ""
+          validation: required
+          help: "填写模拟数据的url地址，参考数据格式和说明：https://uni-halo.925i.cn/deploy/wx-release.html"
         - $formkit: group
           name: copyrightConfig
           label: 页面版权配置
@@ -683,6 +691,7 @@ spec:
           label: 我们的故事
           value:
             enabled: true
+            iconUrl: ""
             content: ""
           children:
             - $formkit: select
@@ -696,6 +705,12 @@ spec:
                 - label: 否
                   value: false
               validation: required
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
             - $formkit: code
               if: "$get(ourStoryEnabled).value === true"
               name: content
@@ -710,6 +725,7 @@ spec:
           label: 恋爱相册
           value:
             enabled: false
+            iconUrl: ""
             groupName: ""
           children:
             - $formkit: select
@@ -724,6 +740,12 @@ spec:
                   value: false
               validation: required
               help: 启用恋爱相册后，可以在恋爱日记中查看恋爱相册
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
             - $formkit: text
               if: "$get(lovePhotoEnabled).value === true"
               name: groupName
@@ -737,6 +759,7 @@ spec:
           label: 恋爱清单
           value:
             enabled: false
+            iconUrl: ""
             list: [ ]
           children:
             - $formkit: select
@@ -750,6 +773,12 @@ spec:
                 - label: 关闭
                   value: false
               validation: required
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
             - $formkit: repeater
               if: "$get(loveListEnabled).value === true"
               name: list
