@@ -146,8 +146,8 @@ spec:
           label: 应用信息
           value:
             name: "uni-halo v2.0"
-            logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
-            qrCodeImageUrl: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
+            logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
+            qrCodeImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
           children:
             - $formkit: text
               name: name
@@ -157,7 +157,7 @@ spec:
             - $formkit: attachment
               name: logo
               label: 应用图标
-              value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
               validation: required
             - $formkit: radio
               id: useDynamicQRCode
@@ -206,7 +206,7 @@ spec:
               name: qrCodeImageUrl
               key: qrCodeImageUrl
               label: 小程序码图片
-              value: "https://b.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
               validation: required
               help: 微信小程序二维码的图片地址，用于海报生成
         - $formkit: group
@@ -221,7 +221,7 @@ spec:
             bgImage: ""
             bgVideo: ""
             backgroundType: "color"
-            logo: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+            logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
             desc1: "新触动 新感受 新体验"
             desc2: "准备好了吗，即刻就出发"
             descStyle: "color:#ffffff;"
@@ -330,7 +330,7 @@ spec:
               if: "$get(startConfigEnabled).value === true"
               name: logo
               label: 启动图标
-              value: "https://b.925i.cn/uni_halo/uni_halo_logo.png"
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
             - $formkit: text
               if: "$get(startConfigEnabled).value === true"
               name: desc1
@@ -429,8 +429,8 @@ spec:
           label: 关于配置
           value:
             pageTitle: "关于博主"
-            bgImageUrl: "https://b.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
-            waveImageUrl: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
+            bgImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
+            waveImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
           children:
             - $formkit: text
               validation: required
@@ -440,13 +440,13 @@ spec:
             - $formkit: attachment
               name: bgImageUrl
               label: 页面背景图
-              value: "https://b.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
               validation: required
               help: 资料卡背景图
             - $formkit: attachment
               name: waveImageUrl
               label: 页面波浪图
-              value: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
               validation: required
               help: 资料卡波浪图
     - group: authorConfig
@@ -588,13 +588,13 @@ spec:
         - $formkit: attachment
           name: loadingGifUrl
           label: 加载中的图片
-          value: "https://b.925i.cn/uni_halo/uni_halo_img_lazyload.gif"
+          value: "https://uni-halo.925i.cn/uni_halo/uni_halo_img_lazyload.gif"
           validation: required
           help: 图片正在加载中的图片资源，请选择较小的gif图片
         - $formkit: attachment
           name: loadingErrUrl
           label: 加载失败图片
-          value: "https://b.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif"
+          value: "https://uni-halo.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif"
           validation: required
           help: 图片资源加载失败后显示的图片，请选择较小的图片
         - $formkit: attachment
@@ -635,9 +635,9 @@ spec:
           name: pageImages
           label: 图片配置
           value:
-            bgImageUrl: "https://b.925i.cn/uni_halo_love/love_bg1.png"
-            waveImageUrl: "https://b.925i.cn/uni_halo/uni_halo_about_wave.gif"
-            heartImageUrl: "https://b.925i.cn/uni_halo_love/like.png"
+            bgImageUrl: "https://uni-halo.925i.cn/uni_halo_love/love_bg1.png"
+            waveImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
+            heartImageUrl: "https://uni-halo.925i.cn/uni_halo_love/like.png"
           children:
             - $formkit: attachment
               name: bgImageUrl
