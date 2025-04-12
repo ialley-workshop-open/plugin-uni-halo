@@ -13,6 +13,7 @@ import run.halo.app.extension.router.selector.FieldSelector;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import org.springframework.data.domain.Sort;
 
 import static run.halo.app.extension.index.query.QueryFactory.equal;
 
@@ -38,7 +39,7 @@ public class QRCodeInfoServiceImpl implements QRCodeInfoService {
         var listOptions = new ListOptions();
         var query = equal("postId", postId);
         listOptions.setFieldSelector(FieldSelector.of(query));
-        Flux<QRCodeInfo> friendFlux = client.listAll(QRCodeInfo.class, listOptions, null);
+        Flux<QRCodeInfo> friendFlux = client.listAll(QRCodeInfo.class, listOptions, Sort.unsorted());
         return friendFlux.next();
     }
 
