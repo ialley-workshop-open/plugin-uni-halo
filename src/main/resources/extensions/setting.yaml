@@ -7,6 +7,12 @@ spec:
     - group: basicConfig
       label: 基本配置
       formSchema:
+        - $formkit: textarea
+          name: personalToken
+          label: 个人令牌
+          help: 用于请求，发布瞬间，图库等操作的token。
+          value: ""
+          validation: required
         - $formkit: radio
           name: auditModeEnabled
           id: auditModeEnabled
@@ -816,17 +822,20 @@ spec:
       label: 插件配置
       formSchema:
         - $formkit: group
-          name: submitLink
+          name: linksSubmitPlugin
           label: 友链提交插件
           value:
             enabled: false
-            pluginId: ""
+            pluginId: "LinksSubmit"
             blogName: ""
             blogDesc: ""
             blogLogo: ""
             blogUrl: ""
-          help: 说明：来自【作者：柳意无情】的友链自动提交插件，用于用于支持小程序内主动提交友链。
           children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：来自【作者：<a href='https://blog.muyin.site' title='前往作者博客' target='_blank' class='text-blue-500 hover:text-blue-700'>柳意梧情</a>】的<a href='https://auth.muyin.site/docs/LinksSubmit' title='前往获取友链自助提交插件' target='_blank' class='text-blue-500 hover:text-blue-700'>友链自助提交插件</a>，用于支持小程序内主动提交友链。"
             - $formkit: select
               name: enabled
               id: submitLinkEnabled
@@ -844,7 +853,22 @@ spec:
               label: 插件ID
               value: "LinksSubmit"
               validation: required
-              help: 请在插件市场搜索「友链提交」插件，然后复制插件 ID
+            - $el: div
+              if: "$get(submitLinkEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/LinksSubmit#:~:text=ID-,LinksSubmit' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: Authorization
+              label: 授权Token
+              value: ""
+              validation: required
+            - $el: div
+              if: "$get(submitLinkEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "友链自助提交插件设置的认证token，<a href='/console/plugins/LinksSubmit?tab=basicSetting#:~:text=高级设置-,认证token' title='前往获取认证token' target='_blank' class='text-blue-500 hover:text-blue-700'>获取认证token</a>。"
             - $formkit: text
               if: "$get(submitLinkEnabled).value === true"
               name: blogName
@@ -874,11 +898,16 @@ spec:
           label: 工具箱插件
           value:
             enabled: false
-            pluginId: ""
+            pluginId: "PluginTools"
             Authorization: ""
+            verifyCodeType: "scan"
+            scanCodeUrl: ""
             rewardedVideoAdId: ""
-          help: 说明：来自【作者：柳意无情】的工具箱插件，用于开启支持文章加密访问。
           children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：来自【作者：<a href='https://blog.muyin.site' title='前往作者博客' target='_blank' class='text-blue-500 hover:text-blue-700'>柳意梧情</a>】的<a href='https://auth.muyin.site/docs/PluginTools' title='前往获取Tools工具箱插件' target='_blank' class='text-blue-500 hover:text-blue-700'>Tools工具箱插件</a>，用于开启支持文章加密访问。"
             - $formkit: select
               name: enabled
               id: toolsPluginEnabled
@@ -896,20 +925,52 @@ spec:
               label: 插件ID
               value: "PluginTools"
               validation: required
-              help: 请在插件市场搜索「工具箱」插件，然后复制插件 ID
+            - $el: div
+              if: "$get(toolsPluginEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/PluginTools#:~:text=ID-,PluginTools' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
             - $formkit: text
               if: "$get(toolsPluginEnabled).value === true"
               name: Authorization
               label: 授权Token
               value: ""
               validation: required
-              help: Tools工具箱插件设置的认证token
-            - $formkit: text
+            - $el: div
               if: "$get(toolsPluginEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "Tools工具箱插件设置的认证token，<a href='/console/plugins/PluginTools?tab=basic#:~:text=模板设置-,认证token' title='前往获取认证token' target='_blank' class='text-blue-500 hover:text-blue-700'>获取认证token</a>。"
+            - $formkit: radio
+              if: "$get(toolsPluginEnabled).value === true"
+              id: verifyCodeType
+              name: verifyCodeType
+              key: verifyCodeType
+              label: 验证码获取方式
+              value: "scan"
+              options:
+                - label: 扫码
+                  value: scan
+                - label: 广告
+                  value: advert
+              help: 验证码获取方式，选择“扫码”或“广告”获取验证码。
+              validation: required
+            - $formkit: attachment
+              if: "$get(verifyCodeType).value === 'scan'"
+              name: scanCodeUrl
+              key: scanCodeUrl
+              label: 扫码链接
+              value: ""
+              help: 扫码链接，请填写二维码图片的链接。
+              validation: required
+            - $formkit: text
+              if: "$get(verifyCodeType).value === 'advert'"
               name: rewardedVideoAdId
+              key: rewardedVideoAdId
               label: 视频广告ID
               value: ""
-              help: 广告ID，请在 UniApp 广告管理中获取。
+              help: 广告ID，请在 微信小程序广告管理中获取。
+              validation: required
     - group: shareConfig
       label: 分享配置
       formSchema:
