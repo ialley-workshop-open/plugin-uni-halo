@@ -2,12 +2,12 @@
 
 > 为免费开源的 `uni-halo v2.0` 微信小程序提供配套的配置插件。
 
+* 官方文档：https://uni-halo.925i.cn/
 * 作者主页：https://www.xiaoxiaomo.cn/
-* 作者博客：https://blog.925i.cn/ 
-* 小程序官方文档：https://uni-halo.925i.cn/
-* 小程序源码仓库：https://github.com/ialley-workshop-open/uni-halo
-* 插件源码仓库：https://github.com/ialley-workshop-open/plugin-uni-halo
-* Halo插件市场：https://www.halo.run/store/apps/app-ryemX
+* 作者博客：https://blog.xiaoxiaomo.cn/
+* 源码仓库：https://github.com/ialley-workshop-open/uni-halo
+* 插件源码：https://github.com/ialley-workshop-open/plugin-uni-halo
+* 插件市场：https://www.halo.run/store/apps/app-ryemX
 
 
 ### 支持我
@@ -16,12 +16,12 @@
 
 |                支付宝												                 |                微信												                 |                QQ												                 |
 |:----------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
-| ![支付宝赞赏](https://blog.925i.cn/upload/zf_zfb_skm.png) | ![微信赞赏](https://blog.925i.cn/upload/zf_wx_zsm.png)	 | ![QQ赞赏](https://blog.925i.cn/upload/zf_qq_skm.png)	 |
+| ![支付宝赞赏](https://blog.xiaoxiaomo.cn/upload/zf_zfb_skm.png) | ![微信赞赏](https://blog.xiaoxiaomo.cn/upload/zf_wx_zsm.png)	 | ![QQ赞赏](https://blog.xiaoxiaomo.cn/upload/zf_qq_skm.png)	 |
 
 
 ### 交流群
 
-![QQ交流群](https://blog.925i.cn/upload/qun.png)
+![QQ交流群](https://blog.xiaoxiaomo.cn/upload/qun.png)
 
 
 ## 一、uni-halo 小程序
@@ -40,7 +40,7 @@
 
 微信内容扫描下方二维码，即可在线预览小程序。
 
-![在线体验](https://blog.925i.cn/upload/xiaochengxu.gif)
+![在线体验](https://blog.xiaoxiaomo.cn/upload/xiaochengxu.gif)
 
 
 ### 3、页面截图
@@ -49,11 +49,11 @@
 
 |首页|分类|图库|
 |:--:|:--:|:--:|
-|![首页](https://blog.925i.cn/upload/39789CF4434C9CD6A6289D7209AF6EEF.jpg)|![分类](https://blog.925i.cn/upload/19CB6B66F40200045B6F572A9C28C5E8.jpg)|![图库](https://blog.925i.cn/upload/464F22FDB216CE802653A5F03BE34351.jpg)|
+|![首页](https://blog.xiaoxiaomo.cn/upload/39789CF4434C9CD6A6289D7209AF6EEF.jpg)|![分类](https://blog.xiaoxiaomo.cn/upload/19CB6B66F40200045B6F572A9C28C5E8.jpg)|![图库](https://blog.xiaoxiaomo.cn/upload/464F22FDB216CE802653A5F03BE34351.jpg)|
 
 |瞬间|我的|
 |:--:|:--:|
-|![瞬间](https://blog.925i.cn/upload/41EE8ADBFAE709A483A6E5F814C6A6E4.jpg)|![我的](https://blog.925i.cn/upload/9AEFE8DA4671A3C7F20F76FF3F9D15C9.jpg)|
+|![瞬间](https://blog.xiaoxiaomo.cn/upload/41EE8ADBFAE709A483A6E5F814C6A6E4.jpg)|![我的](https://blog.xiaoxiaomo.cn/upload/9AEFE8DA4671A3C7F20F76FF3F9D15C9.jpg)|
 
 
 ##### 📱 恋爱日记
@@ -82,35 +82,35 @@
 
 #### 2.1 插件预览
 
-![预览](https://blog.925i.cn/upload/uni-halo-p-1.png)
+![预览](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-1.png)
 
 #### 2.2 基本配置
 
-![基本配置](https://blog.925i.cn/upload/uni-halo-p-2.png)
+![基本配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-2.png)
 
 #### 2.3 应用配置
 
-![应用配置](https://blog.925i.cn/upload/uni-halo-p-3.png)
+![应用配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-3.png)
 
 #### 2.4 页面配置
 
-![页面配置](https://blog.925i.cn/upload/uni-halo-p-4.png)
+![页面配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-4.png)
 
 #### 2.5 我的配置
 
-![我的配置](https://blog.925i.cn/upload/uni-halo-p-5.png)
+![我的配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-5.png)
 
 #### 2.6 图片配置
 
-![图片配置](https://blog.925i.cn/upload/uni-halo-p-6.png)
+![图片配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-6.png)
 
 #### 2.7 恋爱配置
 
-![恋爱配置](https://blog.925i.cn/upload/uni-halo-p-7.png)
+![恋爱配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-7.png)
 
 #### 2.8 插件配置
 
-![插件配置](https://blog.925i.cn/upload/uni-halo-p-8.png)
+![插件配置](https://blog.xiaoxiaomo.cn/upload/uni-halo-p-8.png)
 
 ### 3、使用方式
 
