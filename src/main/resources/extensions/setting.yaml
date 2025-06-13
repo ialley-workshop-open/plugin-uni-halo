@@ -989,11 +989,11 @@ spec:
               label: 验证码获取方式
               value: "scan"
               options:
-                - label: 扫码
+                - label: 微信公众号获取
                   value: scan
-                - label: 广告
+                - label: 小程序广告获取
                   value: advert
-              help: 验证码获取方式，选择“扫码”或“广告”获取验证码。
+              help: 验证码获取方式，可以前往文章单独设置验证码获取方式。
               validation: required
             - $formkit: attachment
               if: "$get(verifyCodeType).value === 'scan'"
