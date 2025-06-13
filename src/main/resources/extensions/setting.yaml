@@ -7,12 +7,22 @@ spec:
     - group: basicConfig
       label: 基本配置
       formSchema:
-        - $formkit: textarea
-          name: personalToken
-          label: 个人令牌
-          help: 用于请求，发布瞬间，图库等操作的token。
-          value: ""
-          validation: required
+        - $formkit: group
+          name: tokenConfig
+          label: Token配置
+          help: 说明：配置小程序需要用到的token。
+          value:
+            personalToken: ""
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "个人令牌：用于请求，发布瞬间，图库等操作（systemToken），参考 <a href='https://uni-halo.925i.cn/deploy/config.html#_1-token-%E9%85%8D%E7%BD%AE' title='UniHalo官方文档' target='_blank' class='text-blue-500 hover:text-blue-700'>Token配置</a> 。"
+            - $formkit: textarea
+              name: personalToken
+              label: 个人令牌
+              value: ""
+              validation: required
         - $formkit: radio
           name: auditModeEnabled
           id: auditModeEnabled
@@ -818,8 +828,38 @@ spec:
                   label: 完成时间
                   value: ""
                   validation: required
+    - group: shareConfig
+      label: 分享配置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 标题
+          value: "uni-halo 2.0"
+          validation: required
+        - $formkit: text
+          name: desc
+          label: 描述
+          value: "一款免费开源可多端编译的微信小程序博客应用。"
+          validation: required
+        - $formkit: attachment
+          name: imageUrl
+          label: 封面
+          value: "https://uni-halo.925i.cn/logo.png"
+          validation: required
+        - $formkit: text
+          name: path
+          label: 页面路径
+          value: "/pages/index/index"
+          validation: required
+          help: 页面路径，如：/pages/index/index（一般默认就行）
+        - $formkit: text
+          name: copyLink
+          label: 复制链接
+          value: "/pages/index/index"
+          validation: required
+          help: 复制链接，如：/pages/index/index（一般默认就行）
     - group: pluginConfig
-      label: 插件配置
+      label: 第三方插件配置
       formSchema:
         - $formkit: group
           name: linksSubmitPlugin
@@ -971,33 +1011,3 @@ spec:
               value: ""
               help: 广告ID，请在 微信小程序广告管理中获取。
               validation: required
-    - group: shareConfig
-      label: 分享配置
-      formSchema:
-        - $formkit: text
-          name: title
-          label: 标题
-          value: "uni-halo 2.0"
-          validation: required
-        - $formkit: text
-          name: desc
-          label: 描述
-          value: "一款免费开源可多端编译的微信小程序博客应用。"
-          validation: required
-        - $formkit: attachment
-          name: imageUrl
-          label: 封面
-          value: "https://uni-halo.925i.cn/logo.png"
-          validation: required
-        - $formkit: text
-          name: path
-          label: 页面路径
-          value: "/pages/index/index"
-          validation: required
-          help: 页面路径，如：/pages/index/index（一般默认就行）
-        - $formkit: text
-          name: copyLink
-          label: 复制链接
-          value: "/pages/index/index"
-          validation: required
-          help: 复制链接，如：/pages/index/index（一般默认就行）
