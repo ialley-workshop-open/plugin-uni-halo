@@ -406,6 +406,8 @@ spec:
                 enabled: true
                 showTitle: true
                 showIndicator: true
+                height: "400rpx"
+                dotPosition: "right"
                 type: "post"
                 list: [ ]
               children:
@@ -439,17 +441,36 @@ spec:
                     - label: 否
                       value: false
                   help: 是否显示轮播图指示器
+                - $formkit: text
+                  name: height
+                  label: 轮播图高度
+                  value: "400rpx"
+                  help: 轮播图高度，单位为 rpx
+                - $formkit: select
+                  name: dotPosition
+                  label: 指示器位置
+                  value: "right"
+                  options:
+                    - label: 左侧
+                      value: "left"
+                    - label: 右侧
+                      value: "right"
+                    - label: 顶部
+                      value: "top"
+                    - label: 底部
+                      value: "bottom"
+                  help: 指示器位置
                 - $formkit: select
                   name: type
                   id: bannerType
-                  label: 轮播图类型
+                  label: 轮播图数据
                   value: "post"
                   options:
                     - label: 文章
                       value: "post"
                     - label: 自定义
                       value: "custom"
-                  help: 轮播图类型, 文章：默认使用置顶的文章、自定义：自定义轮播图列表
+                  help: 轮播图数据说明： 文章=默认使用置顶的文章、自定义=自定义轮播图列表
                 - $formkit: repeater
                   if: "$get(bannerType).value === 'custom'"
                   name: list
