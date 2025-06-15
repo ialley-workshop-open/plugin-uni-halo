@@ -399,6 +399,86 @@ spec:
                 - label: 否
                   value: false
               help: 是否显示精品文章分类
+            - $formkit: group
+              name: bannerConfig
+              label: 轮播图配置
+              value:
+                enabled: true
+                showTitle: true
+                showIndicator: true
+                type: "post"
+                list: [ ]
+              children:
+                - $formkit: select
+                  name: enabled
+                  label: 是否启用
+                  value: true
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
+                  help: 是否启用轮播图
+                - $formkit: select
+                  name: showTitle
+                  label: 是否显示标题
+                  value: true
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
+                  help: 是否显示轮播图标题
+                - $formkit: select
+                  name: showIndicator
+                  label: 是否显示指示器
+                  value: true
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
+                  help: 是否显示轮播图指示器
+                - $formkit: select
+                  name: type
+                  id: bannerType
+                  label: 轮播图类型
+                  value: "post"
+                  options:
+                    - label: 文章
+                      value: "post"
+                    - label: 自定义
+                      value: "custom"
+                  help: 轮播图类型, 文章：默认使用置顶的文章、自定义：自定义轮播图列表
+                - $formkit: repeater
+                  if: "$get(bannerType).value === 'custom'"
+                  name: list
+                  label: 轮播图数据
+                  value: [ ]
+                  children:
+                    - $formkit: text
+                      name: title
+                      label: 标题
+                      value: ""
+                      validation: required
+                    - $formkit: attachment
+                      name: cover
+                      label: 封面图片
+                      value: ""
+                      validation: required
+                    - $formkit: text
+                      name: url
+                      label: 跳转链接
+                      value: ""
+                      help: 跳转链接，留空则不跳转，如果填写了内容详情，会先弹窗显示内容详情，然后详情里显示链接。
+                    - $formkit: code
+                      name: content
+                      label: 内容详情
+                      value: ""
+                      language: html
+                      height: 100px
+                      help: 轮播图内容详情，支持 html/markdown 语法。
+              help: 说明：配置首页的轮播图
         - $formkit: group
           name: galleryConfig
           label: 图库配置
@@ -602,7 +682,7 @@ spec:
     - group: loveConfig
       label: 恋爱配置
       formSchema:
-        - $formkit: select
+        - $formkit: radio
           name: loveEnabled
           id: loveEnabled
           label: 是否启用
@@ -787,7 +867,7 @@ spec:
                   label: 标题
                   value: ""
                   validation: required
-                - $formkit: text
+                - $formkit: textarea
                   name: content
                   label: 内容
                   value: ""
