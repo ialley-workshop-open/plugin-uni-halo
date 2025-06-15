@@ -23,25 +23,6 @@ spec:
               label: 个人令牌
               value: ""
               validation: required
-        - $formkit: radio
-          name: auditModeEnabled
-          id: auditModeEnabled
-          label: 是否开启审核模式
-          help: 开启审核模式，关闭小程序部分数据展示，小程序提交审核使建议开启，审核后关闭。
-          value: false
-          options:
-            - label: 开启
-              value: true
-            - label: 关闭
-              value: false
-          validation: required
-        - $formkit: text
-          if: "$get(auditModeEnabled).value === true"
-          name: auditModeMockUrl
-          label: 模拟数据地址
-          value: ""
-          validation: required
-          help: "填写模拟数据的url地址，参考数据格式和说明：https://uni-halo.925i.cn/deploy/wx-release.html"
         - $formkit: group
           name: copyrightConfig
           label: 页面版权配置
@@ -492,7 +473,7 @@ spec:
               name: email
               label: 邮箱
               value: ""
-            - $formkit: text
+            - $formkit: textarea
               validation: required
               name: description
               label: 简介
@@ -858,6 +839,44 @@ spec:
           value: "/pages/index/index"
           validation: required
           help: 复制链接，如：/pages/index/index（一般默认就行）
+    - group: auditConfig
+      label: 审核配置
+      formSchema:
+        - $formkit: radio
+          name: auditModeEnabled
+          id: auditModeEnabled
+          label: 审核模式
+          help: 开启审核模式，关闭小程序部分数据展示，小程序提交审核使建议开启，审核后关闭。
+          value: false
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
+        - $formkit: group
+          name: auditModeData
+          label: 模拟数据
+          value:
+            jsonUrl: ""
+            jsonData: ""
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer py-3"
+                innerHTML: "支持填写模拟的数据，二选一即可，查看： <a href='https://uni-halo.925i.cn/deploy/wx-release.html#%E5%AE%A1%E6%A0%B8%E6%A8%A1%E6%8B%9F%E6%95%B0%E6%8D%AE' title='UniHalo模拟数据示例' target='_blank'  class='text-blue-500 hover:text-blue-700'>模拟数据说明</a> 。"
+            - $formkit: text
+              name: jsonUrl
+              label: 文件地址
+              value: ""
+              help: "这里填写的是一个可以访问的json文件地址，json文件内容格式查看上方【模拟数据说明】"
+            - $formkit: code
+              name: jsonData
+              label: 数据内容
+              value: ""
+              language: json
+              height: 350px
+              help: "这里填写的是json内容，json内容格式查看上方【模拟数据说明】"
     - group: pluginConfig
       label: 第三方插件配置
       formSchema:
