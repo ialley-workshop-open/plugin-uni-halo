@@ -390,6 +390,16 @@ spec:
               label: 页面标题
               value: "首页"
             - $formkit: select
+              name: useQuickNavigation
+              label: 是否显示快捷导航
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否显示快捷导航
+            - $formkit: select
               name: useCategory
               label: 是否显示分类
               value: true
