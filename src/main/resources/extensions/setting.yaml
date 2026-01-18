@@ -992,6 +992,72 @@ spec:
       label: 第三方插件配置
       formSchema:
         - $formkit: group
+          name: votePlugin
+          label: 投票管理插件
+          value:
+            enabled: true
+            pluginId: "vote"
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：<a href='https://www.halo.run/store/apps/app-veyvzyhv' title='前往获取投票管理插件' target='_blank' class='text-blue-500 hover:text-blue-700'>投票管理插件</a>，用于支持小程序内投票。"
+            - $formkit: select
+              name: enabled
+              id: voteEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(voteEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: "vote"
+              validation: required
+            - $el: div
+              if: "$get(voteEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/vote#:~:text=ID-,vote' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+        - $formkit: group
+          name: linksPlugin
+          label: 链接管理插件
+          value:
+            enabled: true
+            pluginId: "plugin-links"
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：<a href='https://www.halo.run/store/apps/app-hfbQg' title='前往获取链接管理插件' target='_blank' class='text-blue-500 hover:text-blue-700'>链接管理插件</a>，用于支持小程序内友情链接。"
+            - $formkit: select
+              name: enabled
+              id: linksEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(linksEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: "plugin-links"
+              validation: required
+            - $el: div
+              if: "$get(linksEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/PluginLinks#:~:text=ID-,PluginLinks' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+        - $formkit: group
           name: linksSubmitPlugin
           label: 友链提交插件
           value:
