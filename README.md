@@ -14,9 +14,9 @@
 
 如果您觉得这个项目对您有帮助，可以帮作者买杯饮料鼓励鼓励，同时为了项目能够持续发展，可以根据您的喜好支持一下本项目哦，非常感谢您的支持，作者也会更有动力持续维护和更新新的功能哦~
 
-|                支付宝												                 |                微信												                 |                QQ												                 |
-|:----------------------------------------------:|:---------------------------------------------:|:---------------------------------------------:|
-| ![支付宝赞赏](https://blog.xiaoxiaomo.cn/upload/zf_zfb_skm.png) | ![微信赞赏](https://blog.xiaoxiaomo.cn/upload/zf_wx_zsm.png)	 | ![QQ赞赏](https://blog.xiaoxiaomo.cn/upload/zf_qq_skm.png)	 |
+|                                                 支付宝                                                 |                                                微信                                                 |                                                QQ                                                 |
+|:---------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|
+| ![支付宝赞助](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/author/ZFBRewardCode.png) | ![微信赞助](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/author/WXRewardCode.png) | ![QQ赞助](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/author/QQRewardCode.png) |
 
 
 ### 交流群
@@ -36,33 +36,19 @@
 - 支持特色功能，恋爱日记
 - 理论支持编译为 小程序（推荐）、APP
 
-### 2、在线预览
+### 2、页面截图 
 
-微信内容扫描下方二维码，即可在线预览小程序。
-
-![在线体验](https://blog.xiaoxiaomo.cn/upload/xiaochengxu.gif)
-
-
-### 3、页面截图
-
-以下为部分页面截图，更多功能页面请扫码预览体验。
-
-|首页|分类|图库|
+|首页|分类|我的|
 |:--:|:--:|:--:|
-|![首页](https://blog.xiaoxiaomo.cn/upload/39789CF4434C9CD6A6289D7209AF6EEF.jpg)|![分类](https://blog.xiaoxiaomo.cn/upload/19CB6B66F40200045B6F572A9C28C5E8.jpg)|![图库](https://blog.xiaoxiaomo.cn/upload/464F22FDB216CE802653A5F03BE34351.jpg)|
-
-|瞬间|我的|
-|:--:|:--:|
-|![瞬间](https://blog.xiaoxiaomo.cn/upload/41EE8ADBFAE709A483A6E5F814C6A6E4.jpg)|![我的](https://blog.xiaoxiaomo.cn/upload/9AEFE8DA4671A3C7F20F76FF3F9D15C9.jpg)|
+|![首页](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/screenshots/v2/首页.png)|![分类](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/screenshots/v2/分类.jpg)|![我的](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/screenshots/v2/关于.jpg)|
 
 
-##### 📱 恋爱日记
+### 恋爱日记
 
-说明：以下仅为部分截图
+- 在 uni-halo 中，我们为您准备了一个恋爱日记的模块，您可以在其中记录您的恋爱故事，分享给您的朋友们，请扫示例小程序，在线体验恋爱日记的功能。
 
-|主页|恋爱清单|
-|:--:|:--:|
-|![主页](https://uni-halo.925i.cn/assets/love_001.6bf8b4e9.jpg)|![恋爱清单](https://uni-halo.925i.cn/assets/love_002.a08bd8d6.jpg)|
+![恋爱日记](https://gcore.jsdelivr.net/gh/uni-halo/uni-halo-static-resources/screenshots/v2/恋爱日记.jpg)
+
 <br/>
 
 ## 二、uni-halo 配置插件
