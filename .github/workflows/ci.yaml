@@ -100,7 +100,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ needs.build-halo-plugin.outputs.plugin-version }}
-          release_name: Release ${{ needs.build-halo-plugin.outputs.plugin-version }}
+          release_name: ${{ needs.build-halo-plugin.outputs.plugin-version }}
           draft: false
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
