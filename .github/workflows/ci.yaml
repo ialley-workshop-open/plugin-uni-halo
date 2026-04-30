@@ -1,6 +1,16 @@
 name: CI
 
+env:
+  java-version: 17
+  node-version: 20
+  pnpm-version: 8
+  ui-path: ui
+  skip-node-setup: false
+  artifacts-path: build/libs
+  halo-branch: v2.15.0
+
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,7 +19,95 @@ on:
       - main
 
 jobs:
-  ci:
-    uses: halo-sigs/reusable-workflows/.github/workflows/plugin-ci.yaml@v1
-    with:
-      ui-path: "ui"
+  build-halo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache Maven Local
+        uses: actions/cache@v4
+        id: cache-maven
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-local-${{ env.halo-branch }}
+          restore-keys: |
+            ${{ runner.os }}-maven-local-
+      - name: Build Halo
+        if: steps.cache-maven.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /tmp/halo/ && cd /tmp/halo/
+          git clone --branch ${{ env.halo-branch }} --depth 1 https://github.com/halo-dev/halo.git .
+          ./gradlew build publishToMavenLocal -x :ui:build -x test
+
+  build-halo-plugin:
+    needs: build-halo
+    runs-on: ubuntu-latest
+    outputs:
+      plugin-name: ${{ steps.get_fileinfo.outputs.NAME }}
+      plugin-version: ${{ steps.get_fileinfo.outputs.VERSION }}
+      file-name: ${{ steps.get_fileinfo.outputs.FILE_NAME }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        uses: halo-sigs/actions/plugin-setup-env@v1
+        with:
+          cache-dept-path: ${{ env.ui-path }}/pnpm-lock.yaml
+          skip-node-setup: ${{ env.skip-node-setup }}
+          node-version: ${{ env.node-version }}
+          pnpm-version: ${{ env.pnpm-version }}
+          java-version: ${{ env.java-version }}
+      - name: Cache Maven Local
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-local-${{ env.halo-branch }}
+          fail-on-cache-miss: true
+      - name: Check
+        run: ./gradlew clean build
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts
+          path: ${{ env.artifacts-path }}
+          retention-days: 1
+      - name: Get artifact fileinfo from gradle
+        id: get_fileinfo
+        run: |
+          NAME=$(./gradlew properties --quiet | grep "^name:" | awk '{print $2}')
+          VERSION=$(./gradlew properties --quiet | grep "^version:" | awk '{print $2}')
+          FILE_NAME="$NAME-$VERSION.jar"
+
+          echo "FILE_NAME:${FILE_NAME}"
+
+          echo "NAME=$NAME" >> $GITHUB_OUTPUT
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
+
+  create-tag:
+    needs: build-halo-plugin
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build info
+        uses: actions/download-artifact@v4
+        with:
+          name: artifacts
+          path: .
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.build-halo-plugin.outputs.plugin-version }}
+          release_name: Release ${{ needs.build-halo-plugin.outputs.plugin-version }}
+          draft: false
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ needs.build-halo-plugin.outputs.file-name }}
+          asset_name: ${{ needs.build-halo-plugin.outputs.file-name }}
+          asset_content_type: application/java-archive
