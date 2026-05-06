@@ -22,6 +22,18 @@ jobs:
   build-halo:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout halp repo
+        uses: actions/checkout@v4
+        with:
+          repository: halo-dev/halo
+          ref: ${{ env.halo-branch }}
+          fetch-depth: 1
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          cache: "gradle"
+          java-version: ${{ env.java-version }}
       - name: Cache Maven Local
         uses: actions/cache@v4
         id: cache-maven
@@ -32,10 +44,7 @@ jobs:
             ${{ runner.os }}-maven-local-
       - name: Build Halo
         if: steps.cache-maven.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p /tmp/halo/ && cd /tmp/halo/
-          git clone --branch ${{ env.halo-branch }} --depth 1 https://github.com/halo-dev/halo.git .
-          ./gradlew build publishToMavenLocal -x :ui:build -x test
+        run: ./gradlew build publishToMavenLocal -x :ui:build -x test
 
   build-halo-plugin:
     needs: build-halo
