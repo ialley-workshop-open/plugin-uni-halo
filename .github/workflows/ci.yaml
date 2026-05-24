@@ -22,7 +22,7 @@ jobs:
   build-halo:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout halp repo
+      - name: Checkout halo repo
         uses: actions/checkout@v4
         with:
           repository: halo-dev/halo
@@ -97,26 +97,18 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download build info
+      - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
           name: artifacts
-          path: .
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          path: build/libs  # 关键修复：路径必须对应
+
+      - name: Create Release and Upload Asset
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.build-halo-plugin.outputs.plugin-version }}
-          release_name: ${{ needs.build-halo-plugin.outputs.plugin-version }}
+          name: ${{ needs.build-halo-plugin.outputs.plugin-version }}
           draft: false
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
+          files: build/libs/${{ needs.build-halo-plugin.outputs.file-name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./${{ needs.build-halo-plugin.outputs.file-name }}
-          asset_name: ${{ needs.build-halo-plugin.outputs.file-name }}
-          asset_content_type: application/java-archive
