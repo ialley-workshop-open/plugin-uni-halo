@@ -164,14 +164,12 @@ const onEditingModalClose = () => {
                 @change="handleCheckAllChange"
               />
             </div>
-            <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
+            <div class=":uno: flex w-full flex-1 gap-x-2 items-center sm:w-auto">
               <template v-if="!selectedAppNames.length">
-                <input
-                  v-model="keyword"
-                  class=":uno: w-64 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
-                  placeholder="搜索 AppID / 应用名称（回车搜索）"
-                  @keyup.enter="() => refetch()"
-                />
+                <SearchInput v-model="keyword" placeholder="应用名称（回车搜索）"/>
+                <VButton v-if="false" type="secondary" @click="refetch()">
+                  搜索
+                </VButton>
               </template>
               <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
                 删除

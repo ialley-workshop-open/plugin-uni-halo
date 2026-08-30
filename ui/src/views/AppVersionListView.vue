@@ -222,8 +222,8 @@ const onEditingModalClose = () => {
             <div class=":uno: truncate text-sm text-gray-800">
               {{ app.spec.name || app.spec.appid }}
             </div>
-            <div v-if="app.spec.description" class=":uno: truncate text-xs text-gray-500">
-              {{ app.spec.description }}
+            <div v-if="app.spec.appid" class=":uno: truncate text-xs text-gray-500">
+              {{ app.spec.appid }}
             </div>
           </div>
         </div>
@@ -239,9 +239,10 @@ const onEditingModalClose = () => {
               </div>
               <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
                 <template v-if="!selectedVersionNames.length">
-                  <input v-model="keyword"
-                    class=":uno: w-56 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
-                    placeholder="搜索标题 / 版本号（回车搜索）" @keyup.enter="() => refetch()" />
+                  <SearchInput v-model="keyword" placeholder="标题/版本号（回车搜索）"/>
+<!--                  <input v-model="keyword"-->
+<!--                    class=":uno: w-56 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"-->
+<!--                    placeholder="搜索标题 / 版本号（回车搜索）" @keyup.enter="() => refetch()" />-->
                 </template>
                 <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
                   删除

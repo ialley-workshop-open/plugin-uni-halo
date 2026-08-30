@@ -69,11 +69,11 @@ const routeToVersions = () => {
           <div v-else class=":uno: h-10 w-10 rounded bg-gray-100" />
         </template>
       </VEntityField>
-      <VEntityField :title="app.spec.appid || app.metadata.name" width="15rem">
+      <VEntityField :title="app.spec.name || app.spec.appid || app.metadata.name" width="15rem">
         <template #description>
           <VSpace class=":uno: flex-wrap">
             <span class=":uno: truncate text-xs tabular-nums text-gray-500">
-              {{ app.spec.name }}
+              {{ app.spec.appid }}
             </span>
           </VSpace>
         </template>
