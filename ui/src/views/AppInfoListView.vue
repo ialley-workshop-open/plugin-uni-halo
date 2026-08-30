@@ -135,7 +135,7 @@ const onEditingModalClose = () => {
     @close="onEditingModalClose"
   />
 
-  <VPageHeader title="应用管理">
+  <VPageHeader title="UniHalo-应用管理">
     <template #actions>
       <VButton
         v-permission="['plugin:uni-halo:app:manage']"

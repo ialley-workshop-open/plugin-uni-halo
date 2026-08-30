@@ -180,7 +180,7 @@ const onEditingModalClose = () => {
 <template>
   <AppVersionEditingModal v-if="editingModal" :app-version="selectedVersion" :initial-appid="publishAppid"
     :apps="(apps?.items as AppInfo[]) || []" @close="onEditingModalClose" />
-  <VPageHeader title="版本管理">
+  <VPageHeader title="UniHalo-版本管理">
     <template #actions>
       <VButton type="secondary" @click="refetch">
         <template #icon>
@@ -240,9 +240,6 @@ const onEditingModalClose = () => {
               <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
                 <template v-if="!selectedVersionNames.length">
                   <SearchInput v-model="keyword" placeholder="标题/版本号（回车搜索）"/>
-<!--                  <input v-model="keyword"-->
-<!--                    class=":uno: w-56 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"-->
-<!--                    placeholder="搜索标题 / 版本号（回车搜索）" @keyup.enter="() => refetch()" />-->
                 </template>
                 <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
                   删除

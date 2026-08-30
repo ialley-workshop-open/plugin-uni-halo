@@ -1,5 +1,5 @@
 import {definePlugin} from '@halo-dev/ui-shared'
-import {IconPlug, IconSettings} from '@halo-dev/components'
+import {IconDashboard, IconGrid, IconRocketLine} from '@halo-dev/components'
 import {markRaw} from 'vue'
 import WelcomeView from './views/WelcomeView.vue'
 
@@ -23,8 +23,8 @@ export default definePlugin({
           permissions: [],
           menu: {
             name: '欢迎使用',
-            group: 'uni-halo',
-            icon: markRaw(IconSettings),
+            group: 'UniHalo',
+            icon: markRaw(IconDashboard),
             priority: 0,
           },
         },
@@ -43,8 +43,8 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:app:view"],
           menu: {
             name: '应用管理',
-            group: 'uni-halo',
-            icon: markRaw(IconSettings),
+            group: 'UniHalo',
+            icon: markRaw(IconGrid),
             priority: 0,
           },
         },
@@ -63,8 +63,8 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:version:view"],
           menu: {
             name: '版本管理',
-            group: 'uni-halo',
-            icon: markRaw(IconPlug),
+            group: 'UniHalo',
+            icon: markRaw(IconRocketLine),
             priority: 1,
           },
         },

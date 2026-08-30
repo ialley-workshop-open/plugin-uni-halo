@@ -160,7 +160,7 @@ const contacts = [
         </h1>
 
         <p class="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          为免费开源的 uni-halo v2.0 微信小程序提供配套的配置插件，轻松配置你的小程序
+          为免费开源的 uni-halo v2.0 微信小程序/App提供配套的配置插件
         </p>
 
         <div class="flex flex-wrap justify-center gap-4 mb-10">
