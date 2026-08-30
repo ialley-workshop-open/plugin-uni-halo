@@ -28,7 +28,7 @@ metadata:
     rbac.authorization.halo.run/aggregate-to-admin: "true"
   annotations:
     rbac.authorization.halo.run/dependencies: |
-      [ "role-template-view-uni-halo-app" ]
+      [ "plugin-uni-halo-role-template-view-app" ]
     rbac.authorization.halo.run/module: "UniHalo 应用管理"
     rbac.authorization.halo.run/display-name: "应用管理"
     rbac.authorization.halo.run/ui-permissions: |
@@ -72,7 +72,7 @@ metadata:
     rbac.authorization.halo.run/aggregate-to-admin: "true"
   annotations:
     rbac.authorization.halo.run/dependencies: |
-      [ "role-template-view-uni-halo-version" ]
+      [ "plugin-uni-halo-role-template-view-app-version" ]
     rbac.authorization.halo.run/module: "UniHalo 版本管理"
     rbac.authorization.halo.run/display-name: "版本管理"
     rbac.authorization.halo.run/ui-permissions: |
