@@ -1,0 +1,85 @@
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-view-app
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "UniHalo 应用管理"
+    rbac.authorization.halo.run/display-name: "应用查看"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:app:view"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/apps"
+      - "plugins/plugin-uni-halo/apps/*"
+    verbs: [ "get", "list" ]
+
+---
+
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-manage-app
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/dependencies: |
+      [ "role-template-view-uni-halo-app" ]
+    rbac.authorization.halo.run/module: "UniHalo 应用管理"
+    rbac.authorization.halo.run/display-name: "应用管理"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:app:manage"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/apps"
+      - "plugins/plugin-uni-halo/apps/*"
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]
+
+---
+
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-view-app-version
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "UniHalo 版本管理"
+    rbac.authorization.halo.run/display-name: "版本查看"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:version:view"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/app-versions"
+      - "plugins/plugin-uni-halo/app-versions/*"
+    verbs: [ "get", "list" ]
+
+---
+
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-manage-app-version
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/dependencies: |
+      [ "role-template-view-uni-halo-version" ]
+    rbac.authorization.halo.run/module: "UniHalo 版本管理"
+    rbac.authorization.halo.run/display-name: "版本管理"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:version:manage"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/app-versions"
+      - "plugins/plugin-uni-halo/app-versions/*"
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]

@@ -40,7 +40,7 @@ export default definePlugin({
           title: '应用管理',
           searchable: true,
           hideFooter: false,
-          permissions: [],
+          permissions: ["plugin:uni-halo:app:view"],
           menu: {
             name: '应用管理',
             group: 'uni-halo',
@@ -60,7 +60,7 @@ export default definePlugin({
           title: '版本管理',
           searchable: true,
           hideFooter: false,
-          permissions: [],
+          permissions: ["plugin:uni-halo:version:view"],
           menu: {
             name: '版本管理',
             group: 'uni-halo',

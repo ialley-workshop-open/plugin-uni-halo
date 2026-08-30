@@ -137,7 +137,11 @@ const onEditingModalClose = () => {
 
   <VPageHeader title="应用管理">
     <template #actions>
-      <VButton type="primary" @click="editingModal = true">
+      <VButton
+        v-permission="['plugin:uni-halo:app:manage']"
+        type="primary"
+        @click="editingModal = true"
+      >
         <template #icon>
           <IconAddCircle />
         </template>
@@ -197,7 +201,11 @@ const onEditingModalClose = () => {
           <template #actions>
             <VSpace>
               <VButton @click="refetch">刷新</VButton>
-              <VButton type="secondary" @click="editingModal = true">
+              <VButton
+                v-permission="['plugin:uni-halo:app:manage']"
+                type="secondary"
+                @click="editingModal = true"
+              >
                 <template #icon>
                   <IconAddCircle />
                 </template>

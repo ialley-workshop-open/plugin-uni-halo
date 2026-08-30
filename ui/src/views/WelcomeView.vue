@@ -24,6 +24,7 @@ import RiMessage2Line from '~icons/ri/message-2-line'
 import RiGlobalLine from '~icons/ri/global-line'
 import RiMapPinLine from '~icons/ri/map-pin-line'
 import RiLightbulbLine from '~icons/ri/lightbulb-line'
+import RiHomeLine from '~icons/ri/home-line'
 
 import mpPng from '@/assets/mp.png'
 import wxqunPng from '@/assets/wxqun.png'
@@ -31,6 +32,7 @@ import qqqunPng from '@/assets/qqqun.png'
 import wxPng from '@/assets/wx.png'
 import zfbPng from '@/assets/zfb.png'
 import qqPng from '@/assets/qq.png'
+import logoPng from '@/assets/logo.png'
 
 const isLoaded = ref(false)
 
@@ -110,8 +112,8 @@ const contacts = [
   { icon: RiBookOpenLine, label: '个人博客', value: 'blog.xiaoxiaomo.cn', href: 'https://blog.xiaoxiaomo.cn/' },
   { icon: RiGlobalLine, label: '个人主页', value: 'www.xiaoxiaomo.cn', href: 'https://www.xiaoxiaomo.cn/' },
   { icon: RiMailLine, label: '联系邮箱', value: '1431128779@qq.com', href: 'mailto:1431128779@qq.com' },
-  { icon: RiMessage2Line, label: 'QQ 交流群', value: '加入开发者社群', href: '#' },
-  { icon: RiMapPinLine, label: '所在地', value: '中国·深圳', href: '#' },
+  { icon: RiMessage2Line, label: 'QQ 交流群', value: '加入开发者社群', href: 'https://qm.qq.com/q/Kh9QPnL6gO' },
+  { icon: RiMapPinLine, label: '所在地', value: '中国·深圳', href: 'javascript:void(0)' },
 ]
 </script>
 
@@ -145,6 +147,8 @@ const contacts = [
       </div>
 
       <div class="relative z-10 max-w-5xl mx-auto px-4 text-center">
+        <img :src="logoPng" alt="UniHalo Logo" class="w-20 h-20 mx-auto mb-6 drop-shadow-lg" />
+
         <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border rounded-full px-4 py-2 mb-8 shadow-sm" style="border-color: rgba(54,143,239,0.2)">
           <RiSparklingLine class="w-4 h-4" style="color: #368FEF" />
           <span class="text-sm font-medium" style="color: #368FEF">Halo 插件</span>
@@ -214,13 +218,13 @@ const contacts = [
 
         <!-- 三个横向截图占位 -->
         <div class="grid grid-cols-3 gap-4 max-w-4xl mx-auto">
-          <div class="aspect-video rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+          <div class="rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
             <img :src="mpPng" alt="小程序二维码" class="w-full h-full object-contain p-3" />
           </div>
-          <div class="aspect-video rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+          <div class="rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
             <img :src="wxqunPng" alt="微信交流群" class="w-full h-full object-contain p-3" />
           </div>
-          <div class="aspect-video rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+          <div class="rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
             <img :src="qqqunPng" alt="QQ 交流群" class="w-full h-full object-contain p-3" />
           </div>
         </div>
@@ -252,7 +256,7 @@ const contacts = [
               <RiWechatPayLine class="w-7 h-7" />
             </div>
             <h4 class="font-semibold text-slate-800 mb-3">微信赞助</h4>
-            <div class="w-36 h-36 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+            <div class="w-42 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
               <img :src="wxPng" alt="微信赞赏码" class="w-full h-full object-contain" />
             </div>
             <p class="text-sm text-slate-500">扫码请作者喝咖啡</p>
@@ -266,7 +270,7 @@ const contacts = [
               <RiAlipayLine class="w-7 h-7" />
             </div>
             <h4 class="font-semibold text-slate-800 mb-3">支付宝赞助</h4>
-            <div class="w-36 h-36 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+            <div class="w-42 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
               <img :src="zfbPng" alt="支付宝赞赏码" class="w-full h-full object-contain" />
             </div>
             <p class="text-sm text-slate-500">扫码请作者喝奶茶</p>
@@ -280,7 +284,7 @@ const contacts = [
               <RiQqLine class="w-7 h-7" />
             </div>
             <h4 class="font-semibold text-slate-800 mb-3">QQ 赞助</h4>
-            <div class="w-36 h-36 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+            <div class="w-42 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
               <img :src="qqPng" alt="QQ 赞赏码" class="w-full h-full object-contain" />
             </div>
             <p class="text-sm text-slate-500">扫码请作者吃零食</p>
@@ -472,14 +476,14 @@ const contacts = [
           <p class="text-lg text-slate-500">项目的开发者与维护者</p>
         </div>
 
-        <div class="bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-slate-100">
+        <div class="bg-white rounded-3xl p-8 shadow-sm sm:p-10 border border-slate-100">
           <div class="flex flex-col sm:flex-row items-center gap-8">
             <!-- 头像 -->
             <div class="flex-shrink-0">
               <img
                 src="https://www.xiaoxiaomo.cn/logo.jpg"
                 alt="小莫唐尼"
-                class="w-28 h-28 rounded-full shadow-lg object-cover"
+                class="w-28 h-28 rounded-full object-cover"
               />
             </div>
 
@@ -492,6 +496,15 @@ const contacts = [
 
             <!-- 按钮 -->
             <div class="flex gap-3">
+              <a
+                href="https://www.xiaoxiaomo.cn/"
+                class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+                style="color: #368FEF; background: rgba(54,143,239,0.08)"
+                target="_blank"
+              >
+                <RiHomeLine class="w-3.5 h-3.5" />
+                <span>主页</span>
+              </a>
               <a
                 href="https://blog.xiaoxiaomo.cn/"
                 class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
@@ -520,13 +533,13 @@ const contacts = [
           </div>
 
           <!-- 联系方式网格 -->
-          <div class="mt-8 pt-8 border-t border-slate-200">
+          <div class="mt-8 pt-8 border-t border-slate-100">
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               <a
                 v-for="item in contacts"
                 :key="item.label"
                 :href="item.href"
-                class="flex flex-col items-center gap-2 p-4 rounded-xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all duration-200"
+                class="flex flex-col items-center gap-2 p-4 rounded-xl bg-slate-50 border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all duration-200"
                 :target="item.href.startsWith('http') ? '_blank' : undefined"
               >
                 <component :is="item.icon" class="w-5 h-5" style="color: #368FEF" />
