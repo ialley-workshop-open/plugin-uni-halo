@@ -1,0 +1,22 @@
+# Refer https://docs.halo.run/developer-guide/plugin/basics/manifest
+
+apiVersion: plugin.halo.run/v1alpha1
+kind: Plugin
+metadata:
+  # The name defines how the plugin is invoked, A unique name
+  name: uni-halo
+spec:
+  enabled: true
+  requires: ">=2.26.0"
+  author:
+    name: 小莫唐尼
+    website: https://github.com/小莫唐尼
+  logo: logo.png
+  homepage: https://github.com/小莫唐尼/uni-halo#readme
+  repo: https://github.com/小莫唐尼/uni-halo
+  issues: https://github.com/小莫唐尼/uni-halo/issues
+  displayName: "uni-halo"
+  description: "uni-halo - Halo 插件"
+  license:
+    - name: "GPL-3.0"
+      url: "https://github.com/小莫唐尼/uni-halo/blob/main/LICENSE"

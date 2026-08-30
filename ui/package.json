@@ -1,0 +1,55 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "run-p type-check \"build-only {@}\" --",
+    "build-only": "vite build",
+    "dev": "vite build --watch --mode=development",
+    "lint:oxlint": "oxlint . --fix",
+    "lint:eslint": "eslint . --fix --cache",
+    "lint": "run-s \"lint:*\"",
+    "format": "prettier --write --experimental-cli src/",
+    "test:unit": "vitest --passWithNoTests",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@halo-dev/api-client": "^2.26.0",
+    "@halo-dev/components": "^2.26.0",
+    "@halo-dev/ui-shared": "^2.26.0",
+    "axios": "^1.19.0",
+    "canvas-confetti": "^1.9.4",
+    "vue": "^3.5.40"
+  },
+  "devDependencies": {
+    "vite": "^8.2.0",
+    "@halo-dev/ui-plugin-bundler-kit": "^2.26.0",
+    "@iconify-json/ri": "^1.2.10",
+    "@tsconfig/node24": "^24.0.4",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/jsdom": "^28.0.3",
+    "@types/node": "^24.13.3",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vitest/eslint-plugin": "^1.6.23",
+    "@vue/eslint-config-typescript": "^14.9.0",
+    "@vue/test-utils": "^2.4.11",
+    "@vue/tsconfig": "^0.9.1",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-oxlint": "~1.77.0",
+    "eslint-plugin-vue": "~10.9.2",
+    "jiti": "^2.7.0",
+    "jsdom": "^30.0.1",
+    "npm-run-all2": "^9.0.2",
+    "oxlint": "~1.77.0",
+    "prettier": "3.9.6",
+    "sass": "^1.102.0",
+    "typescript": "~6.0.0",
+    "unplugin-icons": "^23.0.1",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.7"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  }
+}
