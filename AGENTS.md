@@ -1,6 +1,6 @@
 # AGENTS.md
 
-plugin-uni-halo：Halo 2.26 插件（Java 21 + Gradle 9.4 wrapper），前端为独立 Gradle 子工程 `ui`（Vue 3.5 + Vite 8 + TypeScript + pnpm 10）。当前处于「架构升级」后的空脚手架状态：后端仅有 `UniHaloPlugin`（继承 `BasePlugin`，生命周期打印日志），UI 仅有示例页；业务（Scheme/Endpoint/业务视图）尚未迁入，详见 `.docs/` 下的迁移规划文档。
+plugin-uni-halo：Halo 2.26 插件（Java 21 + Gradle 9.4 wrapper），前端为独立 Gradle 子工程 `ui`（Vue 3.5 + Vite 8 + TypeScript + pnpm 10）。已从 1.x 仓库迁入完整业务（应用管理 / 版本管理 / 二维码 / 配置接口），API 分组域名采用 `unihalo.ialley.cn`（`BASIC_DOMAIN_NAME` 为唯一源头，GVK 已切换，历史数据需按 `.docs/api-domain-change-plan-a.md` 第 5 节迁移）。
 
 ## 常用命令
 
@@ -13,10 +13,13 @@ plugin-uni-halo：Halo 2.26 插件（Java 21 + Gradle 9.4 wrapper），前端为
 ## 关键约定与坑
 
 - 后端 `compileOnly 'run.halo.app:api'`（BOM `run.halo.tools.platform:plugin:2.26.0`）：依赖 Halo API 编译即可，禁止打进插件。
-- 根包 `cn.ialley.unihalo`；插件清单 `src/main/resources/plugin.yaml` 的 `metadata.name: uni-halo`（与工程名 `plugin-uni-halo` 不同），`spec.requires: ">=2.26.0"`。
+- 根包 `cn.ialley.unihalo`；插件清单 `src/main/resources/plugin.yaml` 的 `metadata.name: uni-halo`（与工程名 `plugin-uni-halo` 不同），`spec.requires: ">=2.26.0"`，已追加 `settingName` / `configMapName` 业务字段。
+- **API 分组**：公开 `api.unihalo.ialley.cn/v1alpha1`，控制台 `console.api.unihalo.ialley.cn/v1alpha1`。`Constants.BASIC_DOMAIN_NAME` 是唯一源头；新增公开 GET 接口必须同步 `extensions/role-anonymous.yaml` 的 `rules`，否则 403。
+- **索引与查询 API（Halo 2.22+ 规范）**：Scheme 索引一律用 `IndexSpecs.single(name, keyType).indexFunc(...)`（keyType 实现 `Comparable`，如 `Boolean.class`），不要用已弃用的 `new IndexSpec()` / `IndexAttributeFactory`；字段查询用 `Queries`（`and/equal/contains/or/not`，`and(Condition, Condition...)` 首条件+可变参）配合 `ListOptions.builder().fieldQuery(...)`，不要用已弃用的 `QueryFactory` / `FieldSelector.of`。`ReactiveSettingFetcher` 用 `getSettingValues()` / `getSettingValue()`（Jackson 3：`tools.jackson.databind.JsonNode`，不是 `com.fasterxml.jackson`）。
+- UI 业务架构参考 `plugin-vote`（`D:\HaloWorkspace\uni-halo\community\reference-projects\plugin-vote\ui`）：views 内直接使用 `@tanstack/vue-query`（`useQuery`/`useMutation`，**无 composables 目录**）、列表用 `VEntityContainer` + `VEntity` + `VEntityField`、表单用 VModal 弹窗 + SubmitButton（Ctrl/Cmd+Enter 提交）。借鉴 `plugin-links/console`（`D:\HaloWorkspace\uni-halo\community\reference-projects\plugin-links\console`）：**领域类型统一放 `ui/src/types/index.ts`**、纯函数封装在 `ui/src/utils/`、列表筛选用统一组件 `ui/src/components/FilterDropdown.vue`（VDropdown + VDropdownItem，点击已选项清除）。构建保持 Vite，未引入 Rsbuild。
 - `generatePluginComponentsIdx` 与配置缓存不兼容（已在 build.gradle 声明 `notCompatibleWithConfigurationCache`），不要尝试启用 configuration cache。
 - `.editorconfig`：Java/Gradle 缩进 4 空格、前端 2 空格，LF 行尾；Java 与前端 max_line_length 100。UTF-8。
-- `.docs/` 是规划/历史文档，其中提到的 `Constants.java`、`endpoints/`、`ui/src/api/` 等**目标态文件当前不存在**；API 域名（`uni.uhalo.pro` vs `unihalo.ialley.cn`）尚未定案，写新 API 前先确认。
+- `.docs/` 是规划/历史文档：迁移、app 升级设计、API 域名变更方案均已落地实施，文档保留作为决策与执行记录；写新 API 前先确认当前域名常量（`unihalo.ialley.cn`）与 role 放行。
 - `workplace/` 为空置目录，勿放代码。
 - UI 入口 `ui/src/index.ts` 用 `@halo-dev/ui-shared` 的 `definePlugin` 注册路由/扩展点，`@` 别名指向 `./src`。
 

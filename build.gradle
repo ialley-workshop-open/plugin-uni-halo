@@ -51,4 +51,5 @@ tasks.named('generatePluginComponentsIdx') {
 
 halo {
     version = '2.26'
+    debug = true
 }

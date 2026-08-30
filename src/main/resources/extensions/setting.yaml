@@ -1,0 +1,1209 @@
+apiVersion: v1alpha1
+kind: Setting
+metadata:
+  name: plugin-uni-halo-settings
+spec:
+  forms:
+    - group: basicConfig
+      label: 基本配置
+      formSchema:
+        - $formkit: group
+          name: tokenConfig
+          label: Token配置
+          help: 说明：配置小程序需要用到的token。
+          value:
+            personalToken: ""
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "个人令牌：用于请求，发布瞬间，图库等操作（systemToken），参考 <a href='https://uni-halo.925i.cn/deploy/config.html#_1-token-%E9%85%8D%E7%BD%AE' title='UniHalo官方文档' target='_blank' class='text-blue-500 hover:text-blue-700'>Token配置</a> 。"
+            - $formkit: textarea
+              name: personalToken
+              label: 个人令牌
+              value: ""
+              validation: required
+        - $formkit: group
+          name: copyrightConfig
+          label: 页面版权配置
+          value:
+            enabled: true
+            content: "「 2022 uni-halo 丨 开源项目@小莫唐尼 」"
+          help: 说明：是否显示页面底部的版权信息（uni-halo 版权），只在【关于】页面中。
+          children:
+            - $formkit: select
+              name: enabled
+              id: copyrightEnabled
+              label: 显示版权信息
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(copyrightEnabled).value === true"
+              name: content
+              label: 版权内容
+              value: ""
+              validation: required
+        - $formkit: group
+          name: postDetailConfig
+          label: 文章详情页配置
+          value:
+            showComment: true
+            copyrightEnabled: true
+            copyrightAuthor: "uni-halo"
+            copyrightDesc: "使用《非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)》协议授权，文章来源于网上收集或者原创，若未在文章内说明的均为原创文章"
+            copyrightViolation: "若侵害到您的权利，请您及时联系我，在收到通知后第一时间处理，邮箱：xxxx@xx.com"
+          children:
+            - $formkit: select
+              name: showComment
+              label: 是否显示评论相关
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+              help: 说明：直接关闭评论区（不显示数据）和评论按钮，优先级高于系统设置的评论开关。
+            - $formkit: select
+              name: copyrightEnabled
+              id: postDetailCopyrightEnabled
+              label: 是否使用文章版权
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+              help: 说明：文章详情页面中，显示关于文章版权相关的说明信息。
+            - $formkit: text
+              if: "$get(postDetailCopyrightEnabled).value === true"
+              name: copyrightAuthor
+              label: 文章版权作者
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(postDetailCopyrightEnabled).value === true"
+              name: copyrightDesc
+              label: 文章版权描述
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(postDetailCopyrightEnabled).value === true"
+              name: copyrightViolation
+              label: 文章侵权说明
+              value: ""
+              validation: required
+        - $formkit: select
+          name: showAboutSystem
+          label: 显示关于项目页面
+          value: true
+          options:
+            - label: 是
+              value: true
+            - label: 否
+              value: false
+          validation: required
+          help: 说明：该页面入口在【关于】导航页面的【关于项目】入口，主要用于介绍该开源项目。
+        - $formkit: group
+          name: disclaimers
+          label: 免责声明
+          value:
+            enabled: true
+            content: ""
+          children:
+            - $formkit: select
+              name: enabled
+              id: disclaimersEnabled
+              label: 是否启用
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+            - $formkit: code
+              name: content
+              label: 声明内容
+              value: ""
+              language: html
+              height: 200px
+              help: 免责声明页面内容，不填写的话使用默认模板，支持 html 语法。
+    - group: appConfig
+      label: 应用配置
+      formSchema:
+        - $formkit: group
+          name: appInfo
+          label: 应用信息
+          value:
+            name: "uni-halo v2.0"
+            logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
+            qrCodeImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
+          children:
+            - $formkit: text
+              name: name
+              label: 应用名称
+              value: "uni-halo v2.0"
+              validation: required
+            - $formkit: attachment
+              name: logo
+              label: 应用图标
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
+              validation: required
+            - $formkit: radio
+              id: useDynamicQRCode
+              name: useDynamicQRCode
+              label: 是否启用动态小程序码
+              value: false
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 启用后，生成的海报将显示动态的小程序码，实现扫描海报跳转文章详情页。
+            - $formkit: text
+              if: "$get(useDynamicQRCode).value === true"
+              name: appId
+              key: appId
+              label: 小程序APP_ID
+              value: ""
+              validation: required
+              help: 小程序的APP_ID，到微信公众平台获取
+            - $formkit: text
+              if: "$get(useDynamicQRCode).value === true"
+              name: appSecret
+              key: appSecret
+              label: 小程序APP_SECRET
+              value: ""
+              validation: required
+              help: 小程序的APP_SECRET，到微信公众平台获取
+            - $formkit: attachmentPolicySelect
+              if: "$get(useDynamicQRCode).value === true"
+              name: policyName
+              key: policyName
+              label: 存储策略
+              help: 存储策略
+              value: "default-policy"
+              validation: required
+            - $formkit: attachmentGroupSelect
+              if: "$get(useDynamicQRCode).value === true"
+              name: fileGroupName
+              key: fileGroupName
+              label: 附件分组
+              help: 附件分组
+              value: ""
+            - $formkit: attachment
+              if: "$get(useDynamicQRCode).value === false"
+              name: qrCodeImageUrl
+              key: qrCodeImageUrl
+              label: 小程序码图片
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_qq_qrcode.png"
+              validation: required
+              help: 微信小程序二维码的图片地址，用于海报生成
+        - $formkit: group
+          name: startConfig
+          label: 启动页配置
+          value:
+            enabled: true
+            alwaysShow: true
+            title: "uni-halo 2.0"
+            titleStyle: "color:#ffffff;"
+            bg: "bg-gradient-blue-lighten-b"
+            bgImage: ""
+            bgVideo: ""
+            backgroundType: "color"
+            logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
+            desc1: "新触动 新感受 新体验"
+            desc2: "准备好了吗，即刻就出发"
+            descStyle: "color:#ffffff;"
+            btnText: "立即体验"
+            btnClass: ""
+            btnStyle: ""
+            useWave: true
+          children:
+            - $formkit: select
+              name: enabled
+              id: startConfigEnabled
+              label: 开启启动页面
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 使用启动页面后，用户访问应用时将优先显示启动页面
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true"
+              name: alwaysShow
+              label: 启动显示频率
+              value: true
+              options:
+                - label: 每次显示
+                  value: true
+                - label: 显示一次
+                  value: false
+              help: 是否每次打开应用时都显示启动页面
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: title
+              label: 启动标题
+              value: "uni-halo 2.0"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: titleStyle
+              label: 标题样式
+              value: "color:#ffffff;"
+              help: 用于自定义样式，标准的css样式写法
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true"
+              name: backgroundType
+              id: backgroundTypeId
+              label: 背景类型
+              value: "color"
+              options:
+                - label: 颜色
+                  value: "color"
+                - label: 视频
+                  value: "video"
+                - label: 图片
+                  value: "image"
+              help: 使用视频背景后，启动页面将显示视频背景，视频背景的宽高比推荐为 9:16
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'color'"
+              key: bg
+              name: bg
+              label: 背景颜色类名
+              value: "bg-gradient-blue-lighten-b"
+              help: 背景颜色类名（仅支持组件内部样式类），用于自定义背景颜色
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'image'"
+              key: bgImage
+              name: bgImage
+              label: 背景图片地址
+              value: ""
+              help: 背景图片地址，支持网络图片地址
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'image'"
+              key: bgImageFit
+              name: bgImageFit
+              label: 图片裁剪模式
+              value: "cover"
+              options:
+                - label: 100%
+                  value: "100% 100%"
+                - label: fill
+                  value: "initial"
+                - label: cover
+                  value: "cover"
+                - label: contain
+                  value: "contain"
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'video'"
+              key: bgVideo
+              name: bgVideo
+              label: 背景视频地址
+              value: ""
+              help: 背景视频地址，支持网络图片地址，宽高比推荐为 9:16
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true && $get(backgroundTypeId).value === 'video'"
+              key: bgVideoFit
+              name: bgVideoFit
+              label: 视频裁剪模式
+              value: "cover"
+              options:
+                - label: cover
+                  value: "cover"
+                - label: fill
+                  value: "fill"
+                - label: contain
+                  value: "contain"
+            - $formkit: attachment
+              if: "$get(startConfigEnabled).value === true"
+              name: logo
+              label: 启动图标
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: desc1
+              label: 文本1
+              value: "新触动 新感受 新体验"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: desc2
+              label: 文本2
+              value: "准备好了吗，即刻就出发"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: descStyle
+              label: 文本样式
+              value: "color:#ffffff;"
+              help: 用于自定义样式，标准的css样式写法
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              validation: required
+              name: btnText
+              label: 按钮文本
+              value: "立即体验"
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: btnClass
+              label: 按钮类名
+              value: ""
+              help: 按钮类名（仅支持组件内部样式类），用于自定义按钮样式
+            - $formkit: text
+              if: "$get(startConfigEnabled).value === true"
+              name: btnStyle
+              label: 按钮样式
+              value: "color:#ffffff;"
+              help: 用于自定义样式，标准的css样式写法
+            - $formkit: select
+              if: "$get(startConfigEnabled).value === true"
+              name: useWave
+              label: 启用波浪效果
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 底部的波浪效果
+          help: 配置项中，提到的内置 类样式 相关的内容，请查阅 https://uni-halo.925i.cn/ 相关文档
+    - group: pageConfig
+      label: 页面配置
+      formSchema:
+        - $formkit: group
+          name: homeConfig
+          label: 首页配置
+          value:
+            pageTitle: "首页"
+            useCategory: true
+          children:
+            - $formkit: text
+              validation: required
+              name: pageTitle
+              label: 页面标题
+              value: "首页"
+            - $formkit: select
+              name: useQuickNavigation
+              label: 是否显示快捷导航
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否显示快捷导航
+            - $formkit: select
+              name: useCategory
+              label: 是否显示分类
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否显示精品文章分类
+            - $formkit: group
+              name: bannerConfig
+              label: 轮播图配置
+              value:
+                enabled: true
+                showTitle: true
+                showIndicator: true
+                height: "400rpx"
+                dotPosition: "right"
+                type: "post"
+                list: [ ]
+              children:
+                - $formkit: select
+                  name: enabled
+                  label: 是否启用
+                  value: true
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
+                  help: 是否启用轮播图
+                - $formkit: select
+                  name: showTitle
+                  label: 是否显示标题
+                  value: true
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
+                  help: 是否显示轮播图标题
+                - $formkit: select
+                  name: showIndicator
+                  label: 是否显示指示器
+                  value: true
+                  options:
+                    - label: 是
+                      value: true
+                    - label: 否
+                      value: false
+                  help: 是否显示轮播图指示器
+                - $formkit: text
+                  name: height
+                  label: 轮播图高度
+                  value: "400rpx"
+                  help: 轮播图高度，单位为 rpx
+                - $formkit: select
+                  name: dotPosition
+                  label: 指示器位置
+                  value: "right"
+                  options:
+                    - label: 左侧
+                      value: "left"
+                    - label: 右侧
+                      value: "right"
+                    - label: 顶部
+                      value: "top"
+                    - label: 底部
+                      value: "bottom"
+                  help: 指示器位置
+                - $formkit: select
+                  name: type
+                  id: bannerType
+                  label: 轮播图数据
+                  value: "post"
+                  options:
+                    - label: 文章
+                      value: "post"
+                    - label: 自定义
+                      value: "custom"
+                  help: 轮播图数据说明： 文章=默认使用置顶的文章、自定义=自定义轮播图列表
+                - $formkit: repeater
+                  if: "$get(bannerType).value === 'custom'"
+                  name: list
+                  label: 轮播图数据
+                  value: [ ]
+                  children:
+                    - $formkit: text
+                      name: title
+                      label: 标题
+                      value: ""
+                      validation: required
+                    - $formkit: attachment
+                      name: cover
+                      label: 封面图片
+                      value: ""
+                      validation: required
+                    - $formkit: text
+                      name: url
+                      label: 跳转链接
+                      value: ""
+                      help: 跳转链接，留空则不跳转，如果填写了内容详情，会先弹窗显示内容详情，然后详情里显示链接。
+                    - $formkit: code
+                      name: content
+                      label: 内容详情
+                      value: ""
+                      language: html
+                      height: 100px
+                      help: 轮播图内容详情，支持 html/markdown 语法。
+              help: 说明：配置首页的轮播图
+        - $formkit: group
+          name: galleryConfig
+          label: 图库配置
+          value:
+            pageTitle: "图库"
+            useWaterfall: true
+          children:
+            - $formkit: text
+              validation: required
+              name: pageTitle
+              label: 页面标题
+              value: "图库"
+            - $formkit: select
+              name: useWaterfall
+              label: 是否使用瀑布流
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否使用瀑布流布局，否则使用列表布局
+        - $formkit: group
+          name: aboutConfig
+          label: 关于配置
+          value:
+            pageTitle: "关于博主"
+            bgImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
+            waveImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
+          children:
+            - $formkit: text
+              validation: required
+              name: pageTitle
+              label: 页面标题
+              value: "关于博主"
+            - $formkit: attachment
+              name: bgImageUrl
+              label: 页面背景图
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_profile_bg.jpg"
+              validation: required
+              help: 资料卡背景图
+            - $formkit: attachment
+              name: waveImageUrl
+              label: 页面波浪图
+              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
+              validation: required
+              help: 资料卡波浪图
+    - group: authorConfig
+      label: 我的配置
+      formSchema:
+        - $formkit: group
+          name: blogger
+          label: 博主信息
+          value:
+            nickname: ""
+            avatar: ""
+            email: ""
+            description: ""
+          children:
+            - $formkit: text
+              validation: required
+              name: nickname
+              label: 昵称
+              value: "uni-halo"
+            - $formkit: attachment
+              validation: required
+              name: avatar
+              label: 头像
+              value: ""
+            - $formkit: text
+              validation: required
+              name: email
+              label: 邮箱
+              value: ""
+            - $formkit: textarea
+              validation: required
+              name: description
+              label: 简介
+              value: ""
+        - $formkit: group
+          name: social
+          label: 社交信息
+          value:
+            enabled: true
+            qq: ""
+            wechat: ""
+            weibo: ""
+            email: ""
+            juejin: ""
+            bilibili: ""
+            gitee: ""
+            github: ""
+            csdn: ""
+          help: 我的社交信息页面显示的内容
+          children:
+            - $formkit: select
+              name: enabled
+              id: socialEnabled
+              label: 是否启用
+              value: true
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              help: 是否启用社交信息页面
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: qq
+              label: QQ号
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: wechat
+              label: 微信号
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: weibo
+              label: 微博地址
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: email
+              label: 邮箱
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: blog
+              label: 博客
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: bilibili
+              label: B站
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: juejin
+              label: 掘金B站
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: csdn
+              label: CSDN
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: gitee
+              label: Gitee
+              value: ""
+            - $formkit: text
+              if: "$get(socialEnabled).value === true"
+              name: github
+              label: Github
+              value: ""
+    - group: imagesConfig
+      label: 图片配置
+      formSchema:
+        - $formkit: attachment
+          name: defaultImageUrl
+          label: 默认图片
+          value: "https://api.7trees.cn/img"
+          validation: required
+          help: 默认图片，当图片加载失败或者无图的时候显示，支持静态图片和随机图api
+        - $formkit: attachment
+          name: defaultThumbnailUrl
+          label: 文章默认封面
+          value: "https://tenapi.cn/v2/acg"
+          validation: required
+          help: 文章默认封面图片，支持静态图片和随机图api
+        - $formkit: attachment
+          name: defaultStaticThumbnailUrl
+          label: 文章默认静态封面
+          value: ""
+          validation: required
+          help: 文章默认封面图片，只支持静态图片
+        - $formkit: attachment
+          name: defaultAvatarUrl
+          label: 默认头像地址
+          value: "https://api.qjqq.cn/api/MiYouShe"
+          validation: required
+          help: 默认头像地址，用于评论/文章作者无头像显示，支持静态图片和随机图api
+        - $formkit: attachment
+          name: loadingGifUrl
+          label: 加载中的图片
+          value: "https://uni-halo.925i.cn/uni_halo/uni_halo_img_lazyload.gif"
+          validation: required
+          help: 图片正在加载中的图片资源，请选择较小的gif图片
+        - $formkit: attachment
+          name: loadingErrUrl
+          label: 加载失败图片
+          value: "https://uni-halo.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif"
+          validation: required
+          help: 图片资源加载失败后显示的图片，请选择较小的图片
+        - $formkit: attachment
+          name: loadingEmptyUrl
+          label: 空图片
+          value: ""
+          help: 图片资源为空时显示的图片，请选择较小的图片
+    - group: loveConfig
+      label: 恋爱配置
+      formSchema:
+        - $formkit: radio
+          name: loveEnabled
+          id: loveEnabled
+          label: 是否启用
+          value: false
+          options:
+            - label: 是
+              value: true
+            - label: 否
+              value: false
+          validation: required
+          help: 启用恋爱日记功能后，可以在我的页面导航找到相关入口
+        - $formkit: text
+          if: "$get(loveEnabled).value === true"
+          name: loveDateTitle
+          label: 纪念日标题
+          value: 这是我们一起走过的
+          validation: required
+        - $formkit: date
+          if: "$get(loveEnabled).value === true"
+          name: loveDate
+          label: 恋爱纪念日
+          value: ""
+          validation: required
+          help: 恋爱纪念日，用于计算恋爱天数，同时这可是一个非常重要的节日呢，可不能忘记哦~
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: pageImages
+          label: 图片配置
+          value:
+            bgImageUrl: "https://uni-halo.925i.cn/uni_halo_love/love_bg1.png"
+            waveImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
+            heartImageUrl: "https://uni-halo.925i.cn/uni_halo_love/like.png"
+          children:
+            - $formkit: attachment
+              name: bgImageUrl
+              label: 背景图片
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: waveImageUrl
+              label: 波浪图片
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: heartImageUrl
+              label: 爱心图片
+              value: ""
+              validation: required
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: loveInfo
+          label: 恋人信息
+          value:
+            boyNickname: ""
+            boyAvatar: ""
+            girlNickname: ""
+            girlAvatar: ""
+            loveDate: ""
+          children:
+            - $formkit: text
+              name: boyNickname
+              label: 男生昵称
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: boyAvatar
+              label: 男生头像
+              value: ""
+              validation: required
+            - $formkit: text
+              name: girlNickname
+              label: 女生昵称
+              value: ""
+              validation: required
+            - $formkit: attachment
+              name: girlAvatar
+              label: 女生头像
+              value: ""
+              validation: required
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: ourStory
+          label: 我们的故事
+          value:
+            enabled: true
+            iconUrl: ""
+            content: ""
+          children:
+            - $formkit: select
+              name: enabled
+              id: ourStoryEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 是
+                  value: true
+                - label: 否
+                  value: false
+              validation: required
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
+            - $formkit: code
+              if: "$get(ourStoryEnabled).value === true"
+              name: content
+              label: 故事经历
+              value: ""
+              language: html
+              height: 200px
+              help: 可以写下彼此的恋爱经过哦，支持 html 语法。
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: lovePhoto
+          label: 恋爱相册
+          value:
+            enabled: false
+            iconUrl: ""
+            groupName: ""
+          children:
+            - $formkit: select
+              name: enabled
+              id: lovePhotoEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+              help: 启用恋爱相册后，可以在恋爱日记中查看恋爱相册
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
+            - $formkit: text
+              if: "$get(lovePhotoEnabled).value === true"
+              name: groupName
+              label: 相册标识
+              value: ""
+              validation: required
+              help: 相册标识（从图库中获取），具体获取方式请参考 uni-halo（v2） 官方文档。
+        - $formkit: group
+          if: "$get(loveEnabled).value === true"
+          name: loveDaily
+          label: 恋爱清单
+          value:
+            enabled: false
+            iconUrl: ""
+            list: [ ]
+          children:
+            - $formkit: select
+              name: enabled
+              id: loveListEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: attachment
+              name: iconUrl
+              label: 图标地址
+              value: ""
+              validation: required
+              help: 功能图标图片地址
+            - $formkit: repeater
+              if: "$get(loveListEnabled).value === true"
+              name: list
+              label: 恋爱清单
+              value: [ ]
+              children:
+                - $formkit: text
+                  name: title
+                  label: 标题
+                  value: ""
+                  validation: required
+                - $formkit: textarea
+                  name: content
+                  label: 内容
+                  value: ""
+                - $formkit: select
+                  name: status
+                  label: 状态
+                  value: wait
+                  options:
+                    - label: 未开始
+                      value: wait
+                    - label: 进行中
+                      value: doing
+                    - label: 已完成
+                      value: complete
+                  validation: required
+                - $formkit: date
+                  if: "$value.status === 'complete'"
+                  name: completeDate
+                  label: 完成时间
+                  value: ""
+                  validation: required
+    - group: shareConfig
+      label: 分享配置
+      formSchema:
+        - $formkit: text
+          name: title
+          label: 标题
+          value: "uni-halo 2.0"
+          validation: required
+        - $formkit: text
+          name: desc
+          label: 描述
+          value: "一款免费开源可多端编译的微信小程序博客应用。"
+          validation: required
+        - $formkit: attachment
+          name: imageUrl
+          label: 封面
+          value: "https://uni-halo.925i.cn/logo.png"
+          validation: required
+        - $formkit: text
+          name: path
+          label: 页面路径
+          value: "/pages/index/index"
+          validation: required
+          help: 页面路径，如：/pages/index/index（一般默认就行）
+        - $formkit: text
+          name: copyLink
+          label: 复制链接
+          value: "/pages/index/index"
+          validation: required
+          help: 复制链接，如：/pages/index/index（一般默认就行）
+    - group: auditConfig
+      label: 审核配置
+      formSchema:
+        - $formkit: radio
+          name: auditModeEnabled
+          id: auditModeEnabled
+          label: 审核模式
+          help: 开启审核模式，关闭小程序部分数据展示，小程序提交审核使建议开启，审核后关闭。
+          value: false
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
+        - $formkit: group
+          name: auditModeData
+          label: 模拟数据
+          value:
+            jsonUrl: ""
+            jsonData: ""
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer py-3"
+                innerHTML: "支持填写模拟的数据，二选一即可，查看： <a href='https://uni-halo.925i.cn/deploy/wx-release.html#%E5%AE%A1%E6%A0%B8%E6%A8%A1%E6%8B%9F%E6%95%B0%E6%8D%AE' title='UniHalo模拟数据示例' target='_blank'  class='text-blue-500 hover:text-blue-700'>模拟数据说明</a> 。"
+            - $formkit: text
+              name: jsonUrl
+              label: 文件地址
+              value: ""
+              help: "这里填写的是一个可以访问的json文件地址，json文件内容格式查看上方【模拟数据说明】"
+            - $formkit: code
+              name: jsonData
+              label: 数据内容
+              value: ""
+              language: json
+              height: 350px
+              help: "这里填写的是json内容，json内容格式查看上方【模拟数据说明】"
+    - group: pluginConfig
+      label: 第三方插件配置
+      formSchema:
+        - $formkit: group
+          name: votePlugin
+          label: 投票管理插件
+          value:
+            enabled: true
+            pluginId: "vote"
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：<a href='https://www.halo.run/store/apps/app-veyvzyhv' title='前往获取投票管理插件' target='_blank' class='text-blue-500 hover:text-blue-700'>投票管理插件</a>，用于支持小程序内投票。"
+            - $formkit: select
+              name: enabled
+              id: voteEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(voteEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: "vote"
+              validation: required
+            - $el: div
+              if: "$get(voteEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/vote#:~:text=ID-,vote' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+        - $formkit: group
+          name: linksPlugin
+          label: 链接管理插件
+          value:
+            enabled: true
+            pluginId: "plugin-links"
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：<a href='https://www.halo.run/store/apps/app-hfbQg' title='前往获取链接管理插件' target='_blank' class='text-blue-500 hover:text-blue-700'>链接管理插件</a>，用于支持小程序内友情链接。"
+            - $formkit: select
+              name: enabled
+              id: linksEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(linksEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: "plugin-links"
+              validation: required
+            - $el: div
+              if: "$get(linksEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/PluginLinks#:~:text=ID-,PluginLinks' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+        - $formkit: group
+          name: linksSubmitPlugin
+          label: 友链提交插件
+          value:
+            enabled: false
+            pluginId: "LinksSubmit"
+            blogName: ""
+            blogDesc: ""
+            blogLogo: ""
+            blogUrl: ""
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：来自【作者：<a href='https://blog.muyin.site' title='前往作者博客' target='_blank' class='text-blue-500 hover:text-blue-700'>柳意梧情</a>】的<a href='https://auth.muyin.site/docs/LinksSubmit' title='前往获取友链自助提交插件' target='_blank' class='text-blue-500 hover:text-blue-700'>友链自助提交插件</a>，用于支持小程序内主动提交友链。"
+            - $formkit: select
+              name: enabled
+              id: submitLinkEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: "LinksSubmit"
+              validation: required
+            - $el: div
+              if: "$get(submitLinkEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/LinksSubmit#:~:text=ID-,LinksSubmit' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: Authorization
+              label: 授权Token
+              value: ""
+              validation: required
+            - $el: div
+              if: "$get(submitLinkEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "友链自助提交插件设置的认证token，<a href='/console/plugins/LinksSubmit?tab=basicSetting#:~:text=高级设置-,认证token' title='前往获取认证token' target='_blank' class='text-blue-500 hover:text-blue-700'>获取认证token</a>。"
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogName
+              label: 博客名称
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogDesc
+              label: 博客描述
+              value: ""
+              validation: required
+            - $formkit: attachment
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogLogo
+              label: 博客Logo
+              value: ""
+              validation: required
+            - $formkit: text
+              if: "$get(submitLinkEnabled).value === true"
+              name: blogUrl
+              label: 博客地址
+              value: ""
+              validation: required
+        - $formkit: group
+          name: toolsPlugin
+          label: 工具箱插件
+          value:
+            enabled: false
+            pluginId: "PluginTools"
+            Authorization: ""
+            verifyCodeType: "scan"
+            scanCodeUrl: ""
+            rewardedVideoAdId: ""
+          children:
+            - $el: div
+              attrs:
+                class: "formkit-help text-xs mt-2 text-gray-500 flex items-center mb-1 cursor-pointer"
+                innerHTML: "说明：来自【作者：<a href='https://blog.muyin.site' title='前往作者博客' target='_blank' class='text-blue-500 hover:text-blue-700'>柳意梧情</a>】的<a href='https://auth.muyin.site/docs/PluginTools' title='前往获取Tools工具箱插件' target='_blank' class='text-blue-500 hover:text-blue-700'>Tools工具箱插件</a>，用于开启支持文章加密访问。"
+            - $formkit: select
+              name: enabled
+              id: toolsPluginEnabled
+              label: 是否启用
+              value: false
+              options:
+                - label: 启用
+                  value: true
+                - label: 关闭
+                  value: false
+              validation: required
+            - $formkit: text
+              if: "$get(toolsPluginEnabled).value === true"
+              name: pluginId
+              label: 插件ID
+              value: "PluginTools"
+              validation: required
+            - $el: div
+              if: "$get(toolsPluginEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "插件信息的ID，<a href='/console/plugins/PluginTools#:~:text=ID-,PluginTools' title='前往获取插件ID' target='_blank' class='text-blue-500 hover:text-blue-700'>获取插件ID</a>。"
+            - $formkit: text
+              if: "$get(toolsPluginEnabled).value === true"
+              name: Authorization
+              label: 授权Token
+              value: ""
+              validation: required
+            - $el: div
+              if: "$get(toolsPluginEnabled).value === true"
+              attrs:
+                class: "formkit-help text-xs text-gray-500"
+                innerHTML: "Tools工具箱插件设置的认证token，<a href='/console/plugins/PluginTools?tab=basic#:~:text=模板设置-,认证token' title='前往获取认证token' target='_blank' class='text-blue-500 hover:text-blue-700'>获取认证token</a>。"
+            - $formkit: radio
+              if: "$get(toolsPluginEnabled).value === true"
+              id: verifyCodeType
+              name: verifyCodeType
+              key: verifyCodeType
+              label: 验证码获取方式
+              value: "scan"
+              options:
+                - label: 微信公众号获取
+                  value: scan
+                - label: 小程序广告获取
+                  value: advert
+              help: 验证码获取方式，可以前往文章单独设置验证码获取方式。
+              validation: required
+            - $formkit: attachment
+              if: "$get(verifyCodeType).value === 'scan'"
+              name: scanCodeUrl
+              key: scanCodeUrl
+              label: 扫码链接
+              value: ""
+              help: 扫码链接，请填写二维码图片的链接。
+              validation: required
+            - $formkit: text
+              if: "$get(verifyCodeType).value === 'advert'"
+              name: rewardedVideoAdId
+              key: rewardedVideoAdId
+              label: 视频广告ID
+              value: ""
+              help: 广告ID，请在 微信小程序广告管理中获取。
+              validation: required
