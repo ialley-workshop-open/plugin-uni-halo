@@ -9,6 +9,7 @@ import {
   VSpace,
 } from "@halo-dev/components";
 import { utils } from "@halo-dev/ui-shared";
+import { useWindowSize } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import type { AppInfo } from "../types";
@@ -31,6 +32,10 @@ const emit = defineEmits<{
 const router = useRouter();
 
 const previewVisible = ref(false);
+
+// 预览弹窗：宽度 80vw（VModal width 为 px 数值，动态计算）、高度 60vh
+const { width: windowWidth } = useWindowSize();
+const previewWidth = computed(() => Math.round(windowWidth.value * 0.8));
 
 const createdText = computed(() => {
   return props.app.metadata.creationTimestamp
@@ -112,12 +117,14 @@ const routeToVersions = () => {
   <VModal
     v-model:visible="previewVisible"
     :title="app.spec.name || app.spec.appid"
-    :width="480"
+    :width="previewWidth"
+    height="80vh"
+    :body-class="[':uno: !p-4']"
   >
     <img
       v-if="app.spec.iconUrl"
       :src="app.spec.iconUrl"
-      class=":uno: w-full rounded object-contain"
+      class=":uno: h-full w-full object-contain"
       alt=""
     />
   </VModal>

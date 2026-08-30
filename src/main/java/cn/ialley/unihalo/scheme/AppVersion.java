@@ -57,9 +57,19 @@ public class AppVersion extends AbstractExtension {
         private String type;
 
         /**
-         * 版本号，须大于当前线上发行版本
+         * 版本号（应用版本名称），须大于当前线上发行版本；公开接口 checkVersion 以此比较
          */
         private String version;
+
+        /**
+         * 应用版本号（整数），须大于该应用已发布的最大值
+         */
+        private Integer versionCode;
+
+        /**
+         * 软删除标记：true 表示已删除（数据保留，列表中标记展示，不可恢复）
+         */
+        private Boolean isDeleted;
 
         /**
          * wgt 所需最低原生 App 版本

@@ -144,9 +144,11 @@ const handleSave = async () => {
         help="支持多张截图，可从附件库选择或直接上传"
       />
       <div class=":uno: mt-4 rounded-md border border-gray-200 p-4">
-        <div class=":uno: mb-2 flex items-center justify-between">
-          <span class=":uno: text-sm font-semibold text-gray-700">Android 平台信息</span>
-          <VTag>可选</VTag>
+        <div class=":uno: mb-2">
+          <span class=":uno: text-sm font-semibold text-gray-700">
+            Android 平台信息
+            <span class=":uno: ml-1 text-xs font-normal text-gray-400">(可选)</span>
+          </span>
         </div>
         <p class=":uno: mb-3 text-xs text-gray-500">
           该配置更新的时候用不到，仅做基础信息，目的是方便在其他地方调用展示而已。

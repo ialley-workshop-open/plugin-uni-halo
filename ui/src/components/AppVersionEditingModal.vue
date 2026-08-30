@@ -52,6 +52,7 @@ const formState = ref<AppVersion>({
     platform: ["Android"],
     type: "native_app",
     version: "",
+    versionCode: undefined,
     minUniVersion: "",
     url: "",
     stablePublish: true,
@@ -60,31 +61,71 @@ const formState = ref<AppVersion>({
   },
 });
 
-// 当前选中应用的最新版本（用于版本号提示）
-const latestVersion = ref("");
+// 简单版本号比较（按 . 分段数字比较）
+const compareVersions = (a: string, b: string): number => {
+  if (!b) {
+    return a ? 1 : 0;
+  }
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const na = pa[i] || 0;
+    const nb = pb[i] || 0;
+    if (na !== nb) {
+      return na - nb;
+    }
+  }
+  return 0;
+};
 
-// 下载地址按包类型约束文件格式：整包仅 apk，wgt 仅 wgt
+// 当前选中应用上次发布的信息（名称 + 版本号，用于填写提示）
+const latestVersion = ref("");
+const latestVersionCode = ref<number>();
+
+// 下载地址按包类型约束文件格式：整包仅 apk，wgt 仅 wgt。
+// 注意：Halo attachment 的 accepts 按 MIME 类型匹配（附件库 mediaType），
+// 不能用扩展名（.apk/.wgt），否则附件库中对应格式文件无法显示。
+// 整包不能包含 application/octet-stream：wgt 文件在附件库中的 mediaType 就是
+// application/octet-stream，会导致整包时 apk 与 wgt 同时被匹配。
 const urlAccepts = computed(() => {
-  return formState.value.spec.type === "wgt" ? [".wgt"] : [".apk"];
+  return formState.value.spec.type === "wgt"
+    ? ["application/octet-stream", "application/zip"]
+    : ["application/vnd.android.package-archive"];
 });
 
 watch(
   [selectedAppid],
   async () => {
     latestVersion.value = "";
+    latestVersionCode.value = undefined;
     if (!selectedAppid.value) {
       return;
     }
     try {
       const result = await appVersionsApi.list({
         appid: selectedAppid.value,
+        stablePublish: "true",
         page: 1,
-        size: 1,
+        size: 50,
       });
-      const first = result.items[0];
-      if (first?.spec?.version) {
-        latestVersion.value = first.spec.version;
+      let maxName = "";
+      let maxCode: number | undefined;
+      for (const item of result.items || []) {
+        const name = item.spec?.version;
+        const code = item.spec?.versionCode;
+        if (!name && code === undefined) {
+          continue;
+        }
+        const currentCode = code ?? -1;
+        const bestCode = maxCode ?? -1;
+        if (currentCode > bestCode
+            || (currentCode === bestCode && compareVersions(name || "", maxName) > 0)) {
+          maxName = name || "";
+          maxCode = code;
+        }
       }
+      latestVersion.value = maxName;
+      latestVersionCode.value = maxCode;
     } catch (error) {
       console.error("Failed to fetch latest version", error);
     }
@@ -200,12 +241,24 @@ const handleSave = async () => {
       <FormKit
         v-model="formState.spec.version"
         name="version"
-        label="版本号"
+        label="应用版本名称"
         type="text"
         validation="required"
-        :validation-messages="{ required: '版本号不能为空' }"
-        placeholder="须大于当前线上发行版本，如 1.1.0"
-        help="当前应用最新版本："
+        :validation-messages="{ required: '应用版本名称不能为空' }"
+        placeholder="例如：1.1.0"
+        :help="latestVersion
+          ? `上次发布：${latestVersion}${latestVersionCode !== undefined ? `（版本号 ${latestVersionCode}）` : ''}，须大于该值`
+          : '当前暂无已上线的版本'"
+      />
+      <FormKit
+        v-model="formState.spec.versionCode"
+        name="versionCode"
+        label="应用版本号"
+        type="number"
+        validation="required"
+        :validation-messages="{ required: '应用版本号不能为空' }"
+        placeholder="整数，例如：110"
+        help="整数数值，须大于该应用已发布的最大版本号"
       />
       <FormKit
         v-if="formState.spec.type === 'wgt'"
@@ -221,10 +274,20 @@ const handleSave = async () => {
         name="url"
         label="下载地址"
         type="attachment"
+        validation="required"
+        :validation-messages="{ required: '下载地址不能为空' }"
         :accepts="urlAccepts"
         :help="formState.spec.type === 'wgt'
           ? '仅支持上传 .wgt 格式文件，或直接输入下载地址'
           : '仅支持上传 .apk 格式文件，或直接输入下载地址'"
+      />
+      <FormKit
+        v-model="formState.spec.url"
+        name="urlPreview"
+        label="地址预览"
+        type="text"
+        disabled
+        placeholder="选择附件后将在此显示下载地址"
       />
       <FormKit
         v-model="formState.spec.stablePublish"

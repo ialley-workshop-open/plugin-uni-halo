@@ -201,8 +201,46 @@ const onEditingModalClose = () => {
     </template>
   </VPageHeader>
 
-  <div class=":uno: m-0 md:m-4">
-    <VCard :body-class="[':uno: !p-0']">
+  <div class=":uno: m-0 flex flex-col gap-4 md:m-4 lg:flex-row">
+    <div v-if="false" class=":uno: w-full flex-shrink-0 lg:w-64">
+      <VCard :body-class="[':uno: !p-0']">
+        <div class=":uno: border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-700">
+          应用
+        </div>
+        <div
+          class=":uno: flex cursor-pointer items-center px-4 py-3 text-sm"
+          :class="filterAppid === '' ? ':uno: bg-gray-50 font-medium text-gray-900' : ':uno: text-gray-700 hover:bg-gray-50'"
+          @click="filterAppid = ''"
+        >
+          全部应用
+        </div>
+        <div
+          v-for="app in apps?.items"
+          :key="app.metadata.name"
+          class=":uno: flex cursor-pointer items-center gap-3 px-4 py-3"
+          :class="filterAppid === (app.spec.appid || '') ? ':uno: bg-gray-50' : ':uno: hover:bg-gray-50'"
+          @click="filterAppid = app.spec.appid || ''"
+        >
+          <img
+            v-if="app.spec.iconUrl"
+            :src="app.spec.iconUrl"
+            class=":uno: h-8 w-8 flex-shrink-0 rounded object-cover"
+            alt=""
+          />
+          <div v-else class=":uno: h-8 w-8 flex-shrink-0 rounded bg-gray-100" />
+          <div class=":uno: min-w-0">
+            <div class=":uno: truncate text-sm text-gray-800">
+              {{ app.spec.name || app.spec.appid }}
+            </div>
+            <div v-if="app.spec.description" class=":uno: truncate text-xs text-gray-500">
+              {{ app.spec.description }}
+            </div>
+          </div>
+        </div>
+      </VCard>
+    </div>
+    <div class=":uno: min-w-0 flex-1">
+      <VCard :body-class="[':uno: !p-0']">
       <template #header>
         <div class=":uno: block w-full bg-gray-50 px-4 py-3">
           <div class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center">
@@ -222,7 +260,7 @@ const onEditingModalClose = () => {
                   @keyup.enter="() => refetch()"
                 />
               </template>
-              <VButton v-else type="danger" @click="handleDeleteInBatch">
+              <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
                 删除
               </VButton>
             </div>
@@ -327,6 +365,7 @@ const onEditingModalClose = () => {
           :size-options="[20, 30, 50, 100]"
         />
       </template>
-    </VCard>
+      </VCard>
+    </div>
   </div>
 </template>

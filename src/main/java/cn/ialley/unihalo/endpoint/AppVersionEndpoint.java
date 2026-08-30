@@ -24,6 +24,7 @@ import run.halo.app.extension.GroupVersion;
 import run.halo.app.extension.ListOptions;
 import run.halo.app.extension.ListResult;
 import run.halo.app.extension.index.query.Condition;
+import run.halo.app.infra.ExternalLinkProcessor;
 
 import static run.halo.app.extension.index.query.Queries.and;
 import static run.halo.app.extension.index.query.Queries.contains;
@@ -40,11 +41,14 @@ public class AppVersionEndpoint implements CustomEndpoint {
 
     private final AppVersionService appVersionService;
     private final AttachmentService attachmentService;
+    private final ExternalLinkProcessor externalLinkProcessor;
 
     public AppVersionEndpoint(AppVersionService appVersionService,
-            AttachmentService attachmentService) {
+            AttachmentService attachmentService,
+            ExternalLinkProcessor externalLinkProcessor) {
         this.appVersionService = appVersionService;
         this.attachmentService = attachmentService;
+        this.externalLinkProcessor = externalLinkProcessor;
     }
 
     @Override
@@ -125,8 +129,9 @@ public class AppVersionEndpoint implements CustomEndpoint {
                             simpleFilePart, null);
                 })
                 .flatMap(attachment -> attachmentService.getPermalink(attachment)
-                        .map(uri -> Map.of("url", uri.toString(), "name",
-                                attachment.getSpec().getDisplayName())))
+                        .map(uri -> Map.of("url",
+                                externalLinkProcessor.processLink(uri.toString()),
+                                "name", attachment.getSpec().getDisplayName())))
                 .flatMap(result -> ServerResponse.ok().bodyValue(result));
     }
 

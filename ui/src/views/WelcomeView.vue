@@ -11,20 +11,26 @@ import RiArrowRightSLine from '~icons/ri/arrow-right-s-line'
 import RiGithubLine from '~icons/ri/github-line'
 import RiBookOpenLine from '~icons/ri/book-open-line'
 import RiFileCodeLine from '~icons/ri/file-code-line'
-import RiCheckLine from '~icons/ri/check-line'
-import RiRocketLine from '~icons/ri/rocket-line'
-import RiSparklingLine from '~icons/ri/sparkling-line'
-import RiDownloadLine from '~icons/ri/download-line'
-import RiInstallLine from '~icons/ri/install-line'
-import RiSettings5Line from '~icons/ri/settings-5-line'
-import RiPlayCircleLine from '~icons/ri/play-circle-line'
 import RiMoneyCnyCircleLine from '~icons/ri/money-cny-circle-line'
 import RiWechatPayLine from '~icons/ri/wechat-pay-line'
 import RiAlipayLine from '~icons/ri/alipay-line'
 import RiQqLine from '~icons/ri/qq-line'
-import RiLinksLine from '~icons/ri/links-line'
 import RiStoreLine from '~icons/ri/store-line'
 import RiCodeBoxLine from '~icons/ri/code-box-line'
+import RiSparklingLine from '~icons/ri/sparkling-line'
+import RiMailLine from '~icons/ri/mail-line'
+import RiLinksLine from '~icons/ri/links-line'
+import RiMessage2Line from '~icons/ri/message-2-line'
+import RiGlobalLine from '~icons/ri/global-line'
+import RiMapPinLine from '~icons/ri/map-pin-line'
+import RiLightbulbLine from '~icons/ri/lightbulb-line'
+
+import mpPng from '@/assets/mp.png'
+import wxqunPng from '@/assets/wxqun.png'
+import qqqunPng from '@/assets/qqqun.png'
+import wxPng from '@/assets/wx.png'
+import zfbPng from '@/assets/zfb.png'
+import qqPng from '@/assets/qq.png'
 
 const isLoaded = ref(false)
 
@@ -37,7 +43,7 @@ onMounted(() => {
     particleCount: 150,
     spread: 100,
     origin: { y: 0.4, x: 0.5 },
-    colors: ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981'],
+    colors: ['#368FEF', '#5BA4F5', '#2D7AD6'],
   })
 })
 
@@ -46,233 +52,298 @@ const features = [
     icon: RiSettingsLine,
     title: '基本配置',
     description: '文章版权、评论开关、页面显示、免责声明等基础设置',
-    color: 'blue',
+    color: '#368FEF',
   },
   {
     icon: RiSmartphoneLine,
     title: '应用配置',
     description: '应用信息、启动页面、小程序专属配置',
-    color: 'purple',
+    color: '#8B5CF6',
   },
   {
     icon: RiLayoutLine,
     title: '页面配置',
     description: '特定页面信息和展示内容的个性化配置',
-    color: 'cyan',
+    color: '#06B6D4',
   },
   {
     icon: RiUserLine,
     title: '我的配置',
     description: '博主信息、社交链接、个人主页定制',
-    color: 'green',
+    color: '#10B981',
   },
   {
     icon: RiImageLine,
     title: '图片配置',
     description: '默认图片地址、封面图、Logo 设置',
-    color: 'orange',
+    color: '#F59E0B',
   },
   {
     icon: RiHeartLine,
     title: '恋爱配置',
     description: '恋人信息、恋爱清单、恋爱相册、我们的故事',
-    color: 'pink',
+    color: '#EC4899',
   },
 ]
 
 const steps = [
   {
-    icon: RiDownloadLine,
     title: '下载源码',
-    desc: '从 GitHub 下载 uni-halo 小程序源码',
+    desc: '从 GitHub 下载 uni-halo v2.0 小程序源码到本地，解压后导入微信开发者工具即可运行',
   },
   {
-    icon: RiInstallLine,
     title: '安装插件',
-    desc: '在 Halo 插件市场搜索安装 UniHalo 配置',
+    desc: '在 Halo 后台插件市场搜索「UniHalo 配置」，一键安装并启用插件',
   },
   {
-    icon: RiSettings5Line,
     title: '配置参数',
-    desc: '根据需求填写应用、页面等配置项',
+    desc: '进入插件设置页面，根据实际需求配置应用信息、页面内容、博主资料等参数',
   },
   {
-    icon: RiPlayCircleLine,
     title: '启动运行',
-    desc: '运行 uni-halo 小程序，预览效果',
+    desc: '启动微信小程序预览配置效果，确认无误后发布上线',
   },
 ]
 
-const colorMap: Record<string, string> = {
-  blue: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-  purple: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-  cyan: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)',
-  green: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-  orange: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-  pink: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-}
+const contacts = [
+  { icon: RiGithubLine, label: 'GitHub 主页', value: 'github.com/okay-xiaomo', href: 'https://github.com/okay-xiaomo' },
+  { icon: RiBookOpenLine, label: '个人博客', value: 'blog.xiaoxiaomo.cn', href: 'https://blog.xiaoxiaomo.cn/' },
+  { icon: RiGlobalLine, label: '个人主页', value: 'www.xiaoxiaomo.cn', href: 'https://www.xiaoxiaomo.cn/' },
+  { icon: RiMailLine, label: '联系邮箱', value: '1431128779@qq.com', href: 'mailto:1431128779@qq.com' },
+  { icon: RiMessage2Line, label: 'QQ 交流群', value: '加入开发者社群', href: '#' },
+  { icon: RiMapPinLine, label: '所在地', value: '中国·深圳', href: '#' },
+]
 </script>
 
 <template>
-  <div class="welcome-page" :class="{ loaded: isLoaded }">
+  <div
+    class="min-h-screen bg-slate-50 transition-opacity duration-500"
+    :class="isLoaded ? 'opacity-100' : 'opacity-0'"
+  >
     <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-bg">
-        <div class="hero-gradient"></div>
-        <div class="hero-pattern"></div>
+    <section class="relative h-screen flex items-center justify-center overflow-hidden">
+      <!-- Background Decorations - 仅使用主题色 #368FEF 淡化 -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div
+          class="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full blur-3xl animate-float"
+          style="background: radial-gradient(circle, rgba(54,143,239,0.15) 0%, rgba(54,143,239,0) 70%)"
+        ></div>
+        <div
+          class="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full blur-3xl animate-float-delayed"
+          style="background: radial-gradient(circle, rgba(54,143,239,0.12) 0%, rgba(54,143,239,0) 70%)"
+        ></div>
+        <div
+          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl animate-pulse-slow"
+          style="background: radial-gradient(circle, rgba(54,143,239,0.08) 0%, rgba(54,143,239,0) 70%)"
+        ></div>
+        <!-- Floating Shapes -->
+        <div class="absolute top-20 left-[10%] w-3 h-3 rounded-full animate-bounce-slow" style="background: rgba(54,143,239,0.2)"></div>
+        <div class="absolute top-[30%] right-[15%] w-4 h-4 rounded-lg rotate-45 animate-bounce-slow-delayed" style="background: rgba(54,143,239,0.15)"></div>
+        <div class="absolute bottom-[25%] left-[20%] w-2.5 h-2.5 rounded-full animate-bounce-slow" style="background: rgba(54,143,239,0.2)"></div>
+        <div class="absolute top-[40%] right-[25%] w-2 h-2 rounded-full animate-bounce-slow-delayed" style="background: rgba(54,143,239,0.25)"></div>
+        <div class="absolute bottom-[15%] right-[10%] w-3.5 h-3.5 rounded-full animate-bounce-slow" style="background: rgba(54,143,239,0.15)"></div>
       </div>
 
-      <div class="hero-content">
-        <div class="badge">
-          <RiSparklingLine />
-          <span>Halo 插件</span>
+      <div class="relative z-10 max-w-5xl mx-auto px-4 text-center">
+        <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border rounded-full px-4 py-2 mb-8 shadow-sm" style="border-color: rgba(54,143,239,0.2)">
+          <RiSparklingLine class="w-4 h-4" style="color: #368FEF" />
+          <span class="text-sm font-medium" style="color: #368FEF">Halo 插件</span>
         </div>
 
-        <h1 class="hero-title">
-          <span class="title-line">UniHalo</span>
-          <span class="title-highlight">配置插件</span>
+        <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6">
+          <span style="color: #368FEF">UniHalo</span>
+          <span class="block text-3xl sm:text-4xl lg:text-5xl mt-3 font-bold text-slate-700">配置插件</span>
         </h1>
 
-        <p class="hero-subtitle">
+        <p class="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
           为免费开源的 uni-halo v2.0 微信小程序提供配套的配置插件，轻松配置你的小程序
         </p>
 
-        <div class="hero-actions">
+        <div class="flex flex-wrap justify-center gap-4 mb-10">
           <a
             href="https://uni-halo.925i.cn/"
-            class="btn btn-primary"
+            class="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-xl transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+            style="background-color: #368FEF"
             target="_blank"
           >
-            <RiBookOpenLine />
+            <RiBookOpenLine class="w-5 h-5" />
             <span>官方文档</span>
           </a>
           <a
             href="https://github.com/ialley-workshop-open/plugin-uni-halo"
-            class="btn btn-secondary"
+            class="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-900 text-white font-semibold px-7 py-3.5 rounded-xl transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
             target="_blank"
           >
-            <RiGithubLine />
+            <RiGithubLine class="w-5 h-5" />
             <span>GitHub</span>
           </a>
           <a
             href="https://www.halo.run/store/apps/app-ryemX"
-            class="btn btn-secondary"
+            class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold px-7 py-3.5 rounded-xl border border-slate-200 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
             target="_blank"
           >
-            <RiStoreLine />
+            <RiStoreLine class="w-5 h-5" />
             <span>插件市场</span>
+          </a>
+          <a
+            href="https://github.com/ialley-workshop-open/uni-halo/issues/23"
+            class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 font-semibold px-7 py-3.5 rounded-xl border border-slate-200 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+            style="color: #368FEF; border-color: rgba(54,143,239,0.3)"
+            target="_blank"
+          >
+            <RiLightbulbLine class="w-5 h-5" />
+            <span>提交案例</span>
           </a>
         </div>
 
-        <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-value">6+</span>
-            <span class="stat-label">配置模块</span>
+        <!-- 统计数据 -->
+        <div class="flex justify-center gap-10 sm:gap-16 mb-10">
+          <div class="text-center">
+            <div class="text-3xl sm:text-4xl font-bold" style="color: #368FEF">6+</div>
+            <div class="text-sm text-slate-500 mt-1">配置模块</div>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-value">100%</span>
-            <span class="stat-label">开源免费</span>
+          <div class="text-center">
+            <div class="text-3xl sm:text-4xl font-bold" style="color: #368FEF">100%</div>
+            <div class="text-sm text-slate-500 mt-1">开源免费</div>
           </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-value">v2.0</span>
-            <span class="stat-label">支持版本</span>
+          <div class="text-center">
+            <div class="text-3xl sm:text-4xl font-bold" style="color: #368FEF">v2.0</div>
+            <div class="text-sm text-slate-500 mt-1">支持版本</div>
           </div>
+        </div>
+
+        <!-- 三个横向截图占位 -->
+        <div class="grid grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <div class="aspect-video rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+            <img :src="mpPng" alt="小程序二维码" class="w-full h-full object-contain p-3" />
+          </div>
+          <div class="aspect-video rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+            <img :src="wxqunPng" alt="微信交流群" class="w-full h-full object-contain p-3" />
+          </div>
+          <div class="aspect-video rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+            <img :src="qqqunPng" alt="QQ 交流群" class="w-full h-full object-contain p-3" />
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部滚动提示 -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce-slow">
+        <span class="text-xs text-slate-400">向下滚动</span>
+        <div class="w-5 h-8 rounded-full border-2 border-slate-300 flex justify-center pt-1.5">
+          <div class="w-1 h-2 rounded-full bg-slate-300"></div>
         </div>
       </div>
     </section>
 
-    <!-- Author Section -->
-    <section class="author-section">
-      <div class="container">
-        <div class="author-card">
-          <div class="author-avatar">
-            <img
-              src="https://avatars.githubusercontent.com/u/ialley-workshop-open"
-              alt="作者头像"
-              @error="($event.target as HTMLImageElement).style.display = 'none'"
-            />
-            <div class="avatar-fallback">
-              <RiUserLine />
+    <!-- Sponsor Section -->
+    <section class="py-16 sm:py-20 bg-white">
+      <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">赞助支持</h2>
+          <p class="text-lg text-slate-500">如果这个项目对你有帮助，可以请作者喝杯饮料</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          <div class="bg-slate-50 rounded-2xl p-6 text-center hover:shadow-md transition-all duration-300">
+            <div
+              class="w-14 h-14 rounded-full flex items-center justify-center text-white mx-auto mb-4"
+              style="background: linear-gradient(135deg, #10B981 0%, #059669 100%)"
+            >
+              <RiWechatPayLine class="w-7 h-7" />
             </div>
-          </div>
-          <div class="author-info">
-            <h3 class="author-name">小莫唐尼</h3>
-            <p class="author-bio">uni-halo 项目作者，专注于 Halo 生态开发</p>
-            <div class="author-links">
-              <a
-                href="https://www.xiaoxiaomo.cn/"
-                class="author-link"
-                target="_blank"
-              >
-                <RiBookOpenLine />
-                <span>博客</span>
-              </a>
-              <a
-                href="https://github.com/ialley-workshop-open"
-                class="author-link"
-                target="_blank"
-              >
-                <RiGithubLine />
-                <span>GitHub</span>
-              </a>
+            <h4 class="font-semibold text-slate-800 mb-3">微信赞助</h4>
+            <div class="w-36 h-36 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+              <img :src="wxPng" alt="微信赞赏码" class="w-full h-full object-contain" />
             </div>
+            <p class="text-sm text-slate-500">扫码请作者喝咖啡</p>
           </div>
+
+          <div class="bg-slate-50 rounded-2xl p-6 text-center hover:shadow-md transition-all duration-300">
+            <div
+              class="w-14 h-14 rounded-full flex items-center justify-center text-white mx-auto mb-4"
+              style="background: linear-gradient(135deg, #368FEF 0%, #2D7AD6 100%)"
+            >
+              <RiAlipayLine class="w-7 h-7" />
+            </div>
+            <h4 class="font-semibold text-slate-800 mb-3">支付宝赞助</h4>
+            <div class="w-36 h-36 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+              <img :src="zfbPng" alt="支付宝赞赏码" class="w-full h-full object-contain" />
+            </div>
+            <p class="text-sm text-slate-500">扫码请作者喝奶茶</p>
+          </div>
+
+          <div class="bg-slate-50 rounded-2xl p-6 text-center hover:shadow-md transition-all duration-300">
+            <div
+              class="w-14 h-14 rounded-full flex items-center justify-center text-white mx-auto mb-4"
+              style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)"
+            >
+              <RiQqLine class="w-7 h-7" />
+            </div>
+            <h4 class="font-semibold text-slate-800 mb-3">QQ 赞助</h4>
+            <div class="w-36 h-36 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+              <img :src="qqPng" alt="QQ 赞赏码" class="w-full h-full object-contain" />
+            </div>
+            <p class="text-sm text-slate-500">扫码请作者吃零食</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center gap-2 mt-8 text-slate-400 text-sm">
+          <RiMoneyCnyCircleLine class="w-4 h-4" />
+          <span>您的支持是作者持续维护的动力</span>
         </div>
       </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">强大功能，灵活配置</h2>
-          <p class="section-desc">全方位满足你的小程序配置需求</p>
+    <section class="py-16 sm:py-20">
+      <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">功能模块</h2>
+          <p class="text-lg text-slate-500">全方位满足你的小程序配置需求</p>
         </div>
 
-        <div class="features-grid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <div
             v-for="feature in features"
             :key="feature.title"
-            class="feature-card"
+            class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 cursor-pointer"
           >
             <div
-              class="feature-icon"
-              :style="{ background: colorMap[feature.color] }"
+              class="w-11 h-11 rounded-xl flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300"
+              :style="{ background: `linear-gradient(135deg, ${feature.color} 0%, ${feature.color}cc 100%)` }"
             >
-              <component :is="feature.icon" />
+              <component :is="feature.icon" class="w-5.5 h-5.5" />
             </div>
-            <h3 class="feature-title">{{ feature.title }}</h3>
-            <p class="feature-desc">{{ feature.description }}</p>
+            <h3 class="text-lg font-semibold text-slate-800 mb-2">{{ feature.title }}</h3>
+            <p class="text-slate-500 text-sm leading-relaxed">{{ feature.description }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Steps Section -->
-    <section class="steps-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">使用流程</h2>
-          <p class="section-desc">从下载到上线，轻松四步</p>
+    <!-- Steps Section - 左右布局 -->
+    <section class="py-16 sm:py-20 bg-white">
+      <div class="max-w-4xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">使用流程</h2>
+          <p class="text-lg text-slate-500">从下载到上线，轻松四步</p>
         </div>
 
-        <div class="steps-timeline">
+        <div class="space-y-4">
           <div
             v-for="(step, index) in steps"
             :key="index"
-            class="step-item"
+            class="flex items-start gap-5 bg-slate-50 rounded-2xl p-6 hover:bg-white hover:shadow-md transition-all duration-300"
           >
-            <div class="step-marker">
-              <div class="step-icon">
-                <component :is="step.icon" />
-              </div>
-              <div v-if="index < steps.length - 1" class="step-line"></div>
+            <div
+              class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg"
+              :style="{ background: index === 0 ? 'linear-gradient(135deg, #368FEF 0%, #2D7AD6 100%)' : index === 1 ? 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)' : index === 2 ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' }"
+            >
+              {{ index + 1 }}
             </div>
-            <div class="step-content">
-              <h3 class="step-title">{{ step.title }}</h3>
-              <p class="step-desc">{{ step.desc }}</p>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-lg font-semibold text-slate-800 mb-1.5">{{ step.title }}</h3>
+              <p class="text-slate-500 text-sm leading-relaxed">{{ step.desc }}</p>
             </div>
           </div>
         </div>
@@ -280,887 +351,266 @@ const colorMap: Record<string, string> = {
     </section>
 
     <!-- Links Section -->
-    <section class="links-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">相关链接</h2>
-          <p class="section-desc">官方资源与社区支持</p>
+    <section class="py-16 sm:py-20">
+      <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">相关链接</h2>
+          <p class="text-lg text-slate-500">官方资源与社区支持</p>
         </div>
 
-        <div class="links-grid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <a
             href="https://uni-halo.925i.cn/"
-            class="link-card"
+            class="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all duration-200"
             target="_blank"
           >
-            <div class="link-icon blue">
-              <RiBookOpenLine />
+            <div
+              class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+              style="background: linear-gradient(135deg, #368FEF 0%, #2D7AD6 100%)"
+            >
+              <RiBookOpenLine class="w-5 h-5" />
             </div>
-            <div class="link-content">
-              <h4 class="link-title">官方文档</h4>
-              <p class="link-desc">uni-halo 小程序使用指南</p>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-slate-800 text-sm">官方文档</div>
+              <div class="text-xs text-slate-400 truncate">UniHalo 使用指南</div>
             </div>
-            <RiArrowRightSLine class="link-arrow" />
+            <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
           </a>
 
           <a
             href="https://github.com/ialley-workshop-open/plugin-uni-halo"
-            class="link-card"
+            class="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all duration-200"
             target="_blank"
           >
-            <div class="link-icon dark">
-              <RiGithubLine />
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0" style="background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)">
+              <RiGithubLine class="w-5 h-5" />
             </div>
-            <div class="link-content">
-              <h4 class="link-title">插件源码</h4>
-              <p class="link-desc">GitHub 仓库，欢迎 Star</p>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-slate-800 text-sm">插件源码</div>
+              <div class="text-xs text-slate-400 truncate">GitHub 仓库，欢迎 Star</div>
             </div>
-            <RiArrowRightSLine class="link-arrow" />
+            <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
           </a>
 
           <a
             href="https://github.com/ialley-workshop-open/uni-halo"
-            class="link-card"
+            class="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all duration-200"
             target="_blank"
           >
-            <div class="link-icon purple">
-              <RiCodeBoxLine />
+            <div
+              class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+              style="background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%)"
+            >
+              <RiCodeBoxLine class="w-5 h-5" />
             </div>
-            <div class="link-content">
-              <h4 class="link-title">小程序源码</h4>
-              <p class="link-desc">uni-halo v2.0 开源代码</p>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-slate-800 text-sm">小程序源码</div>
+              <div class="text-xs text-slate-400 truncate">uni-halo v2.0 开源代码</div>
             </div>
-            <RiArrowRightSLine class="link-arrow" />
+            <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
           </a>
 
           <a
             href="https://www.halo.run/store/apps/app-ryemX"
-            class="link-card"
+            class="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all duration-200"
             target="_blank"
           >
-            <div class="link-icon green">
-              <RiStoreLine />
+            <div
+              class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+              style="background: linear-gradient(135deg, #10B981 0%, #059669 100%)"
+            >
+              <RiStoreLine class="w-5 h-5" />
             </div>
-            <div class="link-content">
-              <h4 class="link-title">Halo 插件市场</h4>
-              <p class="link-desc">在线安装 UniHalo 配置插件</p>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-slate-800 text-sm">Halo 插件市场</div>
+              <div class="text-xs text-slate-400 truncate">在线安装 UniHalo 配置插件</div>
             </div>
-            <RiArrowRightSLine class="link-arrow" />
+            <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
           </a>
 
           <a
             href="https://docs.halo.run/developer-guide/plugin/introduction"
-            class="link-card"
+            class="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all duration-200"
             target="_blank"
           >
-            <div class="link-icon orange">
-              <RiFileCodeLine />
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0" style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%)">
+              <RiFileCodeLine class="w-5 h-5" />
             </div>
-            <div class="link-content">
-              <h4 class="link-title">Halo 开发者文档</h4>
-              <p class="link-desc">插件开发指南与 API 参考</p>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-slate-800 text-sm">Halo 开发者文档</div>
+              <div class="text-xs text-slate-400 truncate">插件开发指南与 API 参考</div>
             </div>
-            <RiArrowRightSLine class="link-arrow" />
+            <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
+          </a>
+
+          <a
+            href="https://blog.xiaoxiaomo.cn/"
+            class="flex items-center gap-4 bg-white rounded-xl p-4 border border-slate-100 hover:shadow-md transition-all duration-200"
+            target="_blank"
+          >
+            <div
+              class="w-10 h-10 rounded-lg flex items-center justify-center text-white flex-shrink-0"
+              style="background: linear-gradient(135deg, #EC4899 0%, #DB2777 100%)"
+            >
+              <RiLinksLine class="w-5 h-5" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-slate-800 text-sm">作者博客</div>
+              <div class="text-xs text-slate-400 truncate">更多技术分享与经验</div>
+            </div>
+            <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
           </a>
         </div>
       </div>
     </section>
 
-    <!-- Sponsor Section -->
-    <section class="sponsor-section">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">赞助支持</h2>
-          <p class="section-desc">
-            如果这个项目对你有帮助，可以请作者喝杯饮料
-          </p>
+    <!-- Author Section -->
+    <section class="py-16 sm:py-20 bg-white">
+      <div class="max-w-5xl mx-auto px-4">
+        <div class="text-center mb-12">
+          <h2 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">关于作者</h2>
+          <p class="text-lg text-slate-500">项目的开发者与维护者</p>
         </div>
 
-        <div class="sponsor-cards">
-          <div class="sponsor-card">
-            <div class="sponsor-icon wechat">
-              <RiWechatPayLine />
+        <div class="bg-white rounded-3xl p-8 sm:p-10 shadow-sm border border-slate-100">
+          <div class="flex flex-col sm:flex-row items-center gap-8">
+            <!-- 头像 -->
+            <div class="flex-shrink-0">
+              <img
+                src="https://www.xiaoxiaomo.cn/logo.jpg"
+                alt="小莫唐尼"
+                class="w-28 h-28 rounded-full shadow-lg object-cover"
+              />
             </div>
-            <h4 class="sponsor-title">微信赞助</h4>
-            <p class="sponsor-desc">扫码请作者喝咖啡</p>
+
+            <!-- 信息 -->
+            <div class="flex-1 text-center sm:text-left">
+              <h3 class="text-2xl font-bold text-slate-800 mb-2">小莫唐尼</h3>
+              <p class="text-slate-500 mb-1">全栈开发者 / 开源爱好者</p>
+              <p class="text-sm text-slate-400">一个爱凑热闹，喜欢捣鼓前端的程序员</p>
+            </div>
+
+            <!-- 按钮 -->
+            <div class="flex gap-3">
+              <a
+                href="https://blog.xiaoxiaomo.cn/"
+                class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
+                style="color: #368FEF; background: rgba(54,143,239,0.08)"
+                target="_blank"
+              >
+                <RiBookOpenLine class="w-3.5 h-3.5" />
+                <span>博客</span>
+              </a>
+              <a
+                href="https://github.com/okay-xiaomo"
+                class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                target="_blank"
+              >
+                <RiGithubLine class="w-3.5 h-3.5" />
+                <span>GitHub</span>
+              </a>
+              <a
+                href="mailto:1431128779@qq.com"
+                class="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+              >
+                <RiMailLine class="w-3.5 h-3.5" />
+                <span>邮箱</span>
+              </a>
+            </div>
           </div>
 
-          <div class="sponsor-card">
-            <div class="sponsor-icon alipay">
-              <RiAlipayLine />
+          <!-- 联系方式网格 -->
+          <div class="mt-8 pt-8 border-t border-slate-200">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+              <a
+                v-for="item in contacts"
+                :key="item.label"
+                :href="item.href"
+                class="flex flex-col items-center gap-2 p-4 rounded-xl bg-white border border-slate-100 hover:border-slate-200 hover:shadow-sm transition-all duration-200"
+                :target="item.href.startsWith('http') ? '_blank' : undefined"
+              >
+                <component :is="item.icon" class="w-5 h-5" style="color: #368FEF" />
+                <span class="text-xs text-slate-400">{{ item.label }}</span>
+                <span class="text-xs font-medium text-slate-600 text-center leading-tight">{{ item.value }}</span>
+              </a>
             </div>
-            <h4 class="sponsor-title">支付宝赞助</h4>
-            <p class="sponsor-desc">扫码请作者喝奶茶</p>
           </div>
-
-          <div class="sponsor-card">
-            <div class="sponsor-icon qq">
-              <RiQqLine />
-            </div>
-            <h4 class="sponsor-title">QQ 赞助</h4>
-            <p class="sponsor-desc">扫码请作者吃零食</p>
-          </div>
-        </div>
-
-        <div class="sponsor-note">
-          <RiMoneyCnyCircleLine />
-          <span>您的支持是作者持续维护的动力</span>
         </div>
       </div>
     </section>
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-      <div class="container">
-        <div class="cta-card">
-          <div class="cta-icon">
-            <RiRocketLine />
-          </div>
-          <h2 class="cta-title">准备好了吗？</h2>
-          <p class="cta-desc">立即开始配置你的微信小程序</p>
-          <div class="cta-actions">
-            <a
-              href="https://uni-halo.925i.cn/"
-              class="btn btn-primary btn-lg"
-              target="_blank"
-            >
-              <RiBookOpenLine />
-              <span>查看文档</span>
-            </a>
-            <a
-              href="https://github.com/ialley-workshop-open/plugin-uni-halo"
-              class="btn btn-outline btn-lg"
-              target="_blank"
-            >
-              <RiGithubLine />
-              <span>源码仓库</span>
-            </a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="container">
-        <div class="footer-content">
-          <div class="footer-brand">
-            <span class="footer-logo">UniHalo</span>
-            <span class="footer-copyright">© 2024 ialley-workshop-open</span>
-          </div>
-          <div class="footer-links">
-            <a
-              href="https://uni-halo.925i.cn/"
-              class="footer-link"
-              target="_blank"
-            >
-              官方文档
-            </a>
-            <a
-              href="https://github.com/ialley-workshop-open/plugin-uni-halo"
-              class="footer-link"
-              target="_blank"
-            >
-              GitHub
-            </a>
-            <a
-              href="https://docs.halo.run/developer-guide/plugin/introduction"
-              class="footer-link"
-              target="_blank"
-            >
-              Halo 开发者
-            </a>
-          </div>
-        </div>
-      </div>
-    </footer>
   </div>
 </template>
 
-<style lang="scss" scoped>
-.welcome-page {
-  min-height: 100vh;
-  background-color: #f8fafc;
-  opacity: 0;
-  transition: opacity 0.5s ease;
-
-  &.loaded {
-    opacity: 1;
+<style scoped>
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
   }
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-// Hero Section
-.hero-section {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.hero-bg {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.hero-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    #1e3a5f 0%,
-    #2563eb 50%,
-    #7c3aed 100%
-  );
-}
-
-.hero-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(
-    circle at 25% 25%,
-    rgba(255, 255, 255, 0.1) 0%,
-    transparent 50%
-  );
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding: 2rem;
-  max-width: 800px;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 9999px;
-  padding: 0.5rem 1rem;
-  color: #fff;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 2rem;
-}
-
-.hero-title {
-  font-size: 4rem;
-  font-weight: 800;
-  line-height: 1.1;
-  margin: 0 0 1.5rem 0;
-  color: #fff;
-
-  .title-line {
-    display: block;
+@keyframes float-delayed {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
   }
-
-  .title-highlight {
-    display: block;
-    background: linear-gradient(90deg, #60a5fa, #a78bfa, #34d399);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  50% {
+    transform: translateY(-30px) rotate(-5deg);
   }
 }
 
-.hero-subtitle {
-  font-size: 1.25rem;
-  line-height: 1.75;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0 0 2.5rem 0;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 3rem;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
-
-  &.btn-primary {
-    background: #fff;
-    color: #2563eb;
-
-    &:hover {
-      background: #f0f9ff;
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
   }
-
-  &.btn-secondary {
-    background: rgba(255, 255, 255, 0.15);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateY(-2px);
-    }
-  }
-
-  &.btn-outline {
-    background: transparent;
-    color: #2563eb;
-    border: 2px solid #2563eb;
-
-    &:hover {
-      background: #2563eb;
-      color: #fff;
-    }
-  }
-
-  &.btn-lg {
-    padding: 1rem 2rem;
-    font-size: 1.125rem;
+  50% {
+    opacity: 0.5;
+    transform: scale(1.05);
   }
 }
 
-.hero-stats {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-}
-
-.stat-item {
-  text-align: center;
-
-  .stat-value {
-    display: block;
-    font-size: 2rem;
-    font-weight: 700;
-    color: #fff;
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0);
   }
-
-  .stat-label {
-    display: block;
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin-top: 0.25rem;
+  50% {
+    transform: translateY(-10px);
   }
 }
 
-.stat-divider {
-  width: 1px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.3);
-}
-
-// Author Section
-.author-section {
-  padding: 4rem 0;
-  background: #fff;
-}
-
-.author-card {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius: 1rem;
-  padding: 2rem;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.author-avatar {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+@keyframes bounce-slow-delayed {
+  0%,
+  100% {
+    transform: translateY(0) rotate(45deg);
   }
-
-  .avatar-fallback {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 2rem;
+  50% {
+    transform: translateY(-15px) rotate(45deg);
   }
 }
 
-.author-info {
-  flex: 1;
+.animate-float {
+  animation: float 6s ease-in-out infinite;
 }
 
-.author-name {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 0.5rem 0;
+.animate-float-delayed {
+  animation: float-delayed 8s ease-in-out infinite;
 }
 
-.author-bio {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0 0 1rem 0;
+.animate-pulse-slow {
+  animation: pulse-slow 4s ease-in-out infinite;
 }
 
-.author-links {
-  display: flex;
-  gap: 1rem;
+.animate-bounce-slow {
+  animation: bounce-slow 3s ease-in-out infinite;
 }
 
-.author-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: #2563eb;
-  text-decoration: none;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #1d4ed8;
-  }
-}
-
-// Section Common
-.section-header {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin: 0 0 1rem 0;
-}
-
-.section-desc {
-  font-size: 1.125rem;
-  color: #64748b;
-  margin: 0;
-}
-
-// Features Section
-.features-section {
-  padding: 6rem 0;
-  background: #fff;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 2rem;
-
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.feature-card {
-  background: #f8fafc;
-  border-radius: 1rem;
-  padding: 2rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
-
-  &:hover {
-    background: #fff;
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.feature-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.feature-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 0.75rem 0;
-}
-
-.feature-desc {
-  font-size: 0.9375rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin: 0;
-}
-
-// Steps Section
-.steps-section {
-  padding: 6rem 0;
-  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
-}
-
-.steps-timeline {
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.step-item {
-  display: flex;
-  gap: 1.5rem;
-  position: relative;
-}
-
-.step-marker {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.step-icon {
-  width: 3rem;
-  height: 3rem;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.step-line {
-  width: 2px;
-  flex: 1;
-  background: linear-gradient(180deg, #3b82f6 0%, #e2e8f0 100%);
-  margin: 0.5rem 0;
-}
-
-.step-content {
-  padding-bottom: 2rem;
-
-  .step-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1e293b;
-    margin: 0 0 0.5rem 0;
-  }
-
-  .step-desc {
-    font-size: 0.9375rem;
-    color: #64748b;
-    margin: 0;
-  }
-}
-
-// Links Section
-.links-section {
-  padding: 6rem 0;
-  background: #fff;
-}
-
-.links-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1rem;
-
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.link-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: #f8fafc;
-  border-radius: 0.75rem;
-  padding: 1.25rem;
-  text-decoration: none;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  }
-}
-
-.link-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-
-  &.blue {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  }
-
-  &.dark {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  }
-
-  &.purple {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  }
-
-  &.green {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  }
-
-  &.orange {
-    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-  }
-}
-
-.link-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.link-title {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 0.25rem 0;
-}
-
-.link-desc {
-  font-size: 0.8125rem;
-  color: #64748b;
-  margin: 0;
-}
-
-.link-arrow {
-  color: #cbd5e1;
-  flex-shrink: 0;
-}
-
-// Sponsor Section
-.sponsor-section {
-  padding: 6rem 0;
-  background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
-}
-
-.sponsor-cards {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 1.5rem;
-  max-width: 900px;
-  margin: 0 auto;
-
-  @media (min-width: 640px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.sponsor-card {
-  background: #fff;
-  border-radius: 1rem;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.sponsor-icon {
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 2rem;
-  margin: 0 auto 1rem;
-
-  &.wechat {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-  }
-
-  &.alipay {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  }
-
-  &.qq {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-  }
-}
-
-.sponsor-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 0.5rem 0;
-}
-
-.sponsor-desc {
-  font-size: 0.875rem;
-  color: #64748b;
-  margin: 0;
-}
-
-.sponsor-note {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  margin-top: 2rem;
-  color: #64748b;
-  font-size: 0.875rem;
-}
-
-// CTA Section
-.cta-section {
-  padding: 6rem 0;
-  background: #fff;
-}
-
-.cta-card {
-  text-align: center;
-  background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 50%, #7c3aed 100%);
-  border-radius: 1.5rem;
-  padding: 4rem 2rem;
-}
-
-.cta-icon {
-  width: 4rem;
-  height: 4rem;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 2rem;
-  margin: 0 auto 1.5rem;
-}
-
-.cta-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0 0 0.75rem 0;
-}
-
-.cta-desc {
-  font-size: 1.125rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin: 0 0 2rem 0;
-}
-
-.cta-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-// Footer
-.footer {
-  background: #1e293b;
-  padding: 2rem 0;
-}
-
-.footer-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-
-  @media (min-width: 640px) {
-    flex-direction: row;
-    justify-content: space-between;
-  }
-}
-
-.footer-brand {
-  text-align: center;
-
-  @media (min-width: 640px) {
-    text-align: left;
-  }
-}
-
-.footer-logo {
-  display: block;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 0.25rem;
-}
-
-.footer-copyright {
-  font-size: 0.875rem;
-  color: #94a3b8;
-}
-
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.footer-link {
-  color: #94a3b8;
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #fff;
-  }
+.animate-bounce-slow-delayed {
+  animation: bounce-slow-delayed 4s ease-in-out infinite;
 }
 </style>

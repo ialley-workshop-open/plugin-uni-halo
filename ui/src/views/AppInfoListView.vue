@@ -169,7 +169,7 @@ const onEditingModalClose = () => {
                   @keyup.enter="() => refetch()"
                 />
               </template>
-              <VButton v-else type="danger" @click="handleDeleteInBatch">
+              <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
                 删除
               </VButton>
             </div>
