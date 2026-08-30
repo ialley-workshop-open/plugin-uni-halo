@@ -247,7 +247,7 @@ const contacts = [
           <p class="text-lg text-slate-500">如果这个项目对你有帮助，可以请作者喝杯饮料</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
           <div class="bg-slate-50 rounded-2xl p-6 text-center hover:shadow-md transition-all duration-300">
             <div
               class="w-14 h-14 rounded-full flex items-center justify-center text-white mx-auto mb-4"
@@ -256,7 +256,7 @@ const contacts = [
               <RiWechatPayLine class="w-7 h-7" />
             </div>
             <h4 class="font-semibold text-slate-800 mb-3">微信赞助</h4>
-            <div class="w-42 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+            <div class="w-full rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
               <img :src="wxPng" alt="微信赞赏码" class="w-full h-full object-contain" />
             </div>
             <p class="text-sm text-slate-500">扫码请作者喝咖啡</p>
@@ -270,7 +270,7 @@ const contacts = [
               <RiAlipayLine class="w-7 h-7" />
             </div>
             <h4 class="font-semibold text-slate-800 mb-3">支付宝赞助</h4>
-            <div class="w-42 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+            <div class="w-full rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
               <img :src="zfbPng" alt="支付宝赞赏码" class="w-full h-full object-contain" />
             </div>
             <p class="text-sm text-slate-500">扫码请作者喝奶茶</p>
@@ -284,7 +284,7 @@ const contacts = [
               <RiQqLine class="w-7 h-7" />
             </div>
             <h4 class="font-semibold text-slate-800 mb-3">QQ 赞助</h4>
-            <div class="w-42 rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
+            <div class="w-full rounded-xl mx-auto mb-3 overflow-hidden bg-white flex items-center justify-center">
               <img :src="qqPng" alt="QQ 赞赏码" class="w-full h-full object-contain" />
             </div>
             <p class="text-sm text-slate-500">扫码请作者吃零食</p>

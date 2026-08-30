@@ -203,11 +203,9 @@ const onEditingModalClose = () => {
         <div class=":uno: border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-700">
           应用列表
         </div>
-        <div
-          class=":uno: flex cursor-pointer items-center gap-3 px-4 py-3 text-sm"
+        <div class=":uno: flex cursor-pointer items-center gap-3 px-4 py-3 text-sm"
           :class="filterAppid === '' ? ':uno: bg-gray-50 font-medium text-gray-900' : ':uno: text-gray-700 hover:bg-gray-50'"
-          @click="filterAppid = ''"
-        >
+          @click="filterAppid = ''">
           <div class=":uno: flex h-8 w-8 flex-shrink-0 items-center justify-center rounded bg-gray-200">
             <IconGrid class=":uno: h-4 w-4 text-gray-500" />
           </div>
