@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Toast, VButton, VModal, VSpace } from "@halo-dev/components";
+import { submitForm } from "@formkit/core";
 import { cloneDeep } from "lodash-es";
 import { computed, ref, watch } from "vue";
 import SubmitButton from "./button/SubmitButton.vue";
@@ -56,15 +57,11 @@ watch(
   }
 );
 
+const handleSubmit = () => {
+  submitForm("app-info-form");
+};
+
 const handleSave = async () => {
-  if (!formState.value.spec.appid?.trim()) {
-    Toast.error("AppID 不能为空");
-    return;
-  }
-  if (!formState.value.spec.name?.trim()) {
-    Toast.error("应用名称不能为空");
-    return;
-  }
   try {
     saving.value = true;
     if (isUpdateMode.value) {
@@ -84,101 +81,95 @@ const handleSave = async () => {
 
 <template>
   <VModal ref="modal" :title="modalTitle" :width="640" @close="emit('close')">
-    <div class=":uno: flex flex-col gap-4">
-      <div class=":uno: flex flex-col gap-3">
-        <h4 class=":uno: m-0 text-sm font-semibold text-gray-700">基础信息</h4>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">AppID *</label>
-          <input
-            v-model="formState.spec.appid"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary disabled:bg-gray-100"
-            placeholder="应用唯一标识（uni-app 的 appid）"
-            :disabled="isUpdateMode"
-          />
-        </div>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">应用名称 *</label>
-          <input
-            v-model="formState.spec.name"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="应用名称"
-          />
-        </div>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">应用类型</label>
-          <select
-            v-model="formState.spec.appType"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-          >
-            <option :value="0">uni-app</option>
-            <option :value="1">uni-app x</option>
-          </select>
-        </div>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">应用描述</label>
-          <textarea
-            v-model="formState.spec.description"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            rows="3"
-          />
-        </div>
-      </div>
-
-      <div class=":uno: flex flex-col gap-3">
-        <h4 class=":uno: m-0 text-sm font-semibold text-gray-700">应用素材</h4>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">图标地址</label>
-          <input
-            v-model="formState.spec.iconUrl"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="Halo 附件永久链接"
-          />
-        </div>
-      </div>
-
-      <div class=":uno: flex flex-col gap-3">
-        <h4 class=":uno: m-0 text-sm font-semibold text-gray-700">平台信息</h4>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">Android</label>
-          <input
-            v-model="formState.spec.appAndroid!.name"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="名称"
-          />
-          <input
-            v-model="formState.spec.appAndroid!.url"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="apk 下载地址"
-          />
-        </div>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">iOS</label>
-          <input
-            v-model="formState.spec.appIos!.name"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="名称"
-          />
-          <input
-            v-model="formState.spec.appIos!.url"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="AppStore 链接"
-          />
-        </div>
-        <div class=":uno: flex flex-col gap-1.5">
-          <label class=":uno: text-[13px] text-gray-500">Harmony</label>
-          <input
-            v-model="formState.spec.appHarmony!.name"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="名称"
-          />
-          <input
-            v-model="formState.spec.appHarmony!.url"
-            class=":uno: w-full rounded border border-gray-300 px-3 py-2 text-sm outline-none focus:border-primary"
-            placeholder="下载地址"
-          />
-        </div>
-      </div>
-    </div>
+    <FormKit
+      id="app-info-form"
+      type="form"
+      name="app-info-form"
+      :config="{ validationVisibility: 'submit' }"
+      @submit="handleSave"
+    >
+      <FormKit
+        v-model="formState.spec.appid"
+        name="appid"
+        label="AppID"
+        type="text"
+        validation="required"
+        :validation-messages="{ required: 'AppID 不能为空' }"
+        placeholder="应用唯一标识（uni-app 的 appid）"
+        :disabled="isUpdateMode"
+      />
+      <FormKit
+        v-model="formState.spec.name"
+        name="name"
+        label="应用名称"
+        type="text"
+        validation="required"
+        :validation-messages="{ required: '应用名称不能为空' }"
+        placeholder="应用名称"
+      />
+      <FormKit
+        v-model="formState.spec.appType"
+        name="appType"
+        label="应用类型"
+        type="select"
+        :options="[
+          { label: 'uni-app', value: 0 },
+          { label: 'uni-app x', value: 1 },
+        ]"
+      />
+      <FormKit
+        v-model="formState.spec.description"
+        name="description"
+        label="应用描述"
+        type="textarea"
+        rows="3"
+      />
+      <FormKit
+        v-model="formState.spec.iconUrl"
+        name="iconUrl"
+        label="图标地址"
+        type="text"
+        placeholder="Halo 附件永久链接"
+      />
+      <FormKit
+        v-model="formState.spec.appAndroid!.name"
+        name="appAndroidName"
+        label="Android 名称"
+        type="text"
+      />
+      <FormKit
+        v-model="formState.spec.appAndroid!.url"
+        name="appAndroidUrl"
+        label="Android 下载地址"
+        type="text"
+        placeholder="apk 下载地址"
+      />
+      <FormKit
+        v-model="formState.spec.appIos!.name"
+        name="appIosName"
+        label="iOS 名称"
+        type="text"
+      />
+      <FormKit
+        v-model="formState.spec.appIos!.url"
+        name="appIosUrl"
+        label="iOS 链接"
+        type="text"
+        placeholder="AppStore 链接"
+      />
+      <FormKit
+        v-model="formState.spec.appHarmony!.name"
+        name="appHarmonyName"
+        label="Harmony 名称"
+        type="text"
+      />
+      <FormKit
+        v-model="formState.spec.appHarmony!.url"
+        name="appHarmonyUrl"
+        label="Harmony 下载地址"
+        type="text"
+      />
+    </FormKit>
 
     <template #footer>
       <VSpace>
@@ -187,7 +178,7 @@ const handleSave = async () => {
           :disabled="saving"
           type="secondary"
           text="提交"
-          @submit="handleSave"
+          @submit="handleSubmit"
         />
         <VButton @click="modal?.close()">关闭</VButton>
       </VSpace>

@@ -14,7 +14,7 @@ import {
   VSpace,
 } from "@halo-dev/components";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import AppVersionEditingModal from "../components/AppVersionEditingModal.vue";
 import AppVersionListItem from "../components/AppVersionListItem.vue";
 import FilterDropdown from "../components/FilterDropdown.vue";
@@ -34,6 +34,9 @@ const total = ref(0);
 const editingModal = ref(false);
 const selectedVersion = ref<AppVersion>();
 
+const checkAll = ref(false);
+const selectedVersionNames = ref<string[]>([]);
+
 // 所属应用下拉数据
 const { data: apps } = useQuery({
   queryKey: ["uni-halo:apps:all"],
@@ -41,7 +44,7 @@ const { data: apps } = useQuery({
   staleTime: 60 * 1000,
 });
 
-const { data: versions, isLoading, refetch } = useQuery({
+const { data: versions, isLoading, isFetching, refetch } = useQuery({
   queryKey: [
     "uni-halo:app-versions",
     page,
@@ -65,12 +68,25 @@ const { data: versions, isLoading, refetch } = useQuery({
   },
 });
 
-const hasFilters = computed(
-  () =>
-    !!filterAppid.value ||
-    !!filterPlatform.value ||
-    !!filterType.value ||
-    !!keyword.value.trim()
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+  if (checked) {
+    selectedVersionNames.value =
+      versions.value?.items.map((version) => version.metadata.name) || [];
+  } else {
+    selectedVersionNames.value = [];
+  }
+};
+
+const checkSelection = (version: AppVersion) => {
+  return selectedVersionNames.value.includes(version.metadata.name);
+};
+
+watch(
+  () => selectedVersionNames.value,
+  (newValue) => {
+    checkAll.value = newValue.length === versions.value?.items.length;
+  }
 );
 
 watch(
@@ -80,11 +96,27 @@ watch(
   }
 );
 
-const handleClearFilters = () => {
-  filterAppid.value = "";
-  filterPlatform.value = "";
-  filterType.value = "";
-  keyword.value = "";
+const handleDeleteInBatch = () => {
+  Dialog.warning({
+    title: "确定要删除选中的版本吗？",
+    description: "该操作不可恢复。",
+    confirmType: "danger",
+    confirmText: "确定",
+    cancelText: "取消",
+    onConfirm: async () => {
+      try {
+        await Promise.all(
+          selectedVersionNames.value.map((name) => appVersionsApi.delete(name))
+        );
+        selectedVersionNames.value = [];
+        Toast.success("删除成功");
+      } catch (error) {
+        console.error("Failed to delete versions", error);
+      } finally {
+        queryClient.invalidateQueries({ queryKey: ["uni-halo:app-versions"] });
+      }
+    },
+  });
 };
 
 const handleOpenEditingModal = (version?: AppVersion) => {
@@ -161,7 +193,30 @@ const onEditingModalClose = () => {
       <template #header>
         <div class=":uno: block w-full bg-gray-50 px-4 py-3">
           <div class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center">
+            <div class=":uno: hidden items-center sm:flex">
+              <input
+                v-model="checkAll"
+                type="checkbox"
+                @change="handleCheckAllChange"
+              />
+            </div>
             <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
+              <template v-if="!selectedVersionNames.length">
+                <input
+                  v-model="keyword"
+                  class=":uno: w-56 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  placeholder="搜索标题 / 版本号"
+                  @keyup.enter="() => refetch()"
+                />
+                <VButton size="sm" type="secondary" @click="() => refetch()">
+                  搜索
+                </VButton>
+              </template>
+              <VButton v-else type="danger" @click="handleDeleteInBatch">
+                删除
+              </VButton>
+            </div>
+            <VSpace spacing="lg" class=":uno: flex-wrap">
               <FilterDropdown
                 v-model="filterAppid"
                 label="应用"
@@ -195,17 +250,19 @@ const onEditingModalClose = () => {
                 ]"
                 @update:model-value="() => refetch()"
               />
-              <input
-                v-model="keyword"
-                class=":uno: w-56 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
-                placeholder="搜索标题 / 版本号"
-                @keyup.enter="() => refetch()"
-              />
-              <VButton size="sm" type="secondary" @click="() => refetch()">搜索</VButton>
-              <VButton v-if="hasFilters" size="sm" type="secondary" @click="handleClearFilters">
-                重置筛选
-              </VButton>
-            </div>
+              <div class=":uno: flex flex-row gap-2">
+                <div
+                  class=":uno: group cursor-pointer rounded p-1 hover:bg-gray-200"
+                  @click="() => refetch()"
+                >
+                  <IconRefreshLine
+                    v-tooltip="'刷新'"
+                    :class="{ 'animate-spin text-gray-900': isFetching }"
+                    class=":uno: h-4 w-4 text-gray-600 group-hover:text-gray-900"
+                  />
+                </div>
+              </div>
+            </VSpace>
           </div>
         </div>
       </template>
@@ -232,10 +289,20 @@ const onEditingModalClose = () => {
             v-for="version in versions?.items"
             :key="version.metadata.name"
             :version="version"
+            :is-selected="checkSelection(version)"
             @editing="handleOpenEditingModal"
             @toggle="handleToggle"
             @delete="handleDelete"
-          />
+          >
+            <template #checkbox>
+              <input
+                v-model="selectedVersionNames"
+                :value="version.metadata.name"
+                name="version-checkbox"
+                type="checkbox"
+              />
+            </template>
+          </AppVersionListItem>
         </VEntityContainer>
       </Transition>
       <template #footer>

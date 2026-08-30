@@ -38,6 +38,9 @@ const createdText = computed(() => {
 
 <template>
   <VEntity :is-selected="isSelected">
+    <template #checkbox>
+      <slot name="checkbox" />
+    </template>
     <template #start>
       <VEntityField :title="app.spec.appid || app.metadata.name" width="15rem">
         <template #description>

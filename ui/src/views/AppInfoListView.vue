@@ -32,7 +32,10 @@ const total = ref(0);
 const editingModal = ref(false);
 const selectedApp = ref<AppInfo>();
 
-const { data: apps, isLoading, refetch } = useQuery({
+const checkAll = ref(false);
+const selectedAppNames = ref<string[]>([]);
+
+const { data: apps, isLoading, isFetching, refetch } = useQuery({
   queryKey: ["uni-halo:apps", page, size, keyword, filterAppType],
   queryFn: async () => {
     const result = await appsApi.list({
@@ -52,6 +55,49 @@ watch(
     page.value = 1;
   }
 );
+
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+  if (checked) {
+    selectedAppNames.value = apps.value?.items.map((app) => app.metadata.name) || [];
+  } else {
+    selectedAppNames.value = [];
+  }
+};
+
+const checkSelection = (app: AppInfo) => {
+  return selectedAppNames.value.includes(app.metadata.name);
+};
+
+watch(
+  () => selectedAppNames.value,
+  (newValue) => {
+    checkAll.value = newValue.length === apps.value?.items.length;
+  }
+);
+
+const handleDeleteInBatch = () => {
+  Dialog.warning({
+    title: "确定要删除选中的应用吗？",
+    description: "该操作不可恢复。",
+    confirmType: "danger",
+    confirmText: "确定",
+    cancelText: "取消",
+    onConfirm: async () => {
+      try {
+        await Promise.all(
+          selectedAppNames.value.map((name) => appsApi.delete(name))
+        );
+        selectedAppNames.value = [];
+        Toast.success("删除成功");
+      } catch (error) {
+        console.error("Failed to delete apps", error);
+      } finally {
+        queryClient.invalidateQueries({ queryKey: ["uni-halo:apps"] });
+      }
+    },
+  });
+};
 
 const handleOpenEditingModal = (app?: AppInfo) => {
   selectedApp.value = app;
@@ -94,12 +140,6 @@ const onEditingModalClose = () => {
 
   <VPageHeader title="应用管理">
     <template #actions>
-      <VButton type="secondary" @click="refetch">
-        <template #icon>
-          <IconRefreshLine />
-        </template>
-        刷新
-      </VButton>
       <VButton type="primary" @click="editingModal = true">
         <template #icon>
           <IconAddCircle />
@@ -113,8 +153,33 @@ const onEditingModalClose = () => {
     <VCard :body-class="[':uno: !p-0']">
       <template #header>
         <div class=":uno: block w-full bg-gray-50 px-4 py-3">
-          <div class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center">
+          <div
+            class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center"
+          >
+            <div class=":uno: hidden items-center sm:flex">
+              <input
+                v-model="checkAll"
+                type="checkbox"
+                @change="handleCheckAllChange"
+              />
+            </div>
             <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
+              <template v-if="!selectedAppNames.length">
+                <input
+                  v-model="keyword"
+                  class=":uno: w-64 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
+                  placeholder="搜索 AppID / 应用名称"
+                  @keyup.enter="() => refetch()"
+                />
+                <VButton size="sm" type="secondary" @click="() => refetch()">
+                  搜索
+                </VButton>
+              </template>
+              <VButton v-else type="danger" @click="handleDeleteInBatch">
+                删除
+              </VButton>
+            </div>
+            <VSpace spacing="lg" class=":uno: flex-wrap">
               <FilterDropdown
                 v-model="filterAppType"
                 label="类型"
@@ -125,14 +190,19 @@ const onEditingModalClose = () => {
                 ]"
                 @update:model-value="() => refetch()"
               />
-              <input
-                v-model="keyword"
-                class=":uno: w-64 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
-                placeholder="搜索 AppID / 应用名称"
-                @keyup.enter="() => refetch()"
-              />
-              <VButton size="sm" type="secondary" @click="() => refetch()">搜索</VButton>
-            </div>
+              <div class=":uno: flex flex-row gap-2">
+                <div
+                  class=":uno: group cursor-pointer rounded p-1 hover:bg-gray-200"
+                  @click="() => refetch()"
+                >
+                  <IconRefreshLine
+                    v-tooltip="'刷新'"
+                    :class="{ 'animate-spin text-gray-900': isFetching }"
+                    class=":uno: h-4 w-4 text-gray-600 group-hover:text-gray-900"
+                  />
+                </div>
+              </div>
+            </VSpace>
           </div>
         </div>
       </template>
@@ -159,9 +229,19 @@ const onEditingModalClose = () => {
             v-for="app in apps?.items"
             :key="app.metadata.name"
             :app="app"
+            :is-selected="checkSelection(app)"
             @editing="handleOpenEditingModal"
             @delete="handleDelete"
-          />
+          >
+            <template #checkbox>
+              <input
+                v-model="selectedAppNames"
+                :value="app.metadata.name"
+                name="app-checkbox"
+                type="checkbox"
+              />
+            </template>
+          </AppInfoListItem>
         </VEntityContainer>
       </Transition>
       <template #footer>

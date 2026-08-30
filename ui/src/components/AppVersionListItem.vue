@@ -48,6 +48,9 @@ const publishedText = computed(() => {
 
 <template>
   <VEntity :is-selected="isSelected">
+    <template #checkbox>
+      <slot name="checkbox" />
+    </template>
     <template #start>
       <VEntityField :title="titleText" width="15rem">
         <template #description>
