@@ -5,16 +5,17 @@ import { cloneDeep } from "lodash-es";
 import { computed, ref, watch } from "vue";
 import SubmitButton from "./button/SubmitButton.vue";
 import { appVersionsApi } from "../api";
-import { PLATFORMS } from "../types";
 import type { AppInfo, AppVersion } from "../types";
 
 const props = withDefaults(
   defineProps<{
     appVersion?: AppVersion;
     apps: AppInfo[];
+    initialAppid?: string;
   }>(),
   {
     appVersion: undefined,
+    initialAppid: "",
   }
 );
 
@@ -48,7 +49,7 @@ const formState = ref<AppVersion>({
     name: "",
     title: "",
     contents: "",
-    platform: [],
+    platform: ["Android"],
     type: "native_app",
     version: "",
     minUniVersion: "",
@@ -59,13 +60,56 @@ const formState = ref<AppVersion>({
   },
 });
 
+// 当前选中应用的最新版本（用于版本号提示）
+const latestVersion = ref("");
+
+// 下载地址按包类型约束文件格式：整包仅 apk，wgt 仅 wgt
+const urlAccepts = computed(() => {
+  return formState.value.spec.type === "wgt" ? [".wgt"] : [".apk"];
+});
+
+watch(
+  [selectedAppid],
+  async () => {
+    latestVersion.value = "";
+    if (!selectedAppid.value) {
+      return;
+    }
+    try {
+      const result = await appVersionsApi.list({
+        appid: selectedAppid.value,
+        page: 1,
+        size: 1,
+      });
+      const first = result.items[0];
+      if (first?.spec?.version) {
+        latestVersion.value = first.spec.version;
+      }
+    } catch (error) {
+      console.error("Failed to fetch latest version", error);
+    }
+  },
+  {
+    immediate: false,
+  }
+);
+
 // 回填 / 初始化时同步所属应用下拉
 watch(
   () => props.appVersion,
   (appVersion) => {
     if (appVersion) {
       formState.value = cloneDeep(appVersion);
+      // 平台仅保留 Android（iOS / Harmony 已隐藏）
+      if (formState.value.spec.platform?.length) {
+        formState.value.spec.platform = formState.value.spec.platform.filter(
+          (p) => p === "Android"
+        );
+      }
       selectedAppid.value = appVersion.spec.appid || "";
+    } else if (props.initialAppid) {
+      // 发布新版：预选所属应用
+      selectedAppid.value = props.initialAppid;
     }
   },
   {
@@ -141,7 +185,7 @@ const handleSave = async () => {
         name="platform"
         label="更新平台"
         type="checkbox"
-        :options="PLATFORMS.map((p) => ({ label: p, value: p }))"
+        :options="[{ label: 'Android', value: 'Android' }]"
       />
       <FormKit
         v-model="formState.spec.type"
@@ -149,7 +193,7 @@ const handleSave = async () => {
         label="包类型"
         type="select"
         :options="[
-          { label: '整包（native_app）', value: 'native_app' },
+          { label: '整包', value: 'native_app' },
           { label: 'wgt 资源包', value: 'wgt' },
         ]"
       />
@@ -161,21 +205,26 @@ const handleSave = async () => {
         validation="required"
         :validation-messages="{ required: '版本号不能为空' }"
         placeholder="须大于当前线上发行版本，如 1.1.0"
+        help="当前应用最新版本："
       />
       <FormKit
         v-if="formState.spec.type === 'wgt'"
         v-model="formState.spec.minUniVersion"
         name="minUniVersion"
-        label="min_uni_version"
+        label="最低原生版本"
         type="text"
-        placeholder="wgt 所需最低原生 App 版本"
+        placeholder="例如：3.0.0"
+        help="指支持该 wgt 资源包的最低原生 App 版本号。客户端原生 App 版本低于此值时无法应用此 wgt 更新，需通过整包更新升级。"
       />
       <FormKit
         v-model="formState.spec.url"
         name="url"
         label="下载地址"
-        type="text"
-        placeholder="Android/Harmony 附件或下载地址；iOS 填 AppStore 链接"
+        type="attachment"
+        :accepts="urlAccepts"
+        :help="formState.spec.type === 'wgt'
+          ? '仅支持上传 .wgt 格式文件，或直接输入下载地址'
+          : '仅支持上传 .apk 格式文件，或直接输入下载地址'"
       />
       <FormKit
         v-model="formState.spec.stablePublish"

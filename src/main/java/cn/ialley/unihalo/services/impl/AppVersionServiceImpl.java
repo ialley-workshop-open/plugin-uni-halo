@@ -69,7 +69,42 @@ public class AppVersionServiceImpl implements AppVersionService {
     @Override
     public Mono<Void> delete(String name) {
         return client.fetch(AppVersion.class, name)
-                .flatMap(client::delete)
+                .flatMap(current -> {
+                    String appid = current.getSpec().getAppid();
+                    if (appid == null || appid.isBlank()) {
+                        return Mono.error(
+                                new IllegalArgumentException("版本信息不完整，无法删除"));
+                    }
+                    var listOptions = ListOptions.builder()
+                            .fieldQuery(equal("spec.appid", appid))
+                            .build();
+                    return client.listAll(AppVersion.class, listOptions, Sort.unsorted())
+                            .collectList()
+                            .flatMap(all -> {
+                                // 找出该应用版本号最大的记录（最新版本）
+                                AppVersion latest = null;
+                                for (AppVersion v : all) {
+                                    if (v.getSpec().getVersion() == null) {
+                                        continue;
+                                    }
+                                    if (latest == null || VersionComparator.compare(
+                                            v.getSpec().getVersion(),
+                                            latest.getSpec().getVersion()) > 0) {
+                                        latest = v;
+                                    }
+                                }
+                                // 最新版本且处于上线（未下架）状态时不允许删除
+                                if (latest != null
+                                        && latest.getMetadata().getName()
+                                                .equals(current.getMetadata().getName())
+                                        && Boolean.TRUE.equals(current.getSpec().getStablePublish())) {
+                                    return Mono.<AppVersion>error(
+                                            new IllegalArgumentException(
+                                                    "该版本为最新版本且未下架，不能删除，请先下线"));
+                                }
+                                return client.delete(current);
+                            });
+                })
                 .then();
     }
 

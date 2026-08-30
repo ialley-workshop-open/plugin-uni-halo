@@ -49,10 +49,8 @@ public class AppInfoEndpoint implements CustomEndpoint {
         int page = queryPage(request);
         int size = querySize(request);
         String keyword = request.queryParam("keyword").orElse("").trim();
-        String appType = request.queryParam("appType").orElse("").trim();
         return appInfoService.listAll()
                 .filter(appInfo -> matchesKeyword(appInfo, keyword))
-                .filter(appInfo -> matchesAppType(appInfo, appType))
                 .collectList()
                 .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)))
                 .flatMap(result -> ServerResponse.ok().bodyValue(result));
@@ -83,7 +81,9 @@ public class AppInfoEndpoint implements CustomEndpoint {
 
     private Mono<ServerResponse> deleteApp(ServerRequest request) {
         return appInfoService.delete(request.pathVariable("name"))
-                .then(ServerResponse.ok().bodyValue(Map.of("success", true)));
+                .then(ServerResponse.ok().bodyValue(Map.of("success", true)))
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> ServerResponse.badRequest().bodyValue(Map.of("message", e.getMessage())));
     }
 
     private static boolean matchesKeyword(AppInfo appInfo, String keyword) {
@@ -97,16 +97,6 @@ public class AppInfoEndpoint implements CustomEndpoint {
         String name = appInfo.getSpec().getName();
         return (appid != null && appid.contains(keyword))
                 || (name != null && name.contains(keyword));
-    }
-
-    private static boolean matchesAppType(AppInfo appInfo, String appType) {
-        if (appType.isEmpty()) {
-            return true;
-        }
-        if (appInfo.getSpec() == null || appInfo.getSpec().getAppType() == null) {
-            return false;
-        }
-        return String.valueOf(appInfo.getSpec().getAppType()).equals(appType);
     }
 
     private static <T> List<T> slice(List<T> list, int page, int size) {

@@ -17,7 +17,6 @@ import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { ref, watch } from "vue";
 import AppInfoEditingModal from "../components/AppInfoEditingModal.vue";
 import AppInfoListItem from "../components/AppInfoListItem.vue";
-import FilterDropdown from "../components/FilterDropdown.vue";
 import { appsApi } from "../api";
 import type { AppInfo } from "../types";
 
@@ -26,7 +25,6 @@ const queryClient = useQueryClient();
 const page = ref(1);
 const size = ref(20);
 const keyword = ref("");
-const filterAppType = ref<string>();
 const total = ref(0);
 
 const editingModal = ref(false);
@@ -36,13 +34,12 @@ const checkAll = ref(false);
 const selectedAppNames = ref<string[]>([]);
 
 const { data: apps, isLoading, isFetching, refetch } = useQuery({
-  queryKey: ["uni-halo:apps", page, size, keyword, filterAppType],
+  queryKey: ["uni-halo:apps", page, size, keyword],
   queryFn: async () => {
     const result = await appsApi.list({
       page: page.value,
       size: size.value,
       keyword: keyword.value,
-      appType: filterAppType.value ? Number(filterAppType.value) : undefined,
     });
     total.value = result.total;
     return result;
@@ -91,7 +88,7 @@ const handleDeleteInBatch = () => {
         selectedAppNames.value = [];
         Toast.success("删除成功");
       } catch (error) {
-        console.error("Failed to delete apps", error);
+        Toast.error((error as Error).message);
       } finally {
         queryClient.invalidateQueries({ queryKey: ["uni-halo:apps"] });
       }
@@ -116,7 +113,7 @@ const handleDelete = (app: AppInfo) => {
         await appsApi.delete(app.metadata.name);
         Toast.success("删除成功");
       } catch (error) {
-        console.error("Failed to delete app", error);
+        Toast.error((error as Error).message);
       } finally {
         queryClient.invalidateQueries({ queryKey: ["uni-halo:apps"] });
       }
@@ -168,28 +165,15 @@ const onEditingModalClose = () => {
                 <input
                   v-model="keyword"
                   class=":uno: w-64 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
-                  placeholder="搜索 AppID / 应用名称"
+                  placeholder="搜索 AppID / 应用名称（回车搜索）"
                   @keyup.enter="() => refetch()"
                 />
-                <VButton size="sm" type="secondary" @click="() => refetch()">
-                  搜索
-                </VButton>
               </template>
               <VButton v-else type="danger" @click="handleDeleteInBatch">
                 删除
               </VButton>
             </div>
             <VSpace spacing="lg" class=":uno: flex-wrap">
-              <FilterDropdown
-                v-model="filterAppType"
-                label="类型"
-                :items="[
-                  { label: '全部类型' },
-                  { label: 'uni-app', value: '0' },
-                  { label: 'uni-app x', value: '1' },
-                ]"
-                @update:model-value="() => refetch()"
-              />
               <div class=":uno: flex flex-row gap-2">
                 <div
                   class=":uno: group cursor-pointer rounded p-1 hover:bg-gray-200"

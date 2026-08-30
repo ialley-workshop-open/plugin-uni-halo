@@ -37,14 +37,14 @@ public class AppInfo extends AbstractExtension {
         private String name;
 
         /**
-         * 应用类型：0 uni-app / 1 uni-app x
-         */
-        private Integer appType;
-
-        /**
-         * 应用描述
+         * 应用简介
          */
         private String description;
+
+        /**
+         * 应用介绍（详细内容）
+         */
+        private String intro;
 
         /**
          * 应用图标（Halo 附件链接）

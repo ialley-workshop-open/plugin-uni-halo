@@ -10,8 +10,8 @@ export interface AppPlatformInfo {
 export interface AppInfoSpec {
   appid?: string;
   name?: string;
-  appType?: number;
   description?: string;
+  intro?: string;
   iconUrl?: string;
   screenshot?: string[];
   appAndroid?: AppPlatformInfo;
@@ -59,7 +59,6 @@ export interface ListQuery {
   platform?: string;
   type?: string;
   stablePublish?: string;
-  appType?: number;
 }
 
 export const TYPE_LABELS: Record<string, string> = {

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {
+  VButton,
   VEntity,
   VEntityField,
   VStatusDot,
@@ -22,6 +23,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{
+  (event: "publish", appid: string): void;
   (event: "editing", version: AppVersion): void;
   (event: "toggle", version: AppVersion): void;
   (event: "delete", version: AppVersion): void;
@@ -88,8 +90,18 @@ const publishedText = computed(() => {
         </template>
       </VEntityField>
       <VEntityField :description="publishedText" />
+      <VEntityField>
+        <template #description>
+          <VButton size="sm" type="secondary" @click="emit('publish', version.spec.appid || '')">
+            发布新版
+          </VButton>
+        </template>
+      </VEntityField>
     </template>
     <template #dropdownItems>
+      <VDropdownItem @click="emit('publish', version.spec.appid || '')">
+        发布新版
+      </VDropdownItem>
       <VDropdownItem @click="emit('toggle', version)">
         {{ version.spec.stablePublish ? "下线" : "上线" }}
       </VDropdownItem>

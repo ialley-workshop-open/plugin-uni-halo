@@ -15,6 +15,7 @@ import {
 } from "@halo-dev/components";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import AppVersionEditingModal from "../components/AppVersionEditingModal.vue";
 import AppVersionListItem from "../components/AppVersionListItem.vue";
 import FilterDropdown from "../components/FilterDropdown.vue";
@@ -22,17 +23,21 @@ import { appVersionsApi, appsApi } from "../api";
 import type { AppInfo, AppVersion } from "../types";
 
 const queryClient = useQueryClient();
+const route = useRoute();
 
 const page = ref(1);
 const size = ref(20);
 const keyword = ref("");
-const filterAppid = ref("");
+// 支持从应用管理跳转时携带 appid 默认筛选（无则全部）
+const filterAppid = ref(typeof route.query.appid === "string" ? route.query.appid : "");
 const filterPlatform = ref("");
 const filterType = ref("");
 const total = ref(0);
 
 const editingModal = ref(false);
 const selectedVersion = ref<AppVersion>();
+// 发布新版时预选的所属应用
+const publishAppid = ref("");
 
 const checkAll = ref(false);
 const selectedVersionNames = ref<string[]>([]);
@@ -111,7 +116,7 @@ const handleDeleteInBatch = () => {
         selectedVersionNames.value = [];
         Toast.success("删除成功");
       } catch (error) {
-        console.error("Failed to delete versions", error);
+        Toast.error((error as Error).message);
       } finally {
         queryClient.invalidateQueries({ queryKey: ["uni-halo:app-versions"] });
       }
@@ -121,6 +126,12 @@ const handleDeleteInBatch = () => {
 
 const handleOpenEditingModal = (version?: AppVersion) => {
   selectedVersion.value = version;
+  editingModal.value = true;
+};
+
+const handlePublish = (appid: string) => {
+  selectedVersion.value = undefined;
+  publishAppid.value = appid;
   editingModal.value = true;
 };
 
@@ -149,7 +160,7 @@ const handleDelete = (version: AppVersion) => {
         await appVersionsApi.delete(version.metadata.name);
         Toast.success("删除成功");
       } catch (error) {
-        console.error("Failed to delete version", error);
+        Toast.error((error as Error).message);
       } finally {
         queryClient.invalidateQueries({ queryKey: ["uni-halo:app-versions"] });
       }
@@ -159,6 +170,7 @@ const handleDelete = (version: AppVersion) => {
 
 const onEditingModalClose = () => {
   selectedVersion.value = undefined;
+  publishAppid.value = "";
   editingModal.value = false;
   refetch();
 };
@@ -168,6 +180,7 @@ const onEditingModalClose = () => {
   <AppVersionEditingModal
     v-if="editingModal"
     :app-version="selectedVersion"
+    :initial-appid="publishAppid"
     :apps="(apps?.items as AppInfo[]) || []"
     @close="onEditingModalClose"
   />
@@ -205,12 +218,9 @@ const onEditingModalClose = () => {
                 <input
                   v-model="keyword"
                   class=":uno: w-56 rounded border border-gray-300 px-3 py-1.5 text-sm outline-none focus:border-primary"
-                  placeholder="搜索标题 / 版本号"
+                  placeholder="搜索标题 / 版本号（回车搜索）"
                   @keyup.enter="() => refetch()"
                 />
-                <VButton size="sm" type="secondary" @click="() => refetch()">
-                  搜索
-                </VButton>
               </template>
               <VButton v-else type="danger" @click="handleDeleteInBatch">
                 删除
@@ -290,6 +300,7 @@ const onEditingModalClose = () => {
             :key="version.metadata.name"
             :version="version"
             :is-selected="checkSelection(version)"
+            @publish="handlePublish"
             @editing="handleOpenEditingModal"
             @toggle="handleToggle"
             @delete="handleDelete"

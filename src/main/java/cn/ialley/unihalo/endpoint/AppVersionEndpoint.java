@@ -106,7 +106,9 @@ public class AppVersionEndpoint implements CustomEndpoint {
 
     private Mono<ServerResponse> deleteVersion(ServerRequest request) {
         return appVersionService.delete(request.pathVariable("name"))
-                .then(ServerResponse.ok().bodyValue(Map.of("success", true)));
+                .then(ServerResponse.ok().bodyValue(Map.of("success", true)))
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> ServerResponse.badRequest().bodyValue(Map.of("message", e.getMessage())));
     }
 
     /**

@@ -35,8 +35,8 @@ const formState = ref<AppInfo>({
   spec: {
     appid: "",
     name: "",
-    appType: 0,
     description: "",
+    intro: "",
     iconUrl: "",
     screenshot: [],
     appAndroid: { name: "", url: "" },
@@ -50,6 +50,9 @@ watch(
   (appInfo) => {
     if (appInfo) {
       formState.value = cloneDeep(appInfo);
+      if (!formState.value.spec.screenshot) {
+        formState.value.spec.screenshot = [];
+      }
     }
   },
   {
@@ -108,67 +111,61 @@ const handleSave = async () => {
         placeholder="应用名称"
       />
       <FormKit
-        v-model="formState.spec.appType"
-        name="appType"
-        label="应用类型"
-        type="select"
-        :options="[
-          { label: 'uni-app', value: 0 },
-          { label: 'uni-app x', value: 1 },
-        ]"
-      />
-      <FormKit
         v-model="formState.spec.description"
         name="description"
-        label="应用描述"
+        label="应用简介"
         type="textarea"
         rows="3"
+        placeholder="简要描述该应用"
+      />
+      <FormKit
+        v-model="formState.spec.intro"
+        name="intro"
+        label="应用介绍"
+        type="textarea"
+        rows="5"
+        placeholder="详细介绍该应用的功能与特性"
       />
       <FormKit
         v-model="formState.spec.iconUrl"
         name="iconUrl"
-        label="图标地址"
-        type="text"
-        placeholder="Halo 附件永久链接"
+        label="应用图标"
+        type="attachment"
+        :accepts="['image/*']"
+        help="支持从附件库选择图片，或直接输入图片地址"
       />
       <FormKit
-        v-model="formState.spec.appAndroid!.name"
-        name="appAndroidName"
-        label="Android 名称"
-        type="text"
+        v-model="formState.spec.screenshot"
+        name="screenshot"
+        label="应用截图"
+        type="attachment"
+        multiple
+        :accepts="['image/*']"
+        help="支持多张截图，可从附件库选择或直接上传"
       />
-      <FormKit
-        v-model="formState.spec.appAndroid!.url"
-        name="appAndroidUrl"
-        label="Android 下载地址"
-        type="text"
-        placeholder="apk 下载地址"
-      />
-      <FormKit
-        v-model="formState.spec.appIos!.name"
-        name="appIosName"
-        label="iOS 名称"
-        type="text"
-      />
-      <FormKit
-        v-model="formState.spec.appIos!.url"
-        name="appIosUrl"
-        label="iOS 链接"
-        type="text"
-        placeholder="AppStore 链接"
-      />
-      <FormKit
-        v-model="formState.spec.appHarmony!.name"
-        name="appHarmonyName"
-        label="Harmony 名称"
-        type="text"
-      />
-      <FormKit
-        v-model="formState.spec.appHarmony!.url"
-        name="appHarmonyUrl"
-        label="Harmony 下载地址"
-        type="text"
-      />
+      <div class=":uno: mt-4 rounded-md border border-gray-200 p-4">
+        <div class=":uno: mb-2 flex items-center justify-between">
+          <span class=":uno: text-sm font-semibold text-gray-700">Android 平台信息</span>
+          <VTag>可选</VTag>
+        </div>
+        <p class=":uno: mb-3 text-xs text-gray-500">
+          该配置更新的时候用不到，仅做基础信息，目的是方便在其他地方调用展示而已。
+        </p>
+        <FormKit
+          v-model="formState.spec.appAndroid!.name"
+          name="appAndroidName"
+          label="Android 名称"
+          type="text"
+        />
+        <FormKit
+          v-model="formState.spec.appAndroid!.url"
+          name="appAndroidUrl"
+          label="Android 下载地址"
+          type="attachment"
+          :accepts="['.apk']"
+          help="仅支持上传 .apk 格式文件，或直接输入下载地址"
+        />
+      </div>
     </FormKit>
 
     <template #footer>
