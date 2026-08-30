@@ -1,0 +1,51 @@
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-view-love
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "UniHalo 恋爱管理"
+    rbac.authorization.halo.run/display-name: "恋爱查看"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:love:view"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/love-config"
+      - "plugins/plugin-uni-halo/love-stories"
+      - "plugins/plugin-uni-halo/love-stories/*"
+      - "plugins/plugin-uni-halo/love-albums"
+      - "plugins/plugin-uni-halo/love-albums/*"
+      - "plugins/plugin-uni-halo/love-daily-items"
+      - "plugins/plugin-uni-halo/love-daily-items/*"
+    verbs: [ "get", "list" ]
+
+---
+
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-manage-love
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/dependencies: |
+      [ "plugin-uni-halo-role-template-view-love" ]
+    rbac.authorization.halo.run/module: "UniHalo 恋爱管理"
+    rbac.authorization.halo.run/display-name: "恋爱管理"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:love:manage"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/love-config"
+      - "plugins/plugin-uni-halo/love-stories"
+      - "plugins/plugin-uni-halo/love-stories/*"
+      - "plugins/plugin-uni-halo/love-albums"
+      - "plugins/plugin-uni-halo/love-albums/*"
+      - "plugins/plugin-uni-halo/love-daily-items"
+      - "plugins/plugin-uni-halo/love-daily-items/*"
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]

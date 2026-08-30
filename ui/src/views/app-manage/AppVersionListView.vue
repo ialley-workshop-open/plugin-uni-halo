@@ -17,11 +17,11 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import AppVersionEditingModal from "../components/AppVersionEditingModal.vue";
-import AppVersionListItem from "../components/AppVersionListItem.vue";
-import FilterDropdown from "../components/FilterDropdown.vue";
-import { appVersionsApi, appsApi } from "../api";
-import type { AppInfo, AppVersion } from "../types";
+import AppVersionEditingModal from "../../components/app-manage/version/AppVersionEditingModal.vue";
+import AppVersionListItem from "../../components/app-manage/version/AppVersionListItem.vue";
+import FilterDropdown from "../../components/common/FilterDropdown.vue";
+import { appVersionsApi, appsApi } from "@/api";
+import type { AppInfo, AppVersion } from "@/types";
 
 const queryClient = useQueryClient();
 const route = useRoute();

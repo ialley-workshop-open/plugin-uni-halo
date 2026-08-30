@@ -3,9 +3,9 @@ import { Toast, VButton, VModal, VSpace } from "@halo-dev/components";
 import { submitForm } from "@formkit/core";
 import { cloneDeep } from "lodash-es";
 import { computed, ref, watch } from "vue";
-import SubmitButton from "./button/SubmitButton.vue";
-import { appVersionsApi } from "../api";
-import type { AppInfo, AppVersion } from "../types";
+import SubmitButton from "../../button/SubmitButton.vue";
+import { appVersionsApi } from "@/api";
+import type { AppInfo, AppVersion } from "@/types";
 
 const props = withDefaults(
   defineProps<{

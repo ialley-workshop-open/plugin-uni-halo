@@ -2,6 +2,10 @@ package cn.ialley.unihalo;
 
 import cn.ialley.unihalo.scheme.AppInfo;
 import cn.ialley.unihalo.scheme.AppVersion;
+import cn.ialley.unihalo.scheme.LoveAlbum;
+import cn.ialley.unihalo.scheme.LoveConfig;
+import cn.ialley.unihalo.scheme.LoveDailyItem;
+import cn.ialley.unihalo.scheme.LoveStory;
 import cn.ialley.unihalo.scheme.QRCodeInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -57,6 +61,35 @@ public class UniHaloPlugin extends BasePlugin {
                     .indexFunc(appVersion -> appVersion.getSpec().getVersion()));
         });
 
+        schemeManager.register(LoveConfig.class, indexSpecs -> {
+            // 单例模型，无需额外索引
+        });
+
+        schemeManager.register(LoveAlbum.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<LoveAlbum, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(loveAlbum -> loveAlbum.getSpec() == null ? null
+                            : loveAlbum.getSpec().getPriority()));
+            indexSpecs.add(IndexSpecs.<LoveAlbum, Boolean>single("spec.passwordEnabled", Boolean.class)
+                    .indexFunc(loveAlbum -> loveAlbum.getSpec() == null ? null
+                            : loveAlbum.getSpec().getPasswordEnabled()));
+        });
+
+        schemeManager.register(LoveDailyItem.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<LoveDailyItem, String>single("spec.status", String.class)
+                    .indexFunc(item -> item.getSpec() == null ? null : item.getSpec().getStatus()));
+            indexSpecs.add(IndexSpecs.<LoveDailyItem, String>single("spec.completeDate", String.class)
+                    .indexFunc(item -> item.getSpec() == null ? null : item.getSpec().getCompleteDate()));
+            indexSpecs.add(IndexSpecs.<LoveDailyItem, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(item -> item.getSpec() == null ? null
+                            : item.getSpec().getPriority()));
+        });
+
+        schemeManager.register(LoveStory.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<LoveStory, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(story -> story.getSpec() == null ? null
+                            : story.getSpec().getPriority()));
+        });
+
         log.info("【UniHalo】插件启动成功！");
     }
 
@@ -66,6 +99,10 @@ public class UniHaloPlugin extends BasePlugin {
         schemeManager.unregister(schemeManager.get(QRCodeInfo.class));
         schemeManager.unregister(schemeManager.get(AppInfo.class));
         schemeManager.unregister(schemeManager.get(AppVersion.class));
+        schemeManager.unregister(schemeManager.get(LoveConfig.class));
+        schemeManager.unregister(schemeManager.get(LoveAlbum.class));
+        schemeManager.unregister(schemeManager.get(LoveDailyItem.class));
+        schemeManager.unregister(schemeManager.get(LoveStory.class));
 
         log.info("【UniHalo】插件停止！");
     }

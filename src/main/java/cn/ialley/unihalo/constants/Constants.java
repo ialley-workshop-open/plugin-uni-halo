@@ -32,6 +32,31 @@ public class Constants {
     public static final String APP_VERSION_API_BASE_PATH = "plugins/plugin-uni-halo/app-versions";
 
     /**
+     * 恋爱配置（console）接口基础路径
+     */
+    public static final String LOVE_CONFIG_API_BASE_PATH = "plugins/plugin-uni-halo/love-config";
+
+    /**
+     * 恋爱相册（console）接口基础路径
+     */
+    public static final String LOVE_ALBUM_API_BASE_PATH = "plugins/plugin-uni-halo/love-albums";
+
+    /**
+     * 恋爱清单（console）接口基础路径
+     */
+    public static final String LOVE_DAILY_API_BASE_PATH = "plugins/plugin-uni-halo/love-daily-items";
+
+    /**
+     * 恋爱故事（console）接口基础路径
+     */
+    public static final String LOVE_STORY_API_BASE_PATH = "plugins/plugin-uni-halo/love-stories";
+
+    /**
+     * 恋爱配置单例名称（metadata.name 固定值）
+     */
+    public static final String LOVE_CONFIG_SINGLETON_NAME = "love-config";
+
+    /**
      * 基础的域名地址
      */
     public static final String BASIC_DOMAIN_NAME = "unihalo.ialley.cn";

@@ -14,11 +14,11 @@ import {
   VSpace,
 } from "@halo-dev/components";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
-import { ref, watch } from "vue";
-import AppInfoEditingModal from "../components/AppInfoEditingModal.vue";
-import AppInfoListItem from "../components/AppInfoListItem.vue";
-import { appsApi } from "../api";
-import type { AppInfo } from "../types";
+import {computed, ref, watch} from "vue";
+import AppInfoEditingModal from "../../components/app-manage/list/AppInfoEditingModal.vue";
+import AppInfoListItem from "../../components/app-manage/list/AppInfoListItem.vue";
+import { appsApi } from "@/api";
+import type { AppInfo } from "@/types";
 
 const queryClient = useQueryClient();
 

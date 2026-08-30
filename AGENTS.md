@@ -21,7 +21,7 @@ plugin-uni-halo：Halo 2.26 插件（Java 21 + Gradle 9.4 wrapper），前端为
 - `.editorconfig`：Java/Gradle 缩进 4 空格、前端 2 空格，LF 行尾；Java 与前端 max_line_length 100。UTF-8。
 - `.docs/` 是规划/历史文档：迁移、app 升级设计、API 域名变更方案均已落地实施，文档保留作为决策与执行记录；写新 API 前先确认当前域名常量（`unihalo.ialley.cn`）与 role 放行。
 - `workplace/` 为空置目录，勿放代码。
-- UI 入口 `ui/src/index.ts` 用 `@halo-dev/ui-shared` 的 `definePlugin` 注册路由/扩展点，`@` 别名指向 `./src`。
+- UI 入口 `ui/src/index.ts` 用 `@halo-dev/ui-shared` 的 `definePlugin` 注册路由/扩展点，`@` 别名指向 `./src`。多页面业务按子目录组织（如 `views/app-manage/`、`views/love-manage/`），菜单用「父路由 + children 原生二级菜单」模式（由 Halo 菜单系统渲染，父路由组件仅含 `<RouterView />`）。**页面/组件内部 import 优先使用 `@` 别名**（`@/api`、`@/types`、`@/components/...`），不用相对路径。
 
 ## 维护规则
 

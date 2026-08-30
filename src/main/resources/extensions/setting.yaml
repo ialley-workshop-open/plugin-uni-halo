@@ -796,7 +796,7 @@ spec:
         - $formkit: group
           if: "$get(loveEnabled).value === true"
           name: ourStory
-          label: 我们的故事
+          label: 恋爱故事
           value:
             enabled: true
             iconUrl: ""

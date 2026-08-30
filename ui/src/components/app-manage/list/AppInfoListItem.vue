@@ -12,7 +12,7 @@ import { utils } from "@halo-dev/ui-shared";
 import { useWindowSize } from "@vueuse/core";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import type { AppInfo } from "../types";
+import type { AppInfo } from "@/types";
 
 const props = withDefaults(
   defineProps<{

@@ -83,7 +83,7 @@ const features = [
   {
     icon: RiHeartLine,
     title: '恋爱配置',
-    description: '恋人信息、恋爱清单、恋爱相册、我们的故事',
+    description: '恋人信息、恋爱清单、恋爱相册、恋爱故事',
     color: '#EC4899',
   },
 ]

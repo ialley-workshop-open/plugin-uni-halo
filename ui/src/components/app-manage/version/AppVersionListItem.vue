@@ -9,8 +9,8 @@ import {
 } from "@halo-dev/components";
 import { utils } from "@halo-dev/ui-shared";
 import { computed } from "vue";
-import type { AppVersion } from "../types";
-import { TYPE_LABELS } from "../types";
+import type { AppVersion } from "@/types";
+import { TYPE_LABELS } from "@/types";
 
 const props = withDefaults(
   defineProps<{

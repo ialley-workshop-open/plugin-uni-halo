@@ -3,9 +3,9 @@ import { Toast, VButton, VModal, VSpace } from "@halo-dev/components";
 import { submitForm } from "@formkit/core";
 import { cloneDeep } from "lodash-es";
 import { computed, ref, watch } from "vue";
-import SubmitButton from "./button/SubmitButton.vue";
-import { appsApi } from "../api";
-import type { AppInfo } from "../types";
+import SubmitButton from "../../button/SubmitButton.vue";
+import { appsApi } from "@/api";
+import type { AppInfo } from "@/types";
 
 const props = withDefaults(
   defineProps<{
@@ -158,6 +158,7 @@ const handleSave = async () => {
           name="appAndroidName"
           label="Android 名称"
           type="text"
+          placeholder="例如：Android 应用名称"
         />
         <FormKit
           v-model="formState.spec.appAndroid!.url"
