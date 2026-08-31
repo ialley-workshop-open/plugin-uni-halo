@@ -31,6 +31,9 @@ const editingModal = ref(false);
 const photoModal = ref(false);
 const selectedAlbum = ref<LoveAlbum>();
 
+const checkAll = ref(false);
+const selectedAlbumNames = ref<string[]>([]);
+
 const { data: albums, isLoading, isFetching, refetch } = useQuery({
   queryKey: ["uni-halo:love-albums", page, size, keyword],
   queryFn: async () => {
@@ -50,6 +53,27 @@ watch(
     page.value = 1;
   }
 );
+
+watch(
+  () => selectedAlbumNames.value,
+  (newValue) => {
+    checkAll.value = newValue.length === (albums.value?.items.length || 0);
+  }
+);
+
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+  if (checked) {
+    selectedAlbumNames.value =
+      albums.value?.items.map((album) => album.metadata.name) || [];
+  } else {
+    selectedAlbumNames.value = [];
+  }
+};
+
+const checkSelection = (album: LoveAlbum) => {
+  return selectedAlbumNames.value.includes(album.metadata.name);
+};
 
 const sortValue = ref("created_desc");
 
@@ -85,6 +109,29 @@ const handleDelete = (album: LoveAlbum) => {
     onConfirm: async () => {
       try {
         await loveAlbumsApi.delete(album.metadata.name);
+        Toast.success("删除成功");
+      } catch (error) {
+        Toast.error((error as Error).message);
+      } finally {
+        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-albums"] });
+      }
+    },
+  });
+};
+
+const handleDeleteInBatch = () => {
+  Dialog.warning({
+    title: "确定要删除选中的相册吗？",
+    description: "相册内的照片将一并删除（附件文件保留），该操作不可恢复。",
+    confirmType: "danger",
+    confirmText: "确定",
+    cancelText: "取消",
+    onConfirm: async () => {
+      try {
+        await Promise.all(
+          selectedAlbumNames.value.map((name) => loveAlbumsApi.delete(name))
+        );
+        selectedAlbumNames.value = [];
         Toast.success("删除成功");
       } catch (error) {
         Toast.error((error as Error).message);
@@ -138,8 +185,20 @@ const onModalClose = () => {
       <template #header>
         <div class=":uno: block w-full bg-gray-50 px-4 py-3">
           <div class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center">
+            <div class=":uno: hidden items-center sm:flex">
+              <input
+                v-model="checkAll"
+                type="checkbox"
+                @change="handleCheckAllChange"
+              />
+            </div>
             <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
-              <SearchInput v-model="keyword" placeholder="相册名称/描述（回车搜索）" />
+              <template v-if="!selectedAlbumNames.length">
+                <SearchInput v-model="keyword" placeholder="相册名称/描述（回车搜索）" />
+              </template>
+              <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
+                删除
+              </VButton>
             </div>
             <VSpace spacing="lg" class=":uno: flex-wrap">
               <FilterDropdown
@@ -172,8 +231,16 @@ const onModalClose = () => {
           :key="album.metadata.name"
           :body-class="[':uno: !p-0']"
           class=":uno: overflow-hidden"
+          :class="checkSelection(album) ? ':uno: border-pink-400 ring-2 ring-pink-200' : ''"
         >
           <div class=":uno: relative aspect-[16/9] w-full overflow-hidden bg-gray-100">
+            <input
+              v-model="selectedAlbumNames"
+              :value="album.metadata.name"
+              name="love-album-checkbox"
+              type="checkbox"
+              class=":uno: absolute left-2 top-2 z-10 h-4 w-4 cursor-pointer rounded border-gray-300"
+            />
             <img
               v-if="album.spec.cover"
               :src="album.spec.cover"

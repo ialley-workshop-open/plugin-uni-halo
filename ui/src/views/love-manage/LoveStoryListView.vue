@@ -42,6 +42,9 @@ const sortValue = ref("date_desc");
 const editingModal = ref(false);
 const selectedStory = ref<LoveStory>();
 
+const checkAll = ref(false);
+const selectedStoryNames = ref<string[]>([]);
+
 const { data: stories, isLoading, isFetching, refetch } = useQuery({
   queryKey: ["uni-halo:love-stories", page, size, keyword],
   queryFn: async () => {
@@ -61,6 +64,27 @@ watch(
     page.value = 1;
   }
 );
+
+watch(
+  () => selectedStoryNames.value,
+  (newValue) => {
+    checkAll.value = newValue.length === (stories.value?.items.length || 0);
+  }
+);
+
+const handleCheckAllChange = (e: Event) => {
+  const { checked } = e.target as HTMLInputElement;
+  if (checked) {
+    selectedStoryNames.value =
+      stories.value?.items.map((story) => story.metadata.name) || [];
+  } else {
+    selectedStoryNames.value = [];
+  }
+};
+
+const checkSelection = (story: LoveStory) => {
+  return selectedStoryNames.value.includes(story.metadata.name);
+};
 
 // 按日期排序（列表与时间轴共用；无日期排最后）
 const sortedStories = computed(() => {
@@ -98,6 +122,29 @@ const handleDelete = (story: LoveStory) => {
     onConfirm: async () => {
       try {
         await loveStoryApi.delete(story.metadata.name);
+        Toast.success("删除成功");
+      } catch (error) {
+        Toast.error((error as Error).message);
+      } finally {
+        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-stories"] });
+      }
+    },
+  });
+};
+
+const handleDeleteInBatch = () => {
+  Dialog.warning({
+    title: "确定要删除选中的故事吗？",
+    description: "该操作不可恢复。",
+    confirmType: "danger",
+    confirmText: "确定",
+    cancelText: "取消",
+    onConfirm: async () => {
+      try {
+        await Promise.all(
+          selectedStoryNames.value.map((name) => loveStoryApi.delete(name))
+        );
+        selectedStoryNames.value = [];
         Toast.success("删除成功");
       } catch (error) {
         Toast.error((error as Error).message);
@@ -154,8 +201,20 @@ const onModalClose = () => {
       <template #header>
         <div class=":uno: block w-full bg-gray-50 px-4 py-3">
           <div class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center">
+            <div class=":uno: hidden items-center sm:flex">
+              <input
+                v-model="checkAll"
+                type="checkbox"
+                @change="handleCheckAllChange"
+              />
+            </div>
             <div class=":uno: flex w-full flex-1 items-center sm:w-auto">
-              <SearchInput v-model="keyword" placeholder="故事标题/内容（回车搜索）" />
+              <template v-if="!selectedStoryNames.length">
+                <SearchInput v-model="keyword" placeholder="故事标题/内容（回车搜索）" />
+              </template>
+              <VButton v-else size="sm" type="danger" @click="handleDeleteInBatch">
+                删除
+              </VButton>
             </div>
             <VSpace spacing="lg" class=":uno: flex-wrap">
               <FilterDropdown
@@ -187,7 +246,19 @@ const onModalClose = () => {
         </Transition>
         <Transition v-else appear name="fade">
           <VEntityContainer>
-            <VEntity v-for="story in sortedStories" :key="story.metadata.name">
+            <VEntity
+              v-for="story in sortedStories"
+              :key="story.metadata.name"
+              :is-selected="checkSelection(story)"
+            >
+              <template #checkbox>
+                <input
+                  v-model="selectedStoryNames"
+                  :value="story.metadata.name"
+                  name="love-story-checkbox"
+                  type="checkbox"
+                />
+              </template>
               <template #start>
                 <VEntityField :title="story.spec.title || story.metadata.name" width="15rem">
                   <template #description>

@@ -2,6 +2,7 @@
 import {Toast, VButton, VModal, VSpace} from "@halo-dev/components";
 import RiArrowUpLine from "~icons/ri/arrow-up-line";
 import RiArrowDownLine from "~icons/ri/arrow-down-line";
+import RiRefreshLine from "~icons/ri/refresh-line";
 import {useQueryClient} from "@tanstack/vue-query";
 import {computed, reactive, ref, watch} from "vue";
 import {loveAlbumsApi} from "@/api";
@@ -114,14 +115,19 @@ const handleSave = async () => {
         Toast.warning("请先选择图片");
         return;
       }
+      let updated: LoveAlbum | undefined;
       for (const url of urls) {
-        await loveAlbumsApi.addPhoto(props.album.metadata.name, {
+        updated = await loveAlbumsApi.addPhoto(props.album.metadata.name, {
           url,
           title: form.title,
           location: form.location,
           takenDate: form.takenDate,
           description: form.description,
         });
+      }
+      // 用后端返回的最新相册同步本地照片列表（addPhoto 为逐张提交，取最后一次结果）
+      if (updated?.spec.photos) {
+        photos.value = updated.spec.photos.map((photo) => ({...photo}));
       }
       pendingUrls.value = [];
       handleClearForm();
@@ -145,8 +151,14 @@ const handleDeletePhoto = async (photo: LoveAlbumPhoto) => {
   }
   try {
     busy.value = true;
-    await loveAlbumsApi.deletePhoto(props.album.metadata.name, photo.name);
-    if (selectedIndex.value >= 0 && photos.value[selectedIndex.value] === photo) {
+    const editingDeleted =
+      selectedIndex.value >= 0 && photos.value[selectedIndex.value] === photo;
+    const updated = await loveAlbumsApi.deletePhoto(props.album.metadata.name, photo.name);
+    // 用后端返回的最新相册同步本地照片列表
+    if (updated?.spec.photos) {
+      photos.value = updated.spec.photos.map((p) => ({...p}));
+    }
+    if (editingDeleted) {
       selectedIndex.value = -1;
       pendingUrls.value = [];
     }
@@ -183,6 +195,26 @@ const handleSaveOrder = async () => {
     Toast.error((error as Error).message);
   } finally {
     busy.value = false;
+  }
+};
+
+const refreshing = ref(false);
+
+/** 从后端重新拉取相册照片列表（用于手动刷新） */
+const handleRefresh = async () => {
+  try {
+    refreshing.value = true;
+    const latest = await loveAlbumsApi.get(props.album.metadata.name);
+    if (latest?.spec.photos) {
+      photos.value = latest.spec.photos.map((photo) => ({...photo}));
+    }
+    selectedIndex.value = -1;
+    pendingUrls.value = [];
+    Toast.success("已刷新");
+  } catch (error) {
+    Toast.error((error as Error).message);
+  } finally {
+    refreshing.value = false;
   }
 };
 </script>
@@ -252,15 +284,30 @@ const handleSaveOrder = async () => {
           <div class=":uno: text-sm font-semibold text-gray-700">
             照片列表（{{ photos.length }}）
           </div>
-          <VButton
-                  v-if="!isEditMode && photos.length"
-                  :loading="busy"
-                  type="secondary"
-                  :disabled="busy"
-                  @click="handleSaveOrder"
-          >
-            保存排序
-          </VButton>
+          <VSpace>
+            <VButton
+              size="sm"
+              type="secondary"
+              :loading="refreshing"
+              :disabled="busy"
+              @click="handleRefresh"
+            >
+              <template #icon>
+                <RiRefreshLine />
+              </template>
+              刷新
+            </VButton>
+            <VButton
+                    v-if="!isEditMode && photos.length"
+                    size="sm"
+                    :loading="busy"
+                    type="secondary"
+                    :disabled="busy"
+                    @click="handleSaveOrder"
+            >
+              保存排序
+            </VButton>
+          </VSpace>
         </div>
         <div class=":uno: min-h-0 flex-1 overflow-y-auto pr-1">
           <div v-if="photos.length" class=":uno: grid grid-cols-2 gap-3 sm:grid-cols-3">

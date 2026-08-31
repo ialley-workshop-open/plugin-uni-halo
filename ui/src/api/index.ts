@@ -53,6 +53,7 @@ export interface LoveAlbumWriteRequest {
 export const loveAlbumsApi = {
   list: (query: { page?: number; size?: number; keyword?: string } = {}) =>
     http.get<PageResult<LoveAlbum>>(`${PLUGIN_BASE}/love-albums`, query),
+  get: (name: string) => http.get<LoveAlbum>(`${PLUGIN_BASE}/love-albums/${name}`),
   create: (data: LoveAlbumWriteRequest) =>
     http.post<LoveAlbum>(`${PLUGIN_BASE}/love-albums`, data),
   update: (name: string, data: LoveAlbumWriteRequest) =>

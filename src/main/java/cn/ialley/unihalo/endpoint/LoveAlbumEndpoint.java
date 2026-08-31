@@ -41,6 +41,7 @@ public class LoveAlbumEndpoint implements CustomEndpoint {
     public RouterFunction<ServerResponse> endpoint() {
         return RouterFunctions.route()
                 .GET(Constants.LOVE_ALBUM_API_BASE_PATH, this::listAlbums)
+                .GET(Constants.LOVE_ALBUM_API_BASE_PATH + "/{name}", this::getAlbum)
                 .POST(Constants.LOVE_ALBUM_API_BASE_PATH, this::createAlbum)
                 .PUT(Constants.LOVE_ALBUM_API_BASE_PATH + "/{name}", this::updateAlbum)
                 .DELETE(Constants.LOVE_ALBUM_API_BASE_PATH + "/{name}", this::deleteAlbum)
@@ -49,6 +50,13 @@ public class LoveAlbumEndpoint implements CustomEndpoint {
                 .DELETE(Constants.LOVE_ALBUM_API_BASE_PATH + "/{name}/photos/{photoName}",
                         this::deletePhoto)
                 .build();
+    }
+
+    private Mono<ServerResponse> getAlbum(ServerRequest request) {
+        return loveAlbumService.getByName(request.pathVariable("name"))
+                .flatMap(album -> ServerResponse.ok().bodyValue(album))
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> ServerResponse.badRequest().bodyValue(Map.of("message", e.getMessage())));
     }
 
     private Mono<ServerResponse> listAlbums(ServerRequest request) {

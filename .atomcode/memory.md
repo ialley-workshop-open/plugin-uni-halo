@@ -1,0 +1,1 @@
+- plugin-uni-halo 前端约定：页面/组件内部 import 优先用 @ 别名（@/api、@/types、@/components/...），不用相对路径；@ 指向 ui/src。
