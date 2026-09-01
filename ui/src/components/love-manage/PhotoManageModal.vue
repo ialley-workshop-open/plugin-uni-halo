@@ -226,23 +226,26 @@ const handleRefresh = async () => {
           @close="emit('close')"
   >
     <div class=":uno: flex h-full w-full flex-col gap-4 md:flex-row">
-      <!-- 左：新增/编辑表单区（内容超出时自身滚动） -->
-      <div class=":uno: w-full shrink-0 overflow-y-auto md:w-96">
-        <div class=":uno: rounded-md border border-gray-200 p-4">
+      <!-- 左：新增/编辑表单区（内容超出时自身滚动），右侧以分割线区分 -->
+      <div
+        class=":uno: w-full shrink-0 overflow-y-auto border-b border-gray-100 pb-4 md:w-96 md:border-b-0 md:border-r md:pb-0 md:pr-4"
+      >
           <div class=":uno: mb-3 text-sm font-semibold text-gray-700">
             {{ isEditMode ? "编辑照片信息" : "添加新照片" }}
             <span v-if="!isEditMode" class=":uno: ml-1 text-xs font-normal text-gray-400">
               （选择图片并填写信息后保存）
             </span>
           </div>
-          <FormKit
-                  v-model="pendingUrl"
-                  type="attachment"
-                  :accepts="['image/*']"
-                  label="选择图片"
-                  help="从附件库选择一张图片，或直接输入图片地址"
-          />
           <div class=":uno: mt-4 space-y-3 w-full">
+            <div class=":uno: flex items-center gap-3 w-full">
+              <label class=":uno: w-14 shrink-0 text-sm text-gray-700">选择图片</label>
+              <FormKit
+                v-model="pendingUrl"
+                type="attachment"
+                :accepts="['image/*']"
+                class=":uno: flex-1"
+              />
+            </div>
             <div class=":uno: flex items-center gap-3 w-full">
               <label class=":uno: w-14 shrink-0 text-sm text-gray-700">标题</label>
               <FormKit v-model="form.title" type="text" placeholder="照片标题"
@@ -258,7 +261,7 @@ const handleRefresh = async () => {
               <FormKit v-model="form.takenDate" type="date" placeholder="选择拍摄日期"
                        class=":uno: flex-1"/>
             </div>
-            <div class=":uno: flex items-start gap-3 w-full">
+            <div class=":uno: flex items-center gap-3 w-full">
               <label class=":uno: w-14 shrink-0 text-sm text-gray-700">描述</label>
               <FormKit v-model="form.description" type="textarea" rows="3" placeholder="照片描述"
                        class=":uno: flex-1"/>
@@ -275,7 +278,6 @@ const handleRefresh = async () => {
               清空表单
             </VButton>
           </div>
-        </div>
       </div>
 
       <!-- 右：照片列表（内部滚动），顶部标题 + 保存排序 -->
@@ -317,7 +319,7 @@ const handleRefresh = async () => {
                     class=":uno: overflow-hidden rounded-lg border transition-shadow"
                     :class="
                 index === selectedIndex
-                  ? ':uno: border-pink-400 ring-2 ring-pink-200'
+                  ? ':uno: border-[rgb(var(--colors-primary))] ring-2 ring-[rgb(var(--colors-primary)_/_0.2)]'
                   : ':uno: border-gray-200 hover:border-gray-300'
               "
             >

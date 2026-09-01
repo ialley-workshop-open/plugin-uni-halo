@@ -116,7 +116,7 @@ public class UniHaloServiceImpl implements UniHaloService {
 
                 } else {
                     return getAccessToken().flatMap(accessTokenJson -> {
-                        String accessToken = accessTokenJson.get("access_token").asText();
+                        String accessToken = accessTokenJson.get("access_token").asString();
                         int expiresIn = accessTokenJson.get("expires_in").asInt();
                         tokenManager.setToken(accessToken, expiresIn);
                         return getQRCodeImg(serverRequest);
@@ -141,8 +141,8 @@ public class UniHaloServiceImpl implements UniHaloService {
     private Mono<JsonNode> getAccessToken() {
         return this.getAppConfigsByGroupName("appConfig").flatMap(config -> {
             JsonNode appInfo = config.get("appInfo");
-            String appId = appInfo.get("appId").asText();
-            String appSecret = appInfo.get("appSecret").asText();
+            String appId = appInfo.get("appId").asString();
+            String appSecret = appInfo.get("appSecret").asString();
             String url = TOKEN_URL + "?grant_type=client_credential&appid=" + appId + "&secret=" + appSecret;
             return WEB_CLIENT.get().uri(url).retrieve().bodyToMono(JsonNode.class);
         });
@@ -153,8 +153,8 @@ public class UniHaloServiceImpl implements UniHaloService {
 
         return this.getAppConfigsByGroupName("appConfig").flatMap(config -> {
             JsonNode appInfo = config.get("appInfo");
-            String policyName = appInfo.get("policyName").asText();
-            String fileGroupName = appInfo.get("fileGroupName").asText();
+            String policyName = appInfo.get("policyName").asString();
+            String fileGroupName = appInfo.get("fileGroupName").asString();
 
             return attachmentService.upload("admin", policyName, fileGroupName, filePart, null);
         });

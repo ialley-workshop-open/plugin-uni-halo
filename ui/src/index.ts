@@ -6,7 +6,8 @@ import RiGalleryLine from '~icons/ri/gallery-line'
 import RiCheckboxMultipleLine from '~icons/ri/checkbox-multiple-line'
 import RiBook2Line from '~icons/ri/book-2-line'
 import RiMegaphoneLine from '~icons/ri/megaphone-line'
-import RiPriceTag3Line from '~icons/ri/price-tag-3-line'
+import RiLink from '~icons/ri/link'
+import RiFileList3Line from '~icons/ri/file-list-3-line'
 import WelcomeView from './views/WelcomeView.vue'
 
 function baseRoutePath(path: string) {
@@ -182,12 +183,11 @@ export default definePlugin({
       parentName: 'Root',
       route: {
         path: baseRoutePath('/notice'),
-        name: 'NoticeManage',
-        component: () => import('@/views/notice-manage/NoticeManageLayout.vue'),
-        redirect: baseRoutePath('/notice/list'),
+        name: 'NoticeList',
+        component: () => import('@/views/notice-manage/NoticeListView.vue'),
         meta: {
           title: '公告管理',
-          searchable: false,
+          searchable: true,
           hideFooter: false,
           permissions: ["plugin:uni-halo:notice:view"],
           menu: {
@@ -197,35 +197,56 @@ export default definePlugin({
             priority: 3,
           },
         },
+      },
+    },
+    {
+      parentName: 'Root',
+      route: {
+        path: baseRoutePath('/links'),
+        name: 'LinkManage',
+        component: () => import('@/views/link-manage/LinkManageLayout.vue'),
+        redirect: baseRoutePath('/links/list'),
+        meta: {
+          title: '链接管理',
+          searchable: false,
+          hideFooter: false,
+          permissions: ["plugin:uni-halo:link:view"],
+          menu: {
+            name: '链接管理',
+            group: 'UniHalo',
+            icon: markRaw(RiLink),
+            priority: 4,
+          },
+        },
         children: [
           {
             path: 'list',
-            name: 'NoticeList',
-            component: () => import('@/views/notice-manage/NoticeListView.vue'),
+            name: 'LinkList',
+            component: () => import('@/views/link-manage/LinkListView.vue'),
             meta: {
-              title: '公告列表',
+              title: '链接列表',
               searchable: true,
               hideFooter: false,
-              permissions: ["plugin:uni-halo:notice:view"],
+              permissions: ["plugin:uni-halo:link:view"],
               menu: {
-                name: '公告列表',
-                icon: markRaw(RiMegaphoneLine),
+                name: '链接列表',
+                icon: markRaw(RiLink),
                 priority: 0,
               },
             },
           },
           {
-            path: 'types',
-            name: 'NoticeTypeList',
-            component: () => import('@/views/notice-manage/NoticeTypeListView.vue'),
+            path: 'submissions',
+            name: 'LinkSubmissions',
+            component: () => import('@/views/link-manage/SubmissionListView.vue'),
             meta: {
-              title: '公告类型',
+              title: '申请审核',
               searchable: true,
               hideFooter: false,
-              permissions: ["plugin:uni-halo:notice:view"],
+              permissions: ["plugin:uni-halo:link:view"],
               menu: {
-                name: '公告类型',
-                icon: markRaw(RiPriceTag3Line),
+                name: '申请审核',
+                icon: markRaw(RiFileList3Line),
                 priority: 1,
               },
             },

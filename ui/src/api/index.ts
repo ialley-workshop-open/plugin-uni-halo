@@ -11,6 +11,11 @@ import type {
   LoveConfig,
   LoveDailyItem,
   LoveStory,
+  MiniProgramLink,
+  MiniProgramLinkGroup,
+  MiniProgramLinkGroupVo,
+  GroupOption,
+  MiniProgramLinkSubmission,
   Notice,
   NoticeType,
 } from "@/types";
@@ -107,6 +112,7 @@ export const noticeApi = {
     status?: string;
     type?: string;
     keyword?: string;
+    sort?: string;
   } = {}) => http.get<PageResult<Notice>>(`${PLUGIN_BASE}/notices`, query),
   create: (data: Notice) => http.post<Notice>(`${PLUGIN_BASE}/notices`, data),
   update: (name: string, data: Notice) =>
@@ -123,4 +129,88 @@ export const noticeTypeApi = {
     http.put<NoticeType>(`${PLUGIN_BASE}/notice-types/${name}`, data),
   delete: (name: string) =>
     http.delete<{ success: boolean }>(`${PLUGIN_BASE}/notice-types/${name}`),
+  /** 拖拽排序保存：names 为按新顺序排列的类型 name 列表 */
+  sortOrder: (names: string[]) =>
+    http.put<{ success: boolean }>(`${PLUGIN_BASE}/notice-types/order`, { names }),
+};
+
+// ===== 友情链接（小程序链接） =====
+
+const MINI_PROGRAM_LINK_BASE = `${PLUGIN_BASE}/mini-program-links`;
+const SUBMISSION_BASE = `${PLUGIN_BASE}/mini-program-link-submissions`;
+
+export const miniProgramLinksApi = {
+  list: (query: {
+    page?: number;
+    size?: number;
+    group?: string;
+    visible?: boolean;
+    keyword?: string;
+  } = {}) => http.get<PageResult<MiniProgramLink>>(MINI_PROGRAM_LINK_BASE, query),
+  create: (data: MiniProgramLink) =>
+    http.post<MiniProgramLink>(MINI_PROGRAM_LINK_BASE, data),
+  update: (name: string, data: MiniProgramLink) =>
+    http.put<MiniProgramLink>(`${MINI_PROGRAM_LINK_BASE}/${name}`, data),
+  delete: (name: string) =>
+    http.delete<{ success: boolean }>(`${MINI_PROGRAM_LINK_BASE}/${name}`),
+  /** 公开分组选项（/types，仅可见链接引用的分组，供筛选/分组标题映射） */
+  listGroupsPublic: () =>
+    http.get<GroupOption[]>(`${PUBLIC_BASE}/mini-program-links/types`),
+  /** 公开分组视图（小程序端将来使用，grouped=true） */
+  listGroupedPublic: (query: { keyword?: string } = {}) =>
+    http.get<MiniProgramLinkGroupVo[]>(`${PUBLIC_BASE}/mini-program-links`, {
+      grouped: true,
+      ...query,
+    }),
+  /** 公开提交申请（匿名） */
+  submitPublic: (data: MiniProgramLinkSubmission) =>
+    http.post<MiniProgramLinkSubmission>(`${PUBLIC_BASE}/mini-program-links/submissions`, data),
+};
+
+/** 分组管理（控制台 CRUD，对标 plugin-links LinkGroup） */
+export const miniProgramLinkGroupsApi = {
+  list: (query: { page?: number; size?: number; keyword?: string } = {}) =>
+    http.get<PageResult<MiniProgramLinkGroup>>(
+      `${PLUGIN_BASE}/mini-program-link-groups`,
+      query
+    ),
+  create: (data: MiniProgramLinkGroup) =>
+    http.post<MiniProgramLinkGroup>(`${PLUGIN_BASE}/mini-program-link-groups`, data),
+  update: (name: string, data: MiniProgramLinkGroup) =>
+    http.put<MiniProgramLinkGroup>(
+      `${PLUGIN_BASE}/mini-program-link-groups/${name}`,
+      data
+    ),
+  delete: (name: string) =>
+    http.delete<{ success: boolean }>(
+      `${PLUGIN_BASE}/mini-program-link-groups/${name}`
+    ),
+};
+
+export const miniProgramLinkSubmissionsApi = {
+  list: (query: {
+    page?: number;
+    size?: number;
+    status?: string;
+    keyword?: string;
+    /** submittedAt（默认）/ reviewedAt / status */
+    sort?: string;
+  } = {}) => http.get<PageResult<MiniProgramLinkSubmission>>(SUBMISSION_BASE, query),
+  /** 控制台新增申请（测试用，提交后进入待审核） */
+  create: (data: MiniProgramLinkSubmission) =>
+    http.post<MiniProgramLinkSubmission>(SUBMISSION_BASE, data),
+  /** 审核通过；groupName 非空时调整分组（空字符串=未分组） */
+  approve: (name: string, reason?: string, groupName?: string) =>
+    http.post<MiniProgramLinkSubmission>(`${SUBMISSION_BASE}/${name}/approve`, {
+      reason,
+      groupName,
+    }),
+  /** 审核拒绝；groupName 非空时调整分组（空字符串=未分组） */
+  reject: (name: string, reason: string, groupName?: string) =>
+    http.post<MiniProgramLinkSubmission>(`${SUBMISSION_BASE}/${name}/reject`, {
+      reason,
+      groupName,
+    }),
+  delete: (name: string) =>
+    http.delete<{ success: boolean }>(`${SUBMISSION_BASE}/${name}`),
 };

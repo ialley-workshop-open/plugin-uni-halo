@@ -263,3 +263,132 @@ export const NOTICE_STATUS_OPTIONS: { label: string; value: string }[] = [
   { label: "已发布", value: "published" },
   { label: "已下线", value: "offline" },
 ];
+
+/** 公告列表排序选项（右侧列表 header 使用） */
+export const NOTICE_SORT_OPTIONS: { label: string; value: string }[] = [
+  { label: "日期 · 最新在前", value: "date_desc" },
+  { label: "日期 · 最早在前", value: "date_asc" },
+  { label: "按类型分组", value: "type" },
+];
+
+// ===== 友情链接（小程序链接） =====
+
+export interface MiniProgramLinkSpec {
+  /** 小程序名称（必填） */
+  displayName?: string;
+  /** 太阳码（小程序码图片 URL，必填） */
+  miniProgramCode?: string;
+  /** 小程序地址（非必填） */
+  link?: string;
+  /** 作者昵称 */
+  authorName?: string;
+  /** 作者头像（图片 URL） */
+  avatar?: string;
+  /** 作者网站（归属作者信息，非必填） */
+  website?: string;
+  /** 分组（引用 MiniProgramLinkGroup 的 metadata.name；为空=未分组） */
+  groupName?: string;
+  /** 描述 */
+  description?: string;
+  /** 预览图（多图） */
+  screenshots?: string[];
+  /** 可见性：true 公开显示（默认）/ false 隐藏 */
+  visible?: boolean;
+  /** 来源（服务端按操作自动设置）：manual 手动添加 / submitted 自助申请 */
+  source?: "manual" | "submitted";
+  /** 排序，越大越靠前 */
+  priority?: number;
+}
+
+/** 链接来源标签映射 */
+export const LINK_SOURCE_LABELS: Record<string, string> = {
+  manual: "手动",
+  submitted: "申请",
+};
+
+/** 链接来源筛选选项（「全部」无 value=清除筛选） */
+export const LINK_SOURCE_OPTIONS: { label: string; value?: string }[] = [
+  { label: "全部" },
+  { label: "手动", value: "manual" },
+  { label: "申请", value: "submitted" },
+];
+
+export interface MiniProgramLink {
+  metadata: Metadata;
+  spec: MiniProgramLinkSpec;
+}
+
+export interface MiniProgramLinkGroupSpec {
+  /** 分组名称（必填），如「工具」「生活」 */
+  displayName?: string;
+  /** 排序，越大越靠前 */
+  priority?: number;
+}
+
+/** 分组模型（对标 plugin-links LinkGroup） */
+export interface MiniProgramLinkGroup {
+  metadata: Metadata;
+  spec: MiniProgramLinkGroupSpec;
+}
+
+/** 分组选项（公开 /types 接口返回，供筛选/分组标题映射） */
+export interface GroupOption {
+  name: string;
+  displayName: string;
+}
+
+/** 分组视图（公开接口 grouped=true 返回） */
+export interface MiniProgramLinkGroupVo {
+  /** 分组 name（空字符串=未分组） */
+  groupName: string;
+  /** 分组显示名（分组不存在或未分组时为空） */
+  displayName: string;
+  links: MiniProgramLink[];
+}
+
+export type SubmissionStatus = "PENDING" | "APPROVED" | "REJECTED";
+
+export interface MiniProgramLinkSubmissionSpec {
+  displayName?: string;
+  miniProgramCode?: string;
+  link?: string;
+  authorName?: string;
+  avatar?: string;
+  website?: string;
+  /** 分组（引用 MiniProgramLinkGroup 的 metadata.name；为空=未分组） */
+  groupName?: string;
+  description?: string;
+  /** 申请说明（小程序端提交时填写） */
+  applyRemark?: string;
+  screenshots?: string[];
+  /** 申请人邮箱（非必填；填写则审核结果邮件通知） */
+  email?: string;
+  status?: SubmissionStatus;
+  /** 审核结果说明（拒绝时必填） */
+  reason?: string;
+  /** 提交时间（服务端自动记录） */
+  submittedAt?: string;
+  /** 审核时间（服务端自动记录） */
+  reviewedAt?: string;
+  /** 审核通过后生成的链接 name */
+  linkName?: string;
+}
+
+export interface MiniProgramLinkSubmission {
+  metadata: Metadata;
+  spec: MiniProgramLinkSubmissionSpec;
+}
+
+export const SUBMISSION_STATUS_LABELS: Record<string, string> = {
+  PENDING: "待审核",
+  APPROVED: "已通过",
+  REJECTED: "已拒绝",
+};
+
+/** 申请状态选项（统一供下拉/筛选使用；「全部」无 value=清除筛选） */
+export const SUBMISSION_STATUS_OPTIONS: { label: string; value?: string }[] = [
+  { label: "全部" },
+  { label: "待审核", value: "PENDING" },
+  { label: "已通过", value: "APPROVED" },
+  { label: "已拒绝", value: "REJECTED" },
+];

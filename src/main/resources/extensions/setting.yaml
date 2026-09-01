@@ -920,36 +920,6 @@ spec:
                   label: 完成时间
                   value: ""
                   validation: required
-    - group: shareConfig
-      label: 分享配置
-      formSchema:
-        - $formkit: text
-          name: title
-          label: 标题
-          value: "uni-halo 2.0"
-          validation: required
-        - $formkit: text
-          name: desc
-          label: 描述
-          value: "一款免费开源可多端编译的微信小程序博客应用。"
-          validation: required
-        - $formkit: attachment
-          name: imageUrl
-          label: 封面
-          value: "https://uni-halo.925i.cn/logo.png"
-          validation: required
-        - $formkit: text
-          name: path
-          label: 页面路径
-          value: "/pages/index/index"
-          validation: required
-          help: 页面路径，如：/pages/index/index（一般默认就行）
-        - $formkit: text
-          name: copyLink
-          label: 复制链接
-          value: "/pages/index/index"
-          validation: required
-          help: 复制链接，如：/pages/index/index（一般默认就行）
     - group: auditConfig
       label: 审核配置
       formSchema:
@@ -1207,3 +1177,36 @@ spec:
               value: ""
               help: 广告ID，请在 微信小程序广告管理中获取。
               validation: required
+    - group: linkConfig
+      label: 友情链接配置
+      formSchema:
+        - $formkit: radio
+          name: submissionEnabled
+          id: submissionEnabled
+          label: 是否开放公开提交申请
+          value: true
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
+          help: 开启后 app 端可提交小程序链接申请，后台「链接管理-申请审核」进行审核。
+        - $formkit: radio
+          name: sendEmail
+          id: sendEmail
+          label: 审核结果邮件通知
+          value: false
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
+          help: 开启后，审核通过/拒绝时向申请人邮箱发送通知（复用 Halo 系统设置的邮件通知器 SMTP 配置，无需重复填写；申请未填邮箱则不发送）。
+        - $formkit: text
+          if: "$get(sendEmail).value === true"
+          name: siteName
+          label: 邮件署名
+          value: "uni-halo"
+          help: 审核邮件标题与正文中的站点名称。

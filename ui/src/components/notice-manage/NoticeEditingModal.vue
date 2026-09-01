@@ -146,7 +146,6 @@ const handleSave = async () => {
             name="cover"
             label="封面图"
             type="attachment"
-            help="从附件库选择或直接输入图片地址"
           />
           <FormKit
             v-model="formState.spec.link"
@@ -156,18 +155,17 @@ const handleSave = async () => {
             help="关联的跳转地址（可选）"
             placeholder="https://..."
           />
-          <div class=":uno: flex items-end gap-2">
-            <FormKit
-              v-model="formState.spec.typeName"
-              name="typeName"
-              label="公告类型"
-              type="select"
-              :options="typeOptions"
-              placeholder="请选择公告类型"
-              wrapper-class=":uno: min-w-0 flex-1"
-            />
+          <FormKit
+            v-model="formState.spec.typeName"
+            name="typeName"
+            label="公告类型"
+            type="select"
+            :options="typeOptions"
+            placeholder="请选择公告类型"
+          />
+          <!-- 新增公告类型：单独一行显示在类型选择下方 -->
+          <div class=":uno: mb-4">
             <VButton
-              class=":uno: mb-1 shrink-0"
               type="secondary"
               size="sm"
               title="新增公告类型"
@@ -176,7 +174,7 @@ const handleSave = async () => {
               <template #icon>
                 <IconAddCircle />
               </template>
-              新增
+              新增公告类型
             </VButton>
           </div>
           <FormKit

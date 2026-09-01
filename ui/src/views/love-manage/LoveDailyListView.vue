@@ -236,14 +236,6 @@ const timelineDotClass = (status?: string) => {
           </template>
           新建清单项
         </VButton>
-        <VButton
-          v-for="mode in LOVE_DAILY_VIEW_MODES"
-          :key="mode.value"
-          :type="viewMode === mode.value ? 'primary' : 'secondary'"
-          @click="viewMode = mode.value"
-        >
-          {{ mode.label }}
-        </VButton>
       </VSpace>
     </template>
   </VPageHeader>
@@ -289,6 +281,23 @@ const timelineDotClass = (status?: string) => {
                 @update:model-value="() => refetch()"
               />
             </VSpace>
+            <!-- 展示方式切换：分段器 -->
+            <div class=":uno: flex items-center rounded-lg bg-gray-100 p-1">
+              <button
+                v-for="mode in LOVE_DAILY_VIEW_MODES"
+                :key="mode.value"
+                type="button"
+                class=":uno: rounded-md px-3 py-1.5 text-sm transition"
+                :class="
+                  viewMode === mode.value
+                    ? ':uno: bg-white font-medium text-gray-900 shadow-sm'
+                    : ':uno: text-gray-500 hover:text-gray-700'
+                "
+                @click="viewMode = mode.value"
+              >
+                {{ mode.label }}
+              </button>
+            </div>
           </div>
         </div>
       </template>

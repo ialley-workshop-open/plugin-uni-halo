@@ -141,6 +141,10 @@ public class UniHaloPlugin extends BasePlugin {
                             String.class)
                     .indexFunc(submission -> submission.getSpec() == null ? null
                             : submission.getSpec().getSubmittedAt()));
+            indexSpecs.add(IndexSpecs.<MiniProgramLinkSubmission, String>single("spec.reviewedAt",
+                            String.class)
+                    .indexFunc(submission -> submission.getSpec() == null ? null
+                            : submission.getSpec().getReviewedAt()));
         });
 
         log.info("【UniHalo】插件启动成功！");

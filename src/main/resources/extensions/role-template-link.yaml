@@ -1,0 +1,49 @@
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-view-link
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "UniHalo 链接管理"
+    rbac.authorization.halo.run/display-name: "链接查看"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:link:view"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/mini-program-links"
+      - "plugins/plugin-uni-halo/mini-program-links/*"
+      - "plugins/plugin-uni-halo/mini-program-link-submissions"
+      - "plugins/plugin-uni-halo/mini-program-link-submissions/*"
+      - "plugins/plugin-uni-halo/mini-program-link-groups"
+      - "plugins/plugin-uni-halo/mini-program-link-groups/*"
+    verbs: [ "get", "list" ]
+
+---
+
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-manage-link
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/dependencies: |
+      [ "plugin-uni-halo-role-template-view-link" ]
+    rbac.authorization.halo.run/module: "UniHalo 链接管理"
+    rbac.authorization.halo.run/display-name: "链接管理"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:link:manage"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/mini-program-links"
+      - "plugins/plugin-uni-halo/mini-program-links/*"
+      - "plugins/plugin-uni-halo/mini-program-link-submissions"
+      - "plugins/plugin-uni-halo/mini-program-link-submissions/*"
+      - "plugins/plugin-uni-halo/mini-program-link-groups"
+      - "plugins/plugin-uni-halo/mini-program-link-groups/*"
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]
