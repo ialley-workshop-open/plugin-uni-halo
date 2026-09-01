@@ -12,10 +12,11 @@ import run.halo.app.extension.ListResult;
 public interface NoticeService {
 
     /**
-     * 分页列表；status/type 非空时分别按状态、类型过滤，keyword 模糊匹配标题/摘要，
-     * 排序 spec.priority 倒序 + 发布时间倒序 + 创建时间倒序。
+     * 分页列表；status/type 非空时分别按状态、类型过滤，keyword 模糊匹配标题/摘要。
+     * sort：date_desc 最新在前（默认）/ date_asc 最早在前 / type 按类型分组。
      */
-    Mono<ListResult<Notice>> list(String status, String type, String keyword, int page, int size);
+    Mono<ListResult<Notice>> list(String status, String type, String keyword,
+            int page, int size, String sort);
 
     /**
      * 按 name 查询；不存在时抛 {@link cn.ialley.unihalo.exception.NotFoundException}。

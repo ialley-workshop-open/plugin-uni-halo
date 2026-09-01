@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
 import run.halo.app.extension.ListResult;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -65,12 +66,12 @@ public class NoticePublicEndpoint implements CustomEndpoint {
     }
 
     /**
-     * 已发布公告分页列表（脱敏：不含 content）。
+     * 已发布公告分页列表（脱敏：不含 content，默认排序）。
      */
     private Mono<ServerResponse> listNotices(ServerRequest request) {
         int page = queryPage(request);
         int size = querySize(request);
-        return noticeService.list(STATUS_PUBLISHED, "", "", page, size)
+        return noticeService.list(STATUS_PUBLISHED, "", "", page, size, "")
                 .flatMap(result -> Flux.fromIterable(result.getItems())
                         .flatMap(this::toListVo)
                         .collectList()
@@ -112,7 +113,8 @@ public class NoticePublicEndpoint implements CustomEndpoint {
      * 详情 Map：完整 Notice 字段 + spec 内追加 typeDisplayName/typeColor。
      */
     private Mono<Map<String, Object>> toDetailMap(Notice notice) {
-        Map<String, Object> result = objectMapper.convertValue(notice, Map.class);
+        Map<String, Object> result = objectMapper.convertValue(notice,
+                new TypeReference<Map<String, Object>>() { });
         if (notice.getSpec() == null || isBlank(notice.getSpec().getTypeName())) {
             return Mono.just(result);
         }

@@ -75,6 +75,25 @@ const handleColorChange = (value: { hex: string }) => {
   formState.value.spec.color = value.hex;
 };
 
+/** 根据背景色亮度返回可读的文字颜色（深底白字 / 浅底深字） */
+const textColorOn = (value: string) => {
+  const hex = (value || "").replace(/^#/, "");
+  const full =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : hex.slice(0, 6);
+  if (!/^[0-9a-fA-F]{6}$/.test(full)) {
+    return "#333333";
+  }
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? "#333333" : "#ffffff";
+};
+
 const handleSubmit = () => {
   submitForm("notice-type-form");
 };
@@ -122,36 +141,40 @@ const handleSave = async () => {
         :validation-messages="{ required: '类型名称不能为空' }"
         placeholder="例如：活动、维护、更新"
       />
-      <div class=":uno: flex items-end gap-2">
-        <FormKit
-          v-model="formState.spec.color"
-          name="color"
-          label="标签颜色"
-          type="text"
-          help="支持手动输入 hex，或点击右侧按钮从色板选择"
-          placeholder="#10B981"
-          wrapper-class=":uno: min-w-0 flex-1"
-        />
+      <FormKit
+        v-model="formState.spec.color"
+        name="color"
+        label="标签颜色"
+        type="text"
+        help="支持手动输入 hex，或点击「选择颜色」展开色板"
+        placeholder="#10B981"
+      />
+      <!-- 颜色预览 + 操作按钮独立一行 -->
+      <div class=":uno: mb-4 flex items-center gap-2">
+        <span
+          class=":uno: inline-flex h-7 items-center rounded border border-gray-300 px-2 text-xs font-medium"
+          :style="{ backgroundColor: colorValue, color: textColorOn(colorValue) }"
+          title="当前颜色"
+        >
+          {{ formState.spec.color || "未设置" }}
+        </span>
         <VButton
-          class=":uno: mb-1 shrink-0"
           type="secondary"
           size="sm"
-          :style="{ backgroundColor: colorValue }"
-          title="从色板选择颜色"
           @click="colorPickerVisible = !colorPickerVisible"
         >
-          色板
+          选择颜色
         </VButton>
       </div>
-      <div v-if="colorPickerVisible" class=":uno: relative mb-4">
-        <div
-          class=":uno: absolute left-0 top-0 z-10 rounded-md border border-gray-200 bg-white p-3 shadow-lg"
-        >
-          <Sketch
-            :model-value="colorObj"
-            @update:model-value="handleColorChange"
-          />
-        </div>
+      <!-- 色板在下方展开/收起（正常文档流，不遮挡） -->
+      <div
+        v-if="colorPickerVisible"
+        class=":uno: mb-4 rounded-md border border-gray-200 bg-white p-3"
+      >
+        <Sketch
+          :model-value="colorObj"
+          @update:model-value="handleColorChange"
+        />
       </div>
       <FormKit
         v-model="formState.spec.priority"

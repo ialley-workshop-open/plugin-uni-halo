@@ -1,7 +1,9 @@
 package cn.ialley.unihalo.endpoint;
 
+import java.util.List;
 import java.util.Map;
 
+import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -38,6 +40,8 @@ public class NoticeTypeEndpoint implements CustomEndpoint {
         return RouterFunctions.route()
                 .GET(Constants.NOTICE_TYPE_API_BASE_PATH, this::listNoticeTypes)
                 .POST(Constants.NOTICE_TYPE_API_BASE_PATH, this::createNoticeType)
+                // /order 必须注册在 /{name} 之前，避免 "order" 被当作 name 匹配
+                .PUT(Constants.NOTICE_TYPE_API_BASE_PATH + "/order", this::sortNoticeTypes)
                 .PUT(Constants.NOTICE_TYPE_API_BASE_PATH + "/{name}", this::updateNoticeType)
                 .DELETE(Constants.NOTICE_TYPE_API_BASE_PATH + "/{name}", this::deleteNoticeType)
                 .build();
@@ -79,6 +83,25 @@ public class NoticeTypeEndpoint implements CustomEndpoint {
                 .then(ServerResponse.ok().bodyValue(Map.of("success", true)))
                 .onErrorResume(IllegalArgumentException.class,
                         e -> ServerResponse.badRequest().bodyValue(Map.of("message", e.getMessage())));
+    }
+
+    /**
+     * 拖拽排序保存：body 为按新顺序排列的 name 列表。
+     */
+    private Mono<ServerResponse> sortNoticeTypes(ServerRequest request) {
+        return request.bodyToMono(SortRequest.class)
+                .flatMap(body -> noticeTypeService.sort(body.getNames()))
+                .then(ServerResponse.ok().bodyValue(Map.of("success", true)))
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> ServerResponse.badRequest().bodyValue(Map.of("message", e.getMessage())));
+    }
+
+    /**
+     * 排序请求体
+     */
+    @Data
+    public static class SortRequest {
+        private List<String> names;
     }
 
     private static int queryPage(ServerRequest request) {

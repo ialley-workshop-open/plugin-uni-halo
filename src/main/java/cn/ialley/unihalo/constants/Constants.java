@@ -62,6 +62,24 @@ public class Constants {
     public static final String NOTICE_TYPE_API_BASE_PATH = "plugins/plugin-uni-halo/notice-types";
 
     /**
+     * 友情链接-小程序链接（console/公开）接口基础路径
+     */
+    public static final String MINI_PROGRAM_LINK_API_BASE_PATH =
+        "plugins/plugin-uni-halo/mini-program-links";
+
+    /**
+     * 友情链接-小程序链接申请单（console/公开）接口基础路径
+     */
+    public static final String MINI_PROGRAM_LINK_SUBMISSION_API_BASE_PATH =
+        "plugins/plugin-uni-halo/mini-program-link-submissions";
+
+    /**
+     * 友情链接-分组（console）接口基础路径
+     */
+    public static final String MINI_PROGRAM_LINK_GROUP_API_BASE_PATH =
+        "plugins/plugin-uni-halo/mini-program-link-groups";
+
+    /**
      * 恋爱配置单例名称（metadata.name 固定值）
      */
     public static final String LOVE_CONFIG_SINGLETON_NAME = "love-config";

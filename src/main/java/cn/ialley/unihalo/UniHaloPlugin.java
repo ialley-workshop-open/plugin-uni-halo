@@ -6,6 +6,9 @@ import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
 import cn.ialley.unihalo.scheme.LoveDailyItem;
 import cn.ialley.unihalo.scheme.LoveStory;
+import cn.ialley.unihalo.scheme.MiniProgramLink;
+import cn.ialley.unihalo.scheme.MiniProgramLinkGroup;
+import cn.ialley.unihalo.scheme.MiniProgramLinkSubmission;
 import cn.ialley.unihalo.scheme.Notice;
 import cn.ialley.unihalo.scheme.NoticeType;
 import cn.ialley.unihalo.scheme.QRCodeInfo;
@@ -113,6 +116,33 @@ public class UniHaloPlugin extends BasePlugin {
                             : type.getSpec().getPriority()));
         });
 
+        schemeManager.register(MiniProgramLinkGroup.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<MiniProgramLinkGroup, Integer>single("spec.priority",
+                            Integer.class)
+                    .indexFunc(group -> group.getSpec() == null ? null
+                            : group.getSpec().getPriority()));
+        });
+
+        schemeManager.register(MiniProgramLink.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<MiniProgramLink, Boolean>single("spec.visible", Boolean.class)
+                    .indexFunc(link -> link.getSpec() == null ? null
+                            : link.getSpec().getVisible()));
+            indexSpecs.add(IndexSpecs.<MiniProgramLink, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(link -> link.getSpec() == null ? null
+                            : link.getSpec().getPriority()));
+        });
+
+        schemeManager.register(MiniProgramLinkSubmission.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<MiniProgramLinkSubmission, String>single("spec.status",
+                            String.class)
+                    .indexFunc(submission -> submission.getSpec() == null ? null
+                            : submission.getSpec().getStatus()));
+            indexSpecs.add(IndexSpecs.<MiniProgramLinkSubmission, String>single("spec.submittedAt",
+                            String.class)
+                    .indexFunc(submission -> submission.getSpec() == null ? null
+                            : submission.getSpec().getSubmittedAt()));
+        });
+
         log.info("【UniHalo】插件启动成功！");
     }
 
@@ -128,6 +158,9 @@ public class UniHaloPlugin extends BasePlugin {
         schemeManager.unregister(schemeManager.get(LoveStory.class));
         schemeManager.unregister(schemeManager.get(Notice.class));
         schemeManager.unregister(schemeManager.get(NoticeType.class));
+        schemeManager.unregister(schemeManager.get(MiniProgramLink.class));
+        schemeManager.unregister(schemeManager.get(MiniProgramLinkGroup.class));
+        schemeManager.unregister(schemeManager.get(MiniProgramLinkSubmission.class));
 
         log.info("【UniHalo】插件停止！");
     }

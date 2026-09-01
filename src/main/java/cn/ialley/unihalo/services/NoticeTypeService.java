@@ -1,5 +1,7 @@
 package cn.ialley.unihalo.services;
 
+import java.util.List;
+
 import cn.ialley.unihalo.scheme.NoticeType;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ListResult;
@@ -32,4 +34,9 @@ public interface NoticeTypeService {
     Mono<NoticeType> update(NoticeType noticeType);
 
     Mono<Void> delete(String name);
+
+    /**
+     * 按 names 顺序保存排序（拖拽后调用；names[0] 最靠前，priority 从大到小赋值）。
+     */
+    Mono<Void> sort(List<String> names);
 }

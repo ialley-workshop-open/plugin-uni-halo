@@ -41,7 +41,7 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public Mono<ListResult<Notice>> list(String status, String type, String keyword,
-            int page, int size) {
+            int page, int size, String sort) {
         var builder = ListOptions.builder();
         if (!isBlank(status)) {
             builder.fieldQuery(equal("spec.status", status));
@@ -50,12 +50,27 @@ public class NoticeServiceImpl implements NoticeService {
             builder.fieldQuery(equal("spec.typeName", type));
         }
         ListOptions listOptions = builder.build();
-        return client.listAll(Notice.class, listOptions,
-                        Sort.by(Sort.Direction.DESC, "spec.priority", "spec.publishTime",
-                                "metadata.creationTimestamp"))
+        return client.listAll(Notice.class, listOptions, resolveSort(sort))
                 .filter(notice -> matchesKeyword(notice, keyword))
                 .collectList()
                 .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+    }
+
+    /**
+     * 排序映射：date_desc 最新在前（默认，置顶优先）；date_asc 最早在前；
+     * type 按类型分组（typeName 升序 + 组内最新在前）。
+     */
+    private static Sort resolveSort(String sort) {
+        return switch (sort == null ? "" : sort) {
+            case "date_asc" -> Sort.by(Sort.Order.asc("spec.publishTime"),
+                    Sort.Order.asc("metadata.creationTimestamp"));
+            case "type" -> Sort.by(Sort.Order.asc("spec.typeName"),
+                    Sort.Order.desc("spec.publishTime"),
+                    Sort.Order.desc("metadata.creationTimestamp"));
+            default -> Sort.by(Sort.Order.desc("spec.priority"),
+                    Sort.Order.desc("spec.publishTime"),
+                    Sort.Order.desc("metadata.creationTimestamp"));
+        };
     }
 
     @Override

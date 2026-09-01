@@ -2,6 +2,7 @@
 import {
   Dialog,
   IconAddCircle,
+  IconGrid,
   IconRefreshLine,
   Toast,
   VButton,
@@ -17,16 +18,23 @@ import {
   VDropdownItem,
 } from "@halo-dev/components";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { VueDraggable } from "vue-draggable-plus";
 import { computed, ref, watch } from "vue";
 import NoticeEditingModal from "@/components/notice-manage/NoticeEditingModal.vue";
+import NoticeTypeEditingModal from "@/components/notice-manage/NoticeTypeEditingModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
 import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
+import RiDragMove2Line from "~icons/ri/drag-move-2-line";
+import RiEditLine from "~icons/ri/edit-line";
+import RiDeleteBinLine from "~icons/ri/delete-bin-6-line";
 import { noticeApi, noticeTypeApi } from "@/api";
 import {
+  NOTICE_SORT_OPTIONS,
   NOTICE_STATUS_LABELS,
   NOTICE_STATUS_OPTIONS,
   type Notice,
   type NoticeStatus,
+  type NoticeType,
 } from "@/types";
 
 const queryClient = useQueryClient();
@@ -36,10 +44,13 @@ const size = ref(20);
 const keyword = ref("");
 const status = ref<NoticeStatus>();
 const type = ref<string>();
+const sort = ref("date_desc");
 const total = ref(0);
 
 const editingModal = ref(false);
 const selectedNotice = ref<Notice>();
+const typeEditingVisible = ref(false);
+const editingType = ref<NoticeType>();
 
 // 公告封面预览
 const previewVisible = ref(false);
@@ -49,13 +60,14 @@ const checkAll = ref(false);
 const selectedNoticeNames = ref<string[]>([]);
 
 const { data: notices, isLoading, isFetching, refetch } = useQuery({
-  queryKey: ["uni-halo:notices", page, size, status, type, keyword],
+  queryKey: ["uni-halo:notices", page, size, status, type, sort, keyword],
   queryFn: async () => {
     const result = await noticeApi.list({
       page: page.value,
       size: size.value,
       status: status.value,
       type: type.value,
+      sort: sort.value,
       keyword: keyword.value || undefined,
     });
     total.value = result.total;
@@ -63,7 +75,7 @@ const { data: notices, isLoading, isFetching, refetch } = useQuery({
   },
 });
 
-// 公告类型（供类型筛选下拉使用）
+// 公告类型（供左侧类型栏与列表标签展示使用）
 const { data: types } = useQuery({
   queryKey: ["uni-halo:notice-types-filter"],
   queryFn: async () => {
@@ -72,14 +84,66 @@ const { data: types } = useQuery({
   },
 });
 
-const typeFilterOptions = computed(() => {
-  return (
-    types.value?.map((t) => ({
-      label: t.spec.displayName || t.metadata.name,
-      value: t.metadata.name,
-    })) || []
-  );
-});
+// 左侧类型栏数据（VueDraggable 拖拽用可变数组）
+const typeList = ref<NoticeType[]>([]);
+watch(
+  () => types.value,
+  (val) => {
+    typeList.value = val ? [...val] : [];
+  },
+  { immediate: true }
+);
+
+const toggleType = (value: string) => {
+  type.value = type.value === value ? undefined : value;
+};
+
+const handleTypeCreate = () => {
+  editingType.value = undefined;
+  typeEditingVisible.value = true;
+};
+
+const handleTypeEdit = (typeItem: NoticeType) => {
+  editingType.value = typeItem;
+  typeEditingVisible.value = true;
+};
+
+const handleTypeSaved = () => {
+  typeEditingVisible.value = false;
+  editingType.value = undefined;
+  queryClient.invalidateQueries({ queryKey: ["uni-halo:notice-types-filter"] });
+};
+
+const handleTypeDelete = (typeItem: NoticeType) => {
+  Dialog.warning({
+    title: "确定要删除这个公告类型吗？",
+    description: "删除后已关联的公告将不再显示类型标签，该操作不可恢复。",
+    confirmType: "danger",
+    confirmText: "确定",
+    cancelText: "取消",
+    onConfirm: async () => {
+      try {
+        await noticeTypeApi.delete(typeItem.metadata.name);
+        Toast.success("删除成功");
+      } catch (error) {
+        Toast.error((error as Error).message);
+      } finally {
+        queryClient.invalidateQueries({ queryKey: ["uni-halo:notice-types-filter"] });
+      }
+    },
+  });
+};
+
+/** 拖拽排序结束：按新顺序保存排序 */
+const handleTypeDragEnd = async () => {
+  const names = typeList.value.map((t) => t.metadata.name);
+  try {
+    await noticeTypeApi.sortOrder(names);
+    queryClient.invalidateQueries({ queryKey: ["uni-halo:notice-types-filter"] });
+  } catch (error) {
+    Toast.error((error as Error).message);
+  }
+};
 
 /** 类型名称/颜色映射（列表展示用） */
 const typeInfoMap = computed(() => {
@@ -106,7 +170,7 @@ const typeBadgeText = (notice: Notice) => {
 };
 
 watch(
-  () => [keyword.value, status.value, type.value],
+  () => [keyword.value, status.value, type.value, sort.value],
   () => {
     page.value = 1;
   }
@@ -234,6 +298,14 @@ const formatTime = (value?: string | null) => {
     @close="onModalClose"
   />
 
+  <!-- 类型编辑弹窗（新建/编辑，与公告编辑弹窗平级挂载） -->
+  <NoticeTypeEditingModal
+    v-if="typeEditingVisible"
+    :item="editingType"
+    @close="typeEditingVisible = false"
+    @saved="handleTypeSaved"
+  />
+
   <VPageHeader title="UniHalo-公告管理">
     <template #actions>
       <VSpace>
@@ -257,8 +329,78 @@ const formatTime = (value?: string | null) => {
     </template>
   </VPageHeader>
 
-  <div class=":uno: m-0 flex flex-col gap-4 md:m-4">
-    <VCard :body-class="[':uno: !p-0']">
+  <div class=":uno: m-0 flex flex-col gap-4 md:m-4 lg:flex-row">
+    <!-- 左侧公告类型栏：类型筛选 + 类型管理入口（对齐应用管理-版本管理布局） -->
+    <div class=":uno: w-full flex-shrink-0 lg:w-64">
+      <VCard :body-class="[':uno: !p-0']">
+        <div class=":uno: flex items-center justify-between border-b border-gray-100 px-4 py-3">
+          <span class=":uno: text-sm font-semibold text-gray-700">公告类型</span>
+          <VButton size="sm" type="secondary" @click="handleTypeCreate">
+            <template #icon>
+              <IconAddCircle />
+            </template>
+            新建类型
+          </VButton>
+        </div>
+        <div
+          class=":uno: flex cursor-pointer items-center gap-2 px-4 py-3 text-sm"
+          :class="
+            type === undefined
+              ? ':uno: bg-gray-50 font-medium text-gray-900'
+              : ':uno: text-gray-700 hover:bg-gray-50'
+          "
+          @click="type = undefined"
+        >
+          <IconGrid class=":uno: h-4 w-4 text-gray-400" />
+          全部公告
+        </div>
+        <VueDraggable v-model="typeList" handle=".type-drag-handle" @end="handleTypeDragEnd">
+          <div
+            v-for="t in typeList"
+            :key="t.metadata.name"
+            class=":uno: group flex cursor-pointer items-center gap-2 px-4 py-3 text-sm"
+            :class="
+              type === t.metadata.name
+                ? ':uno: bg-gray-50'
+                : ':uno: hover:bg-gray-50'
+            "
+          >
+            <span class=":uno: type-drag-handle cursor-move text-gray-300 hover:text-gray-500">
+              <RiDragMove2Line class=":uno: h-4 w-4" />
+            </span>
+            <span
+              class=":uno: inline-block h-3.5 w-3.5 rounded-full border border-gray-200"
+              :style="{
+                backgroundColor: isValidColor(t.spec.color) ? t.spec.color : '#cccccc',
+              }"
+            />
+            <span class=":uno: min-w-0 flex-1 truncate" @click="toggleType(t.metadata.name)">
+              {{ t.spec.displayName || t.metadata.name }}
+            </span>
+            <span class=":uno: hidden items-center gap-1 group-hover:flex">
+              <button
+                class=":uno: rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                title="编辑"
+                @click="handleTypeEdit(t)"
+              >
+                <RiEditLine class=":uno: h-3.5 w-3.5" />
+              </button>
+              <button
+                class=":uno: rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                title="删除"
+                @click="handleTypeDelete(t)"
+              >
+                <RiDeleteBinLine class=":uno: h-3.5 w-3.5" />
+              </button>
+            </span>
+          </div>
+        </VueDraggable>
+      </VCard>
+    </div>
+
+    <!-- 右侧公告列表 -->
+    <div class=":uno: min-w-0 flex-1">
+      <VCard :body-class="[':uno: !p-0']">
       <template #header>
         <div class=":uno: block w-full bg-gray-50 px-4 py-3">
           <div class=":uno: relative flex flex-col flex-wrap items-start gap-4 sm:flex-row sm:items-center">
@@ -285,9 +427,9 @@ const formatTime = (value?: string | null) => {
                 @update:model-value="() => refetch()"
               />
               <FilterDropdown
-                v-model="type"
-                label="类型"
-                :items="typeFilterOptions"
+                v-model="sort"
+                label="排序"
+                :items="NOTICE_SORT_OPTIONS"
                 @update:model-value="() => refetch()"
               />
             </VSpace>
@@ -405,7 +547,8 @@ const formatTime = (value?: string | null) => {
           :size-options="[20, 30, 50, 100]"
         />
       </template>
-    </VCard>
+      </VCard>
+    </div>
   </div>
 
   <ImagePreviewModal

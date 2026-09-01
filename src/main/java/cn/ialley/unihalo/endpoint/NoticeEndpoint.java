@@ -49,7 +49,8 @@ public class NoticeEndpoint implements CustomEndpoint {
         String status = request.queryParam("status").orElse("").trim();
         String type = request.queryParam("type").orElse("").trim();
         String keyword = request.queryParam("keyword").orElse("").trim();
-        return noticeService.list(status, type, keyword, page, size)
+        String sort = request.queryParam("sort").orElse("").trim();
+        return noticeService.list(status, type, keyword, page, size, sort)
                 .flatMap(result -> ServerResponse.ok().bodyValue(result));
     }
 
