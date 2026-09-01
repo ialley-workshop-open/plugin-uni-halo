@@ -62,6 +62,11 @@ public class Constants {
     public static final String NOTICE_TYPE_API_BASE_PATH = "plugins/plugin-uni-halo/notice-types";
 
     /**
+     * 审核配置（console/公开）接口基础路径
+     */
+    public static final String AUDIT_DATA_API_BASE_PATH = "plugins/plugin-uni-halo/audit-data";
+
+    /**
      * 友情链接-小程序链接（console/公开）接口基础路径
      */
     public static final String MINI_PROGRAM_LINK_API_BASE_PATH =
@@ -83,6 +88,11 @@ public class Constants {
      * 恋爱配置单例名称（metadata.name 固定值）
      */
     public static final String LOVE_CONFIG_SINGLETON_NAME = "love-config";
+
+    /**
+     * 审核配置单例名称（metadata.name 固定值）
+     */
+    public static final String AUDIT_DATA_CONFIG_SINGLETON_NAME = "audit-data-config";
 
     /**
      * 基础的域名地址

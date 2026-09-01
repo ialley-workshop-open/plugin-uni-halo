@@ -18,6 +18,10 @@ import type {
   MiniProgramLinkSubmission,
   Notice,
   NoticeType,
+  AuditDataConfig,
+  AuditDataConfigDetail,
+  AuditDataCandidateResult,
+  AuditCandidateType,
 } from "@/types";
 
 const CONSOLE_API_GROUP = "console.api.unihalo.ialley.cn/v1alpha1";
@@ -213,4 +217,23 @@ export const miniProgramLinkSubmissionsApi = {
     }),
   delete: (name: string) =>
     http.delete<{ success: boolean }>(`${SUBMISSION_BASE}/${name}`),
+};
+
+// ===== 审核配置 =====
+
+const AUDIT_DATA_BASE = `${PLUGIN_BASE}/audit-data`;
+
+export const auditDataApi = {
+  /** 读取配置详情（原始配置 + 各类型已选条目详情） */
+  get: () => http.get<AuditDataConfigDetail>(AUDIT_DATA_BASE),
+  /** 整体保存（服务端校验并剔除失效引用） */
+  save: (data: AuditDataConfig) => http.put<AuditDataConfig>(AUDIT_DATA_BASE, data),
+  /** 候选数据查询（选择器数据源） */
+  candidates: (
+    type: AuditCandidateType,
+    query: { keyword?: string; page?: number; size?: number } = {}
+  ) => http.get<AuditDataCandidateResult>(`${AUDIT_DATA_BASE}/candidates`, { type, ...query }),
+  /** 公开读取（审核模式联动开关，供小程序端二期接入） */
+  getPublic: () =>
+    http.get<{ enabled: boolean; spec?: AuditDataConfig["spec"] }>(`${PUBLIC_BASE}/audit-data`),
 };

@@ -2,6 +2,7 @@ package cn.ialley.unihalo;
 
 import cn.ialley.unihalo.scheme.AppInfo;
 import cn.ialley.unihalo.scheme.AppVersion;
+import cn.ialley.unihalo.scheme.AuditDataConfig;
 import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
 import cn.ialley.unihalo.scheme.LoveDailyItem;
@@ -67,6 +68,10 @@ public class UniHaloPlugin extends BasePlugin {
         });
 
         schemeManager.register(LoveConfig.class, indexSpecs -> {
+            // 单例模型，无需额外索引
+        });
+
+        schemeManager.register(AuditDataConfig.class, indexSpecs -> {
             // 单例模型，无需额外索引
         });
 
@@ -157,6 +162,7 @@ public class UniHaloPlugin extends BasePlugin {
         schemeManager.unregister(schemeManager.get(AppInfo.class));
         schemeManager.unregister(schemeManager.get(AppVersion.class));
         schemeManager.unregister(schemeManager.get(LoveConfig.class));
+        schemeManager.unregister(schemeManager.get(AuditDataConfig.class));
         schemeManager.unregister(schemeManager.get(LoveAlbum.class));
         schemeManager.unregister(schemeManager.get(LoveDailyItem.class));
         schemeManager.unregister(schemeManager.get(LoveStory.class));

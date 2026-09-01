@@ -8,6 +8,7 @@ import RiBook2Line from '~icons/ri/book-2-line'
 import RiMegaphoneLine from '~icons/ri/megaphone-line'
 import RiLink from '~icons/ri/link'
 import RiFileList3Line from '~icons/ri/file-list-3-line'
+import RiShieldCheckLine from '~icons/ri/shield-check-line'
 import WelcomeView from './views/WelcomeView.vue'
 
 function baseRoutePath(path: string) {
@@ -252,6 +253,26 @@ export default definePlugin({
             },
           },
         ],
+      },
+    },
+    {
+      parentName: 'Root',
+      route: {
+        path: baseRoutePath('/audit-config'),
+        name: 'AuditConfig',
+        component: () => import('@/views/audit-config/AuditConfigView.vue'),
+        meta: {
+          title: '审核配置',
+          searchable: true,
+          hideFooter: false,
+          permissions: ["plugin:uni-halo:audit-data:view"],
+          menu: {
+            name: '审核配置',
+            group: 'UniHalo',
+            icon: markRaw(RiShieldCheckLine),
+            priority: 5,
+          },
+        },
       },
     },
   ],

@@ -392,3 +392,74 @@ export const SUBMISSION_STATUS_OPTIONS: { label: string; value?: string }[] = [
   { label: "已通过", value: "APPROVED" },
   { label: "已拒绝", value: "REJECTED" },
 ];
+
+// ===== 审核配置 =====
+
+/** 被选中引用的快照（name 为扩展 metadata.name，其余字段按类型选择性填充） */
+export interface AuditDataRef {
+  name: string;
+  title?: string;
+  cover?: string;
+  subTitle?: string;
+  extra?: string;
+}
+
+/** 审核模式模拟数据的选中引用（对象快照存储，数组顺序即展示顺序） */
+export interface AuditDataConfigSpec {
+  /** 选中的文章 Post 引用列表 */
+  posts?: AuditDataRef[];
+  /** 选中的分类 Category 引用列表 */
+  categories?: AuditDataRef[];
+  /** 选中的图库分组 PhotoGroup 引用列表（未分组照片不展示） */
+  galleryGroups?: AuditDataRef[];
+  /** 选中的瞬间 Moment 引用列表 */
+  moments?: AuditDataRef[];
+  /** 选中的链接分组 LinkGroup 引用列表 */
+  linkGroups?: AuditDataRef[];
+  /** 备注（如「微信审核用模拟数据」） */
+  description?: string;
+}
+
+export interface AuditDataConfig {
+  metadata: Metadata;
+  spec: AuditDataConfigSpec;
+}
+
+/** 审核配置详情（管理端 GET /audit-data 返回）：原始配置 + 各类型已选条目的最新详情 */
+export interface AuditDataConfigDetail {
+  config: AuditDataConfig;
+  selections: Record<AuditCandidateType, AuditDataRef[]>;
+}
+
+export type AuditCandidateType =
+  | "post"
+  | "category"
+  | "galleryGroup"
+  | "moment"
+  | "linkGroup";
+
+/** 候选数据分页结果（条目即 AuditDataRef 快照，可直接用于已选列表渲染） */
+export interface AuditDataCandidateResult {
+  items: AuditDataRef[];
+  page: number;
+  size: number;
+  total: number;
+  /** 数据源插件未安装/扩展未注册（UI 提示「请先安装 XX 插件」） */
+  pluginMissing?: boolean;
+}
+
+/** 候选类型中文名（UI 展示/提示用） */
+export const AUDIT_CANDIDATE_TYPE_LABELS: Record<AuditCandidateType, string> = {
+  post: "文章",
+  category: "分类",
+  galleryGroup: "图库分组",
+  moment: "瞬间",
+  linkGroup: "链接分组",
+};
+
+/** 候选类型对应依赖插件提示（pluginMissing 时展示） */
+export const AUDIT_CANDIDATE_PLUGIN_HINTS: Partial<Record<AuditCandidateType, string>> = {
+  galleryGroup: "请先安装 plugin-photos（图库插件）",
+  moment: "请先安装 plugin-moments（瞬间插件）",
+  linkGroup: "请先安装 plugin-links（链接管理插件）",
+};
