@@ -208,3 +208,58 @@ export interface LoveStory {
   metadata: Metadata;
   spec: LoveStorySpec;
 }
+
+// ===== 通知公告 =====
+
+export type NoticeStatus = "draft" | "published" | "offline";
+
+export interface NoticeSpec {
+  title?: string;
+  /** 富文本正文（编辑器输出的 HTML） */
+  content?: string;
+  /** 摘要（手填可选，为空时服务端自动从正文剥离生成） */
+  summary?: string;
+  /** 封面图（Halo 附件 URL） */
+  cover?: string;
+  /** 外链地址（可选） */
+  link?: string;
+  /** 公告类型（关联 NoticeType.metadata.name，可为空=不分类） */
+  typeName?: string;
+  status?: NoticeStatus;
+  /** 排序，越大越靠前 */
+  priority?: number;
+  /** 发布时间（状态为已发布时服务端自动记录） */
+  publishTime?: string;
+}
+
+export interface Notice {
+  metadata: Metadata;
+  spec: NoticeSpec;
+}
+
+export interface NoticeTypeSpec {
+  /** 类型名称（必填），如「活动」「维护」 */
+  displayName?: string;
+  /** 标签颜色（hex，如 #10B981） */
+  color?: string;
+  /** 排序，越大越靠前 */
+  priority?: number;
+}
+
+export interface NoticeType {
+  metadata: Metadata;
+  spec: NoticeTypeSpec;
+}
+
+export const NOTICE_STATUS_LABELS: Record<string, string> = {
+  draft: "草稿",
+  published: "已发布",
+  offline: "已下线",
+};
+
+/** 公告状态选项（统一供下拉/筛选使用） */
+export const NOTICE_STATUS_OPTIONS: { label: string; value: string }[] = [
+  { label: "草稿", value: "draft" },
+  { label: "已发布", value: "published" },
+  { label: "已下线", value: "offline" },
+];

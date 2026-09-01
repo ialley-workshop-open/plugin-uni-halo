@@ -20,6 +20,7 @@ import { useRoute } from "vue-router";
 import AppVersionEditingModal from "../../components/app-manage/version/AppVersionEditingModal.vue";
 import AppVersionListItem from "../../components/app-manage/version/AppVersionListItem.vue";
 import FilterDropdown from "../../components/common/FilterDropdown.vue";
+import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import { appVersionsApi, appsApi } from "@/api";
 import type { AppInfo, AppVersion } from "@/types";
 
@@ -39,6 +40,10 @@ const editingModal = ref(false);
 const selectedVersion = ref<AppVersion>();
 // 发布新版时预选的所属应用
 const publishAppid = ref("");
+
+// 侧边栏应用图标预览
+const previewVisible = ref(false);
+const previewUrl = ref("");
 
 const checkAll = ref(false);
 const selectedVersionNames = ref<string[]>([]);
@@ -215,8 +220,13 @@ const onEditingModalClose = () => {
           class=":uno: flex cursor-pointer items-center gap-3 px-4 py-3"
           :class="filterAppid === (app.spec.appid || '') ? ':uno: bg-gray-50' : ':uno: hover:bg-gray-50'"
           @click="filterAppid = app.spec.appid || ''">
-          <img v-if="app.spec.iconUrl" :src="app.spec.iconUrl" class=":uno: h-8 w-8 flex-shrink-0 rounded object-cover"
-            alt="" />
+          <img
+            v-if="app.spec.iconUrl"
+            :src="app.spec.iconUrl"
+            class=":uno: h-8 w-8 flex-shrink-0 cursor-pointer rounded object-cover hover:opacity-80"
+            alt=""
+            @click.stop="() => { previewUrl = app.spec.iconUrl || ''; previewVisible = true; }"
+          />
           <div v-else class=":uno: h-8 w-8 flex-shrink-0 rounded bg-gray-100" />
           <div class=":uno: min-w-0">
             <div class=":uno: truncate text-sm text-gray-800">
@@ -310,4 +320,10 @@ const onEditingModalClose = () => {
       </VCard>
     </div>
   </div>
+
+  <ImagePreviewModal
+    v-model:visible="previewVisible"
+    :images="previewUrl ? [previewUrl] : []"
+    :title="'应用图标'"
+  />
 </template>

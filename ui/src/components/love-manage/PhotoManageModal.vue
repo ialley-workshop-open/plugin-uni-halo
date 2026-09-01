@@ -5,6 +5,7 @@ import RiArrowDownLine from "~icons/ri/arrow-down-line";
 import RiRefreshLine from "~icons/ri/refresh-line";
 import {useQueryClient} from "@tanstack/vue-query";
 import {computed, reactive, ref, watch} from "vue";
+import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import {loveAlbumsApi} from "@/api";
 import type {LoveAlbum, LoveAlbumPhoto} from "@/types";
 import {useWindowSize} from "@vueuse/core";
@@ -19,12 +20,15 @@ const emit = defineEmits<{
 
 const modal = ref<InstanceType<typeof VModal> | null>(null);
 const busy = ref(false);
-/** 新选择的待添加图片 URL */
-const pendingUrls = ref<string[]>([]);
+/** 新选择的待添加图片 URL（单张模式，v-model 绑定字符串） */
+const pendingUrl = ref("");
 /** 相册照片本地副本 */
 const photos = ref<LoveAlbumPhoto[]>([]);
 /** 网格选中照片索引（-1 = 添加模式；>=0 = 编辑该照片） */
 const selectedIndex = ref(-1);
+/** 照片大图预览 */
+const previewVisible = ref(false);
+const previewIndex = ref(0);
 
 const {width: windowWidth} = useWindowSize();
 const modalWidth = computed(() => Math.round(windowWidth.value * 0.8));
@@ -59,9 +63,7 @@ watch(selectedIndex, (index) => {
   form.location = photo?.location || "";
   form.takenDate = photo?.takenDate || "";
   form.description = photo?.description || "";
-  if (index >= 0) {
-    pendingUrls.value = photo?.url ? [photo.url] : [];
-  }
+  pendingUrl.value = photo?.url || "";
 });
 
 const refreshList = () => {
@@ -77,7 +79,7 @@ const handleClearForm = () => {
 
 /** 清空已选择图片 + 表单内容（并退出编辑选中态） */
 const handleClearAll = () => {
-  pendingUrls.value = [];
+  pendingUrl.value = "";
   handleClearForm();
   selectedIndex.value = -1;
 };
@@ -101,35 +103,31 @@ const handleSave = async () => {
         description: form.description,
       });
       // 附件组件回显了当前照片：若用户更换/新增了图片则同步更新 URL
-      const pendingUrl = pendingUrls.value[0];
-      if (pendingUrl && pendingUrl !== photo.url) {
-        photo.url = pendingUrl;
+      if (pendingUrl.value && pendingUrl.value !== photo.url) {
+        photo.url = pendingUrl.value;
       }
       await loveAlbumsApi.updatePhotos(props.album.metadata.name, photos.value);
       selectedIndex.value = -1;
-      pendingUrls.value = [];
+      pendingUrl.value = "";
       Toast.success("保存成功");
     } else {
-      const urls = pendingUrls.value.filter((url) => url);
-      if (!urls.length) {
+      const url = pendingUrl.value;
+      if (!url) {
         Toast.warning("请先选择图片");
         return;
       }
-      let updated: LoveAlbum | undefined;
-      for (const url of urls) {
-        updated = await loveAlbumsApi.addPhoto(props.album.metadata.name, {
-          url,
-          title: form.title,
-          location: form.location,
-          takenDate: form.takenDate,
-          description: form.description,
-        });
-      }
-      // 用后端返回的最新相册同步本地照片列表（addPhoto 为逐张提交，取最后一次结果）
+      const updated = await loveAlbumsApi.addPhoto(props.album.metadata.name, {
+        url,
+        title: form.title,
+        location: form.location,
+        takenDate: form.takenDate,
+        description: form.description,
+      });
+      // 用后端返回的最新相册同步本地照片列表
       if (updated?.spec.photos) {
         photos.value = updated.spec.photos.map((photo) => ({...photo}));
       }
-      pendingUrls.value = [];
+      pendingUrl.value = "";
       handleClearForm();
       Toast.success("添加成功");
     }
@@ -160,7 +158,7 @@ const handleDeletePhoto = async (photo: LoveAlbumPhoto) => {
     }
     if (editingDeleted) {
       selectedIndex.value = -1;
-      pendingUrls.value = [];
+      pendingUrl.value = "";
     }
     Toast.success("删除成功");
     refreshList();
@@ -209,7 +207,7 @@ const handleRefresh = async () => {
       photos.value = latest.spec.photos.map((photo) => ({...photo}));
     }
     selectedIndex.value = -1;
-    pendingUrls.value = [];
+    pendingUrl.value = "";
     Toast.success("已刷新");
   } catch (error) {
     Toast.error((error as Error).message);
@@ -238,12 +236,11 @@ const handleRefresh = async () => {
             </span>
           </div>
           <FormKit
-                  v-model="pendingUrls"
+                  v-model="pendingUrl"
                   type="attachment"
-                  multiple
                   :accepts="['image/*']"
                   label="选择图片"
-                  help="从附件库选择多张图片，或直接输入图片地址"
+                  help="从附件库选择一张图片，或直接输入图片地址"
           />
           <div class=":uno: mt-4 space-y-3 w-full">
             <div class=":uno: flex items-center gap-3 w-full">
@@ -270,6 +267,9 @@ const handleRefresh = async () => {
           <div class=":uno: mt-4 flex items-center gap-2">
             <VButton :loading="busy" type="primary" @click="handleSave">
               {{ isEditMode ? "保存修改" : "保存" }}
+            </VButton>
+            <VButton v-if="isEditMode" type="secondary" plain :disabled="busy" @click="handleClearAll">
+              取消编辑
             </VButton>
             <VButton type="secondary" plain :disabled="busy" @click="handleClearAll">
               清空表单
@@ -322,7 +322,8 @@ const handleRefresh = async () => {
               "
             >
               <img :src="photo.url" :alt="photo.title || ''" loading="lazy"
-                   class=":uno: h-24 w-full object-cover"/>
+                   class=":uno: h-24 w-full cursor-pointer object-cover hover:opacity-80"
+                   @click="() => { previewIndex = index; previewVisible = true; }"/>
               <div class=":uno: space-y-0.5 bg-gray-50 px-2 py-1.5">
                 <div v-if="photo.title" class=":uno: truncate text-xs text-gray-700">
                   {{ photo.title }}
@@ -376,4 +377,11 @@ const handleRefresh = async () => {
       </VSpace>
     </template>
   </VModal>
+
+  <ImagePreviewModal
+    v-model:visible="previewVisible"
+    :images="photos.map((photo) => photo.url).filter((url): url is string => !!url)"
+    :initial-index="previewIndex"
+    :title="`照片预览：${props.album.spec.displayName || '未命名相册'}`"
+  />
 </template>

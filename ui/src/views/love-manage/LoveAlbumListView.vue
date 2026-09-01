@@ -17,6 +17,7 @@ import { computed, ref, watch } from "vue";
 import LoveAlbumEditingModal from "@/components/love-manage/album/LoveAlbumEditingModal.vue";
 import PhotoManageModal from "@/components/love-manage/PhotoManageModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
+import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import { loveAlbumsApi } from "@/api";
 import { LOVE_LIST_SORT_OPTIONS, type LoveAlbum } from "@/types";
 
@@ -30,6 +31,10 @@ const total = ref(0);
 const editingModal = ref(false);
 const photoModal = ref(false);
 const selectedAlbum = ref<LoveAlbum>();
+
+// 相册封面预览
+const previewVisible = ref(false);
+const previewUrl = ref("");
 
 const checkAll = ref(false);
 const selectedAlbumNames = ref<string[]>([]);
@@ -246,7 +251,8 @@ const onModalClose = () => {
               :src="album.spec.cover"
               alt=""
               loading="lazy"
-              class=":uno: h-full w-full object-cover"
+              class=":uno: h-full w-full cursor-pointer object-cover hover:opacity-80"
+              @click="() => { previewUrl = album.spec.cover || ''; previewVisible = true; }"
             />
             <div v-else class=":uno: flex h-full w-full items-center justify-center text-gray-300">
               <span class=":uno: text-sm">暂无封面</span>
@@ -296,4 +302,10 @@ const onModalClose = () => {
       </template>
     </VCard>
   </div>
+
+  <ImagePreviewModal
+    v-model:visible="previewVisible"
+    :images="previewUrl ? [previewUrl] : []"
+    title="相册封面"
+  />
 </template>

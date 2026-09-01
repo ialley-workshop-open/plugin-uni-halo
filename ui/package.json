@@ -13,9 +13,11 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
+    "@ckpack/vue-color": "^1.6.0",
     "@formkit/core": "^2.1.2",
     "@halo-dev/api-client": "^2.26.0",
     "@halo-dev/components": "^2.26.0",
+    "@halo-dev/richtext-editor": "2.26.0",
     "@halo-dev/ui-shared": "^2.26.0",
     "@imengyu/vue3-context-menu": "^1.5.6",
     "@tanstack/vue-query": "^4.44.0",

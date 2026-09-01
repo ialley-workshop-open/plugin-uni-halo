@@ -1,0 +1,45 @@
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-view-notice
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/module: "UniHalo 公告管理"
+    rbac.authorization.halo.run/display-name: "公告查看"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:notice:view"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/notices"
+      - "plugins/plugin-uni-halo/notices/*"
+      - "plugins/plugin-uni-halo/notice-types"
+      - "plugins/plugin-uni-halo/notice-types/*"
+    verbs: [ "get", "list" ]
+
+---
+
+apiVersion: v1alpha1
+kind: "Role"
+metadata:
+  name: plugin-uni-halo-role-template-manage-notice
+  labels:
+    halo.run/role-template: "true"
+    rbac.authorization.halo.run/aggregate-to-admin: "true"
+  annotations:
+    rbac.authorization.halo.run/dependencies: |
+      [ "plugin-uni-halo-role-template-view-notice" ]
+    rbac.authorization.halo.run/module: "UniHalo 公告管理"
+    rbac.authorization.halo.run/display-name: "公告管理"
+    rbac.authorization.halo.run/ui-permissions: |
+      ["plugin:uni-halo:notice:manage"]
+rules:
+  - apiGroups: [ "console.api.unihalo.ialley.cn" ]
+    resources:
+      - "plugins/plugin-uni-halo/notices"
+      - "plugins/plugin-uni-halo/notices/*"
+      - "plugins/plugin-uni-halo/notice-types"
+      - "plugins/plugin-uni-halo/notice-types/*"
+    verbs: [ "create", "patch", "update", "delete", "deletecollection" ]

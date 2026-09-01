@@ -20,6 +20,7 @@ import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { computed, ref, watch } from "vue";
 import LoveStoryEditingModal from "@/components/love-manage/story/LoveStoryEditingModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
+import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import { loveStoryApi } from "@/api";
 import {
   LOVE_STORY_SORT_OPTIONS,
@@ -41,6 +42,11 @@ const sortValue = ref("date_desc");
 
 const editingModal = ref(false);
 const selectedStory = ref<LoveStory>();
+
+// 故事图片大图预览（多图，从点击的那张开始）
+const previewVisible = ref(false);
+const previewImages = ref<string[]>([]);
+const previewIndex = ref(0);
 
 const checkAll = ref(false);
 const selectedStoryNames = ref<string[]>([]);
@@ -337,7 +343,8 @@ const onModalClose = () => {
                     :src="url"
                     :alt="story.spec.title || ''"
                     loading="lazy"
-                    class=":uno: h-20 w-full rounded object-cover"
+                    class=":uno: h-20 w-full cursor-pointer rounded object-cover hover:opacity-80"
+                    @click="() => { previewImages = story.spec.images || []; previewIndex = index; previewVisible = true; }"
                   />
                 </div>
               </VCard>
@@ -359,4 +366,11 @@ const onModalClose = () => {
       </template>
     </VCard>
   </div>
+
+  <ImagePreviewModal
+    v-model:visible="previewVisible"
+    :images="previewImages"
+    :initial-index="previewIndex"
+    title="故事图片"
+  />
 </template>

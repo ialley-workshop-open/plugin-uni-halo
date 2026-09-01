@@ -6,6 +6,8 @@ import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
 import cn.ialley.unihalo.scheme.LoveDailyItem;
 import cn.ialley.unihalo.scheme.LoveStory;
+import cn.ialley.unihalo.scheme.Notice;
+import cn.ialley.unihalo.scheme.NoticeType;
 import cn.ialley.unihalo.scheme.QRCodeInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -90,6 +92,27 @@ public class UniHaloPlugin extends BasePlugin {
                             : story.getSpec().getPriority()));
         });
 
+        schemeManager.register(Notice.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<Notice, String>single("spec.status", String.class)
+                    .indexFunc(notice -> notice.getSpec() == null ? null
+                            : notice.getSpec().getStatus()));
+            indexSpecs.add(IndexSpecs.<Notice, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(notice -> notice.getSpec() == null ? null
+                            : notice.getSpec().getPriority()));
+            indexSpecs.add(IndexSpecs.<Notice, String>single("spec.typeName", String.class)
+                    .indexFunc(notice -> notice.getSpec() == null ? null
+                            : notice.getSpec().getTypeName()));
+            indexSpecs.add(IndexSpecs.<Notice, String>single("spec.publishTime", String.class)
+                    .indexFunc(notice -> notice.getSpec() == null ? null
+                            : notice.getSpec().getPublishTime()));
+        });
+
+        schemeManager.register(NoticeType.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<NoticeType, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(type -> type.getSpec() == null ? null
+                            : type.getSpec().getPriority()));
+        });
+
         log.info("【UniHalo】插件启动成功！");
     }
 
@@ -103,6 +126,8 @@ public class UniHaloPlugin extends BasePlugin {
         schemeManager.unregister(schemeManager.get(LoveAlbum.class));
         schemeManager.unregister(schemeManager.get(LoveDailyItem.class));
         schemeManager.unregister(schemeManager.get(LoveStory.class));
+        schemeManager.unregister(schemeManager.get(Notice.class));
+        schemeManager.unregister(schemeManager.get(NoticeType.class));
 
         log.info("【UniHalo】插件停止！");
     }

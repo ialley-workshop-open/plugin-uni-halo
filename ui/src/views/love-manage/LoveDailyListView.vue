@@ -21,6 +21,7 @@ import { useQuery, useQueryClient } from "@tanstack/vue-query";
 import { computed, ref, watch } from "vue";
 import LoveDailyItemEditingModal from "@/components/love-manage/daily/LoveDailyItemEditingModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
+import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import { loveDailyApi } from "@/api";
 import {
   LOVE_DAILY_TIME_SORT_OPTIONS,
@@ -48,6 +49,11 @@ const timelineSortValue = ref("plan_desc");
 
 const editingModal = ref(false);
 const selectedItem = ref<LoveDailyItem>();
+
+// 图片大图预览（多图，从点击的那张开始）
+const previewVisible = ref(false);
+const previewImages = ref<string[]>([]);
+const previewIndex = ref(0);
 
 const checkAll = ref(false);
 const selectedItemNames = ref<string[]>([]);
@@ -412,7 +418,8 @@ const timelineDotClass = (status?: string) => {
                     :src="url"
                     :alt="item.spec.title || ''"
                     loading="lazy"
-                    class=":uno: h-20 w-full rounded object-cover"
+                    class=":uno: h-20 w-full cursor-pointer rounded object-cover hover:opacity-80"
+                    @click="() => { previewImages = item.spec.images || []; previewIndex = index; previewVisible = true; }"
                   />
                 </div>
               </VCard>
@@ -434,4 +441,11 @@ const timelineDotClass = (status?: string) => {
       </template>
     </VCard>
   </div>
+
+  <ImagePreviewModal
+    v-model:visible="previewVisible"
+    :images="previewImages"
+    :initial-index="previewIndex"
+    title="图片预览"
+  />
 </template>

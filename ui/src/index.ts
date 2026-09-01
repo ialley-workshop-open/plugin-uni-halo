@@ -5,6 +5,8 @@ import RiHeartLine from '~icons/ri/heart-line'
 import RiGalleryLine from '~icons/ri/gallery-line'
 import RiCheckboxMultipleLine from '~icons/ri/checkbox-multiple-line'
 import RiBook2Line from '~icons/ri/book-2-line'
+import RiMegaphoneLine from '~icons/ri/megaphone-line'
+import RiPriceTag3Line from '~icons/ri/price-tag-3-line'
 import WelcomeView from './views/WelcomeView.vue'
 
 function baseRoutePath(path: string) {
@@ -170,6 +172,61 @@ export default definePlugin({
                 name: '恋爱故事',
                 icon: markRaw(RiBook2Line),
                 priority: 3,
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      parentName: 'Root',
+      route: {
+        path: baseRoutePath('/notice'),
+        name: 'NoticeManage',
+        component: () => import('@/views/notice-manage/NoticeManageLayout.vue'),
+        redirect: baseRoutePath('/notice/list'),
+        meta: {
+          title: '公告管理',
+          searchable: false,
+          hideFooter: false,
+          permissions: ["plugin:uni-halo:notice:view"],
+          menu: {
+            name: '公告管理',
+            group: 'UniHalo',
+            icon: markRaw(RiMegaphoneLine),
+            priority: 3,
+          },
+        },
+        children: [
+          {
+            path: 'list',
+            name: 'NoticeList',
+            component: () => import('@/views/notice-manage/NoticeListView.vue'),
+            meta: {
+              title: '公告列表',
+              searchable: true,
+              hideFooter: false,
+              permissions: ["plugin:uni-halo:notice:view"],
+              menu: {
+                name: '公告列表',
+                icon: markRaw(RiMegaphoneLine),
+                priority: 0,
+              },
+            },
+          },
+          {
+            path: 'types',
+            name: 'NoticeTypeList',
+            component: () => import('@/views/notice-manage/NoticeTypeListView.vue'),
+            meta: {
+              title: '公告类型',
+              searchable: true,
+              hideFooter: false,
+              permissions: ["plugin:uni-halo:notice:view"],
+              menu: {
+                name: '公告类型',
+                icon: markRaw(RiPriceTag3Line),
+                priority: 1,
               },
             },
           },

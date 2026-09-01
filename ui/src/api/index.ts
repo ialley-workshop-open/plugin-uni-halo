@@ -11,6 +11,8 @@ import type {
   LoveConfig,
   LoveDailyItem,
   LoveStory,
+  Notice,
+  NoticeType,
 } from "@/types";
 
 const CONSOLE_API_GROUP = "console.api.unihalo.ialley.cn/v1alpha1";
@@ -94,4 +96,31 @@ export const publicApi = {
   getConfigs: () => http.get<Record<string, unknown>>(`${PUBLIC_BASE}/getConfigs`),
   getConfigsByGroupName: (groupName: string) =>
     http.get<unknown>(`${PUBLIC_BASE}/getConfigs/${groupName}`),
+};
+
+// ===== 公告管理 =====
+
+export const noticeApi = {
+  list: (query: {
+    page?: number;
+    size?: number;
+    status?: string;
+    type?: string;
+    keyword?: string;
+  } = {}) => http.get<PageResult<Notice>>(`${PLUGIN_BASE}/notices`, query),
+  create: (data: Notice) => http.post<Notice>(`${PLUGIN_BASE}/notices`, data),
+  update: (name: string, data: Notice) =>
+    http.put<Notice>(`${PLUGIN_BASE}/notices/${name}`, data),
+  delete: (name: string) =>
+    http.delete<{ success: boolean }>(`${PLUGIN_BASE}/notices/${name}`),
+};
+
+export const noticeTypeApi = {
+  list: (query: { page?: number; size?: number; keyword?: string } = {}) =>
+    http.get<PageResult<NoticeType>>(`${PLUGIN_BASE}/notice-types`, query),
+  create: (data: NoticeType) => http.post<NoticeType>(`${PLUGIN_BASE}/notice-types`, data),
+  update: (name: string, data: NoticeType) =>
+    http.put<NoticeType>(`${PLUGIN_BASE}/notice-types/${name}`, data),
+  delete: (name: string) =>
+    http.delete<{ success: boolean }>(`${PLUGIN_BASE}/notice-types/${name}`),
 };

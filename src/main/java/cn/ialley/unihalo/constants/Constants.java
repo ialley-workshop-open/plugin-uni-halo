@@ -52,6 +52,16 @@ public class Constants {
     public static final String LOVE_STORY_API_BASE_PATH = "plugins/plugin-uni-halo/love-stories";
 
     /**
+     * 通知公告（console）接口基础路径
+     */
+    public static final String NOTICE_API_BASE_PATH = "plugins/plugin-uni-halo/notices";
+
+    /**
+     * 公告类型（console）接口基础路径
+     */
+    public static final String NOTICE_TYPE_API_BASE_PATH = "plugins/plugin-uni-halo/notice-types";
+
+    /**
      * 恋爱配置单例名称（metadata.name 固定值）
      */
     public static final String LOVE_CONFIG_SINGLETON_NAME = "love-config";
