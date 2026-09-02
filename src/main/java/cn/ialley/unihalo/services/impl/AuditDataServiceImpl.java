@@ -30,6 +30,8 @@ import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.extension.SchemeManager;
 
+import static run.halo.app.extension.index.query.Queries.isNull;
+
 /**
  * 审核配置服务实现（单例模型 audit-data-config）。
  *
@@ -144,6 +146,9 @@ public class AuditDataServiceImpl implements AuditDataService {
         }
         return Flux.fromIterable(refs)
                 .concatMap(ref -> client.fetch(type, ref.getName())
+                        // 删除中对象视为失效引用（决策 D7）
+                        .filter(found -> found.getMetadata() == null
+                                || found.getMetadata().getDeletionTimestamp() == null)
                         .map(found -> ref)
                         .onErrorResume(e -> Mono.empty()))
                 .collectList();
@@ -172,9 +177,13 @@ public class AuditDataServiceImpl implements AuditDataService {
     /**
      * 全量拉取某类型候选（按创建时间倒序），供内存关键字过滤 + 手动分页。
      * 数据量级：文章/分组/瞬间/链接分组，审核配置为低频操作，全量可接受。
+     * 候选读路径：排除删除中对象（决策 D7）。
      */
     private Flux<Extension> listAllRef(CandidateType type) {
-        return client.listAll(resolveRefClass(type), ListOptions.builder().build(),
+        return client.listAll(resolveRefClass(type),
+                        ListOptions.builder()
+                                .fieldQuery(isNull("metadata.deletionTimestamp"))
+                                .build(),
                         Sort.by(Sort.Direction.DESC, "metadata.creationTimestamp"))
                 .map(extension -> (Extension) extension);
     }

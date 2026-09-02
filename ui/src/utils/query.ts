@@ -17,3 +17,13 @@ export function deletingRefetchInterval(data?: {
 } | null): number | false {
   return data?.items?.some((item) => item.metadata?.deletionTimestamp) ? 1000 : false;
 }
+
+/**
+ * 数组型列表（如类型/分组侧栏 useQuery 直接返回 items 数组）的条件轮询，
+ * 语义同 {@link deletingRefetchInterval}。
+ */
+export function deletingRefetchIntervalForList<T extends { metadata?: Metadata }>(
+  data?: T[] | null,
+): number | false {
+  return data?.some((item) => item.metadata?.deletionTimestamp) ? 1000 : false;
+}

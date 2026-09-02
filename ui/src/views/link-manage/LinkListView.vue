@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconGrid,
   IconRefreshLine,
@@ -15,12 +14,15 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VStatusDot,
   VDropdownItem,
 } from "@halo-dev/components";
 import RiEditLine from "~icons/ri/edit-line";
 import RiDeleteBinLine from "~icons/ri/delete-bin-line";
 import RiFolderLine from "~icons/ri/folder-line";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchIntervalForList } from "@/utils/query";
 import { computed, ref, watch } from "vue";
 import LinkEditingModal from "@/components/link-manage/LinkEditingModal.vue";
 import LinkGroupEditingModal from "@/components/link-manage/LinkGroupEditingModal.vue";
@@ -49,6 +51,10 @@ const VISIBLE_FILTER_OPTIONS = [
 ];
 
 const queryClient = useQueryClient();
+const { confirmDelete: confirmDeleteLink } = useDeletionFlow(["uni-halo:mini-program-links"]);
+const { confirmDelete: confirmDeleteGroup } = useDeletionFlow([
+  "uni-halo:mini-program-link-groups-filter",
+]);
 
 const activeGroup = ref<string>();
 const keyword = ref("");
@@ -75,6 +81,8 @@ const { data: links, isLoading, isFetching, refetch } = useQuery({
     const result = await miniProgramLinksApi.list({ page: 1, size: 500 });
     return result.items;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchIntervalForList(data),
 });
 
 // 分组（左侧分组栏 + 列表分组名展示）
@@ -84,6 +92,8 @@ const { data: groups } = useQuery({
     const result = await miniProgramLinkGroupsApi.list({ page: 1, size: 100 });
     return result.items;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchIntervalForList(data),
 });
 
 /** 分组名映射（列表展示用） */
@@ -216,44 +226,22 @@ const handleOpenEditingModal = (link?: MiniProgramLink) => {
 };
 
 const handleDelete = (link: MiniProgramLink) => {
-  Dialog.warning({
+  confirmDeleteLink({
     title: "确定要删除这个链接吗？",
     description: "删除后 app 端将不可见，该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await miniProgramLinksApi.delete(link.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:mini-program-links"] });
-      }
-    },
+    names: [link.metadata.name],
+    doDelete: (name) => miniProgramLinksApi.delete(name),
   });
 };
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedNames.value];
+  confirmDeleteLink({
     title: "确定要删除选中的链接吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await Promise.all(
-          selectedNames.value.map((name) => miniProgramLinksApi.delete(name))
-        );
-        selectedNames.value = [];
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:mini-program-links"] });
-      }
+    names,
+    doDelete: (name) => miniProgramLinksApi.delete(name),
+    onSuccess: () => {
+      selectedNames.value = [];
     },
   });
 };
@@ -283,24 +271,17 @@ const handleOpenGroupEdit = (group: MiniProgramLinkGroup) => {
 };
 
 const handleDeleteGroup = (group: MiniProgramLinkGroup) => {
-  Dialog.warning({
+  confirmDeleteGroup({
     title: "确定要删除这个分组吗？",
     description: "删除后已关联的链接将按未分组展示，该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await miniProgramLinkGroupsApi.delete(group.metadata.name);
-        if (activeGroup.value === group.metadata.name) {
-          activeGroup.value = undefined;
-        }
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        refreshGroups();
+    names: [group.metadata.name],
+    doDelete: (name) => miniProgramLinkGroupsApi.delete(name),
+    onSuccess: () => {
+      if (activeGroup.value === group.metadata.name) {
+        activeGroup.value = undefined;
       }
+      // 分组删除后刷新分组列表与编辑弹窗选项（链接列表不受影响）
+      queryClient.invalidateQueries({ queryKey: ["uni-halo:mini-program-link-groups-options"] });
     },
   });
 };
@@ -543,6 +524,11 @@ const onModalClose = () => {
                 </VEntityField>
               </template>
               <template #end>
+                <VEntityField v-if="link.metadata.deletionTimestamp">
+                  <template #description>
+                    <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+                  </template>
+                </VEntityField>
                 <VEntityField>
                   <template #description>
                     <span class=":uno: truncate text-xs text-gray-500" style="max-width: 16rem">

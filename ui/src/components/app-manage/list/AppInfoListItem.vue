@@ -75,6 +75,11 @@ const routeToVersions = () => {
       </VEntityField>
     </template>
     <template #end>
+      <VEntityField v-if="app.metadata.deletionTimestamp">
+        <template #description>
+          <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+        </template>
+      </VEntityField>
       <VEntityField v-if="app.spec.description">
         <template #description>
           <span class=":uno: truncate text-xs tabular-nums text-gray-500">

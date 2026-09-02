@@ -67,11 +67,12 @@ public class NoticePublicEndpoint implements CustomEndpoint {
 
     /**
      * 已发布公告分页列表（脱敏：不含 content，默认排序）。
+     * 走公开专用查询：仅 published 且排除删除中对象（决策 D7）。
      */
     private Mono<ServerResponse> listNotices(ServerRequest request) {
         int page = queryPage(request);
         int size = querySize(request);
-        return noticeService.list(STATUS_PUBLISHED, "", "", page, size, "")
+        return noticeService.listPublic(page, size)
                 .flatMap(result -> Flux.fromIterable(result.getItems())
                         .flatMap(this::toListVo)
                         .collectList()
@@ -92,12 +93,17 @@ public class NoticePublicEndpoint implements CustomEndpoint {
 
     /**
      * 公告详情（含 content 富文本正文，内嵌类型信息）；不存在返回 404。
+     * 删除中对象视为不存在（决策 D7）。
      */
     private Mono<ServerResponse> getNotice(ServerRequest request) {
         String name = request.pathVariable("name");
         return noticeService.getByName(name)
+                // 公开详情：删除中对象视为不存在（决策 D7）
+                .filter(notice -> notice.getMetadata() == null
+                        || notice.getMetadata().getDeletionTimestamp() == null)
                 .flatMap(this::toDetailMap)
-                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+                .flatMap(body -> ServerResponse.ok().bodyValue(body))
+                .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));
     }
 
     /**

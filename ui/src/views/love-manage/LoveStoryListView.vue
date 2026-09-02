@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconRefreshLine,
-  Toast,
   VButton,
   VCard,
   VEmpty,
@@ -14,9 +12,12 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VStatusDot,
   VDropdownItem,
 } from "@halo-dev/components";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchInterval } from "@/utils/query";
 import { computed, ref, watch } from "vue";
 import LoveStoryEditingModal from "@/components/love-manage/story/LoveStoryEditingModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
@@ -29,7 +30,7 @@ import {
   type LoveStoryViewMode,
 } from "@/types";
 
-const queryClient = useQueryClient();
+const { confirmDelete } = useDeletionFlow(["uni-halo:love-stories"]);
 
 const page = ref(1);
 const size = ref(20);
@@ -62,6 +63,8 @@ const { data: stories, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 watch(
@@ -119,44 +122,21 @@ const handleOpenEditingModal = (story?: LoveStory) => {
 };
 
 const handleDelete = (story: LoveStory) => {
-  Dialog.warning({
+  confirmDelete({
     title: "确定要删除这段故事吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await loveStoryApi.delete(story.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-stories"] });
-      }
-    },
+    names: [story.metadata.name],
+    doDelete: (name) => loveStoryApi.delete(name),
   });
 };
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedStoryNames.value];
+  confirmDelete({
     title: "确定要删除选中的故事吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await Promise.all(
-          selectedStoryNames.value.map((name) => loveStoryApi.delete(name))
-        );
-        selectedStoryNames.value = [];
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-stories"] });
-      }
+    names,
+    doDelete: (name) => loveStoryApi.delete(name),
+    onSuccess: () => {
+      selectedStoryNames.value = [];
     },
   });
 };
@@ -287,6 +267,11 @@ const onModalClose = () => {
                 </VEntityField>
               </template>
               <template #end>
+                <VEntityField v-if="story.metadata.deletionTimestamp">
+                  <template #description>
+                    <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+                  </template>
+                </VEntityField>
                 <VEntityField>
                   <template #description>
                     <span class=":uno: truncate text-xs text-gray-500">
@@ -321,8 +306,16 @@ const onModalClose = () => {
               <div class=":uno: absolute -left-9 top-1.5 h-3 w-3 rounded-full bg-pink-400 ring-4 ring-pink-100" />
               <VCard :body-class="[':uno: !p-4']">
                 <div class=":uno: flex items-center justify-between gap-2">
-                  <div class=":uno: truncate text-sm font-semibold text-gray-800">
-                    {{ story.spec.title || story.metadata.name }}
+                  <div class=":uno: flex min-w-0 items-center gap-2">
+                    <span class=":uno: truncate text-sm font-semibold text-gray-800">
+                      {{ story.spec.title || story.metadata.name }}
+                    </span>
+                    <VStatusDot
+                      v-if="story.metadata.deletionTimestamp"
+                      v-tooltip="'删除中'"
+                      state="warning"
+                      text="删除中"
+                    />
                   </div>
                   <VSpace spacing="sm">
                     <VButton size="sm" type="secondary" @click="handleOpenEditingModal(story)">

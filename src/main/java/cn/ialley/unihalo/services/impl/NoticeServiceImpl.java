@@ -17,7 +17,9 @@ import run.halo.app.extension.ListResult;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
+import static run.halo.app.extension.index.query.Queries.and;
 import static run.halo.app.extension.index.query.Queries.equal;
+import static run.halo.app.extension.index.query.Queries.isNull;
 
 /**
  * 通知公告服务实现
@@ -52,6 +54,20 @@ public class NoticeServiceImpl implements NoticeService {
         ListOptions listOptions = builder.build();
         return client.listAll(Notice.class, listOptions, resolveSort(sort))
                 .filter(notice -> matchesKeyword(notice, keyword))
+                .collectList()
+                .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+    }
+
+    @Override
+    public Mono<ListResult<Notice>> listPublic(int page, int size) {
+        // 公开读路径：仅 published 且排除删除中对象（决策 D7）
+        return client.listAll(Notice.class,
+                        ListOptions.builder()
+                                .fieldQuery(and(
+                                        equal("spec.status", STATUS_PUBLISHED),
+                                        isNull("metadata.deletionTimestamp")))
+                                .build(),
+                        resolveSort(""))
                 .collectList()
                 .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
     }
@@ -114,9 +130,12 @@ public class NoticeServiceImpl implements NoticeService {
 
     @Override
     public Mono<Notice> getLatestPublished() {
+        // 公开读路径：排除删除中对象（决策 D7）
         return client.listAll(Notice.class,
                         ListOptions.builder()
-                                .fieldQuery(equal("spec.status", STATUS_PUBLISHED))
+                                .fieldQuery(and(
+                                        equal("spec.status", STATUS_PUBLISHED),
+                                        isNull("metadata.deletionTimestamp")))
                                 .build(),
                         Sort.by(Sort.Direction.DESC, "spec.priority", "spec.publishTime",
                                 "metadata.creationTimestamp"))

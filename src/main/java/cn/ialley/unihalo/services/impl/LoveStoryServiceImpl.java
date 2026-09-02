@@ -15,6 +15,8 @@ import run.halo.app.extension.ListResult;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
+import static run.halo.app.extension.index.query.Queries.isNull;
+
 /**
  * 恋爱故事服务实现
  *
@@ -31,6 +33,18 @@ public class LoveStoryServiceImpl implements LoveStoryService {
         return client.listAll(LoveStory.class, new ListOptions(),
                         Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))
                 .filter(story -> matchesKeyword(story, keyword))
+                .collectList()
+                .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+    }
+
+    @Override
+    public Mono<ListResult<LoveStory>> listPublic(int page, int size) {
+        // 公开读路径：排除删除中对象（决策 D7）
+        return client.listAll(LoveStory.class,
+                        ListOptions.builder()
+                                .fieldQuery(isNull("metadata.deletionTimestamp"))
+                                .build(),
+                        Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))
                 .collectList()
                 .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
     }

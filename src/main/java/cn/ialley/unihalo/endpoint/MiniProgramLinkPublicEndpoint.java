@@ -110,7 +110,8 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
         int page = queryPage(request);
         int size = querySize(request);
         String group = request.queryParam("group").orElse("").trim();
-        return miniProgramLinkService.list(blankToNull(group), true,
+        // 公开读路径专用查询：visible=true 且排除删除中对象（决策 D7）
+        return miniProgramLinkService.listPublic(blankToNull(group),
                         blankToNull(keyword), page, size)
                 .flatMap(result -> ServerResponse.ok().bodyValue(result));
     }
@@ -118,7 +119,10 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
     private Mono<ServerResponse> getLink(ServerRequest request) {
         String name = request.pathVariable("name");
         return miniProgramLinkService.getByName(name)
-                .filter(link -> link.getSpec() != null
+                // 公开详情：仅可见且非删除中（决策 D7）
+                .filter(link -> (link.getMetadata() == null
+                        || link.getMetadata().getDeletionTimestamp() == null)
+                        && link.getSpec() != null
                         && Boolean.TRUE.equals(link.getSpec().getVisible()))
                 .flatMap(link -> ServerResponse.ok().bodyValue(link))
                 .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));

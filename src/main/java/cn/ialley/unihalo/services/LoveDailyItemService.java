@@ -13,8 +13,14 @@ public interface LoveDailyItemService {
 
     /**
      * 分页列表；status 精确筛选，keyword 模糊匹配标题。
+     * 管理端使用，保留删除中对象（决策 D7）。
      */
     Mono<ListResult<LoveDailyItem>> list(String status, String keyword, int page, int size);
+
+    /**
+     * 公开列表（keyword 恒空，排除删除中对象，决策 D7）。公开读路径专用。
+     */
+    Mono<ListResult<LoveDailyItem>> listPublic(String status, int page, int size);
 
     Mono<LoveDailyItem> getByName(String name);
 

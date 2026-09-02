@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconRefreshLine,
-  Toast,
   VButton,
   VCard,
   VEmpty,
@@ -11,8 +9,11 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VStatusDot,
 } from "@halo-dev/components";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchInterval } from "@/utils/query";
 import { computed, ref, watch } from "vue";
 import LoveAlbumEditingModal from "@/components/love-manage/album/LoveAlbumEditingModal.vue";
 import PhotoManageModal from "@/components/love-manage/PhotoManageModal.vue";
@@ -21,7 +22,7 @@ import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import { loveAlbumsApi } from "@/api";
 import { LOVE_LIST_SORT_OPTIONS, type LoveAlbum } from "@/types";
 
-const queryClient = useQueryClient();
+const { confirmDelete } = useDeletionFlow(["uni-halo:love-albums"]);
 
 const page = ref(1);
 const size = ref(20);
@@ -50,6 +51,8 @@ const { data: albums, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 watch(
@@ -105,44 +108,23 @@ const handleOpenPhotoModal = (album: LoveAlbum) => {
 };
 
 const handleDelete = (album: LoveAlbum) => {
-  Dialog.warning({
+  confirmDelete({
     title: "确定要删除该相册吗？",
     description: "相册内的照片将一并删除（附件文件保留），该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await loveAlbumsApi.delete(album.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-albums"] });
-      }
-    },
+    names: [album.metadata.name],
+    doDelete: (name) => loveAlbumsApi.delete(name),
   });
 };
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedAlbumNames.value];
+  confirmDelete({
     title: "确定要删除选中的相册吗？",
     description: "相册内的照片将一并删除（附件文件保留），该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await Promise.all(
-          selectedAlbumNames.value.map((name) => loveAlbumsApi.delete(name))
-        );
-        selectedAlbumNames.value = [];
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-albums"] });
-      }
+    names,
+    doDelete: (name) => loveAlbumsApi.delete(name),
+    onSuccess: () => {
+      selectedAlbumNames.value = [];
     },
   });
 };
@@ -265,8 +247,16 @@ const onModalClose = () => {
             </span>
           </div>
           <div class=":uno: p-4">
-            <div class=":uno: truncate text-sm font-semibold text-gray-800">
-              {{ album.spec.displayName || "未命名相册" }}
+            <div class=":uno: flex items-center gap-2">
+              <div class=":uno: truncate text-sm font-semibold text-gray-800">
+                {{ album.spec.displayName || "未命名相册" }}
+              </div>
+              <VStatusDot
+                v-if="album.metadata.deletionTimestamp"
+                v-tooltip="'删除中'"
+                state="warning"
+                text="删除中"
+              />
             </div>
             <div class=":uno: mt-1 line-clamp-1 text-xs text-gray-500">
               {{ album.spec.description || "暂无描述" }}

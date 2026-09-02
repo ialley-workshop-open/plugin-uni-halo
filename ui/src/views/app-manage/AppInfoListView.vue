@@ -1,9 +1,7 @@
 <script lang="ts" setup>
 import {
-  Dialog,
   IconAddCircle,
   IconRefreshLine,
-  Toast,
   VButton,
   VCard,
   VEmpty,
@@ -13,14 +11,16 @@ import {
   VPagination,
   VSpace,
 } from "@halo-dev/components";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchInterval } from "@/utils/query";
 import {computed, ref, watch} from "vue";
 import AppInfoEditingModal from "../../components/app-manage/list/AppInfoEditingModal.vue";
 import AppInfoListItem from "../../components/app-manage/list/AppInfoListItem.vue";
 import { appsApi } from "@/api";
 import type { AppInfo } from "@/types";
 
-const queryClient = useQueryClient();
+const { confirmDelete } = useDeletionFlow(["uni-halo:apps"]);
 
 const page = ref(1);
 const size = ref(20);
@@ -44,6 +44,8 @@ const { data: apps, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 watch(
@@ -74,24 +76,13 @@ watch(
 );
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedAppNames.value];
+  confirmDelete({
     title: "确定要删除选中的应用吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await Promise.all(
-          selectedAppNames.value.map((name) => appsApi.delete(name))
-        );
-        selectedAppNames.value = [];
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:apps"] });
-      }
+    names,
+    doDelete: (name) => appsApi.delete(name),
+    onSuccess: () => {
+      selectedAppNames.value = [];
     },
   });
 };
@@ -102,22 +93,11 @@ const handleOpenEditingModal = (app?: AppInfo) => {
 };
 
 const handleDelete = (app: AppInfo) => {
-  Dialog.warning({
+  confirmDelete({
     title: "确定要删除该应用吗？",
     description: "删除之后将无法恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await appsApi.delete(app.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:apps"] });
-      }
-    },
+    names: [app.metadata.name],
+    doDelete: (name) => appsApi.delete(name),
   });
 };
 

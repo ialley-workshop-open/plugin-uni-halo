@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconRefreshLine,
-  Toast,
   VButton,
   VCard,
   VEmpty,
@@ -17,7 +15,9 @@ import {
   VStatusDot,
   VDropdownItem,
 } from "@halo-dev/components";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchInterval } from "@/utils/query";
 import { computed, ref, watch } from "vue";
 import LoveDailyItemEditingModal from "@/components/love-manage/daily/LoveDailyItemEditingModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
@@ -33,7 +33,7 @@ import {
   type LoveDailyViewMode,
 } from "@/types";
 
-const queryClient = useQueryClient();
+const { confirmDelete } = useDeletionFlow(["uni-halo:love-daily"]);
 
 const page = ref(1);
 const size = ref(20);
@@ -70,6 +70,8 @@ const { data: items, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 watch(
@@ -144,44 +146,21 @@ const handleOpenEditingModal = (item?: LoveDailyItem) => {
 };
 
 const handleDelete = (item: LoveDailyItem) => {
-  Dialog.warning({
+  confirmDelete({
     title: "确定要删除该清单项吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await loveDailyApi.delete(item.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-daily"] });
-      }
-    },
+    names: [item.metadata.name],
+    doDelete: (name) => loveDailyApi.delete(name),
   });
 };
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedItemNames.value];
+  confirmDelete({
     title: "确定要删除选中的清单项吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await Promise.all(
-          selectedItemNames.value.map((name) => loveDailyApi.delete(name))
-        );
-        selectedItemNames.value = [];
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:love-daily"] });
-      }
+    names,
+    doDelete: (name) => loveDailyApi.delete(name),
+    onSuccess: () => {
+      selectedItemNames.value = [];
     },
   });
 };
@@ -343,6 +322,11 @@ const timelineDotClass = (status?: string) => {
                 </VEntityField>
               </template>
               <template #end>
+                <VEntityField v-if="item.metadata.deletionTimestamp">
+                  <template #description>
+                    <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+                  </template>
+                </VEntityField>
                 <VEntityField>
                   <template #description>
                     <VStatusDot
@@ -387,6 +371,12 @@ const timelineDotClass = (status?: string) => {
                     <span class=":uno: truncate text-sm font-semibold text-gray-800">
                       {{ item.spec.title || item.metadata.name }}
                     </span>
+                    <VStatusDot
+                      v-if="item.metadata.deletionTimestamp"
+                      v-tooltip="'删除中'"
+                      state="warning"
+                      text="删除中"
+                    />
                     <VStatusDot
                       :state="statusDotState(item.spec.status)"
                       :text="LOVE_STATUS_LABELS[item.spec.status || 'wait'] || item.spec.status"

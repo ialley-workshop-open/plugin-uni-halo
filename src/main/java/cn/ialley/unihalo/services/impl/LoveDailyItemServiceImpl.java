@@ -16,7 +16,9 @@ import run.halo.app.extension.ListResult;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
+import static run.halo.app.extension.index.query.Queries.and;
 import static run.halo.app.extension.index.query.Queries.equal;
+import static run.halo.app.extension.index.query.Queries.isNull;
 
 /**
  * 恋爱清单服务实现
@@ -43,6 +45,19 @@ public class LoveDailyItemServiceImpl implements LoveDailyItemService {
         return client.listAll(LoveDailyItem.class, listOptions,
                         Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))
                 .filter(item -> matchesKeyword(item, keyword))
+                .collectList()
+                .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+    }
+
+    @Override
+    public Mono<ListResult<LoveDailyItem>> listPublic(String status, int page, int size) {
+        // 公开读路径：排除删除中对象（决策 D7）
+        var builder = ListOptions.builder().fieldQuery(isNull("metadata.deletionTimestamp"));
+        if (!isBlank(status)) {
+            builder.fieldQuery(equal("spec.status", status));
+        }
+        return client.listAll(LoveDailyItem.class, builder.build(),
+                        Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))
                 .collectList()
                 .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
     }

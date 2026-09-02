@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconRefreshLine,
-  Toast,
   VButton,
   VCard,
   VEmpty,
@@ -14,9 +12,12 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VStatusDot,
   VDropdownItem,
 } from "@halo-dev/components";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchInterval } from "@/utils/query";
 import { computed, ref, watch } from "vue";
 import SubmissionAuditModal from "@/components/link-manage/SubmissionAuditModal.vue";
 import SubmissionDetailModal from "@/components/link-manage/SubmissionDetailModal.vue";
@@ -35,7 +36,7 @@ const SORT_OPTIONS = [
   { label: "状态", value: "status" },
 ];
 
-const queryClient = useQueryClient();
+const { confirmDelete } = useDeletionFlow(["uni-halo:mini-program-link-submissions"]);
 
 const page = ref(1);
 const size = ref(20);
@@ -74,6 +75,8 @@ const { data: submissions, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 watch(
@@ -134,48 +137,22 @@ const handleBatchAudit = (action: "approve" | "reject") => {
 };
 
 const handleDelete = (submission: MiniProgramLinkSubmission) => {
-  Dialog.warning({
+  confirmDelete({
     title: "确定要删除这条申请吗？",
     description: "删除后不影响已生成的链接，该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await miniProgramLinkSubmissionsApi.delete(submission.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({
-          queryKey: ["uni-halo:mini-program-link-submissions"],
-        });
-      }
-    },
+    names: [submission.metadata.name],
+    doDelete: (name) => miniProgramLinkSubmissionsApi.delete(name),
   });
 };
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedNames.value];
+  confirmDelete({
     title: "确定要删除选中的申请吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await Promise.all(
-          selectedNames.value.map((name) => miniProgramLinkSubmissionsApi.delete(name))
-        );
-        selectedNames.value = [];
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({
-          queryKey: ["uni-halo:mini-program-link-submissions"],
-        });
-      }
+    names,
+    doDelete: (name) => miniProgramLinkSubmissionsApi.delete(name),
+    onSuccess: () => {
+      selectedNames.value = [];
     },
   });
 };
@@ -354,6 +331,11 @@ const formatTime = (value?: string | null) => {
               </VEntityField>
             </template>
             <template #end>
+              <VEntityField v-if="submission.metadata.deletionTimestamp">
+                <template #description>
+                  <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+                </template>
+              </VEntityField>
               <VEntityField>
                 <template #description>
                   <span

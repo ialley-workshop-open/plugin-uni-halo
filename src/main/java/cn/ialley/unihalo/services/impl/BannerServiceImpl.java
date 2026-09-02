@@ -143,7 +143,11 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Mono<ListResult<BannerCandidateVo>> listCandidates(String keyword, int page, int size) {
-        return client.listAll(PostRef.class, ListOptions.builder().build(),
+        // 候选读路径：排除删除中对象（决策 D7）
+        return client.listAll(PostRef.class,
+                        ListOptions.builder()
+                                .fieldQuery(isNull("metadata.deletionTimestamp"))
+                                .build(),
                         Sort.by(Sort.Direction.DESC, "metadata.creationTimestamp"))
                 .filter(post -> post.getSpec() != null
                         && Boolean.TRUE.equals(post.getSpec().getPublish()))

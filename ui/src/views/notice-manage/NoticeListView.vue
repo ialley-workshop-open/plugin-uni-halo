@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconGrid,
   IconRefreshLine,
@@ -15,9 +14,15 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VStatusDot,
   VDropdownItem,
 } from "@halo-dev/components";
 import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import {
+  deletingRefetchInterval,
+  deletingRefetchIntervalForList,
+} from "@/utils/query";
 import { VueDraggable } from "vue-draggable-plus";
 import { computed, ref, watch } from "vue";
 import NoticeEditingModal from "@/components/notice-manage/NoticeEditingModal.vue";
@@ -38,6 +43,10 @@ import {
 } from "@/types";
 
 const queryClient = useQueryClient();
+const { confirmDelete: confirmDeleteNotice } = useDeletionFlow(["uni-halo:notices"]);
+const { confirmDelete: confirmDeleteType } = useDeletionFlow([
+  "uni-halo:notice-types-filter",
+]);
 
 const page = ref(1);
 const size = ref(20);
@@ -73,6 +82,8 @@ const { data: notices, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 // 公告类型（供左侧类型栏与列表标签展示使用）
@@ -82,6 +93,8 @@ const { data: types } = useQuery({
     const result = await noticeTypeApi.list({ page: 1, size: 100 });
     return result.items;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（删除语义统一）
+  refetchInterval: (data) => deletingRefetchIntervalForList(data),
 });
 
 // 左侧类型栏数据（VueDraggable 拖拽用可变数组）
@@ -115,22 +128,11 @@ const handleTypeSaved = () => {
 };
 
 const handleTypeDelete = (typeItem: NoticeType) => {
-  Dialog.warning({
+  confirmDeleteType({
     title: "确定要删除这个公告类型吗？",
     description: "删除后已关联的公告将不再显示类型标签，该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await noticeTypeApi.delete(typeItem.metadata.name);
-        Toast.success("删除成功");
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:notice-types-filter"] });
-      }
-    },
+    names: [typeItem.metadata.name],
+    doDelete: (name) => noticeTypeApi.delete(name),
   });
 };
 
@@ -203,54 +205,31 @@ const handleOpenEditingModal = (notice?: Notice) => {
 };
 
 const handleDelete = (notice: Notice) => {
-  Dialog.warning({
+  confirmDeleteNotice({
     title: "确定要删除这条公告吗？",
     description: "删除后 app 端将不可见，该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await noticeApi.delete(notice.metadata.name);
-        Toast.success("删除成功");
-        // 删除当前页最后一条后回退页码，避免停留在空页；否则显式刷新列表
-        if (page.value > 1 && notices.value?.items.length === 1) {
-          page.value -= 1;
-        } else {
-          refetch();
-        }
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:notices"] });
+    names: [notice.metadata.name],
+    doDelete: (name) => noticeApi.delete(name),
+    onSuccess: () => {
+      // 删除当前页最后一条后回退页码，避免停留在空页
+      if (page.value > 1 && notices.value?.items.length === 1) {
+        page.value -= 1;
       }
     },
   });
 };
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedNoticeNames.value];
+  confirmDeleteNotice({
     title: "确定要删除选中的公告吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      const names = [...selectedNoticeNames.value];
-      try {
-        await Promise.all(names.map((name) => noticeApi.delete(name)));
-        selectedNoticeNames.value = [];
-        Toast.success("删除成功");
-        // 删除覆盖当前页全部条目时回退页码，否则显式刷新列表
-        if (page.value > 1 && notices.value?.items.length === names.length) {
-          page.value -= 1;
-        } else {
-          refetch();
-        }
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:notices"] });
+    names,
+    doDelete: (name) => noticeApi.delete(name),
+    onSuccess: () => {
+      selectedNoticeNames.value = [];
+      // 删除覆盖当前页全部条目时回退页码，否则由 invalidate 触发刷新
+      if (page.value > 1 && notices.value?.items.length === names.length) {
+        page.value -= 1;
       }
     },
   });
@@ -377,6 +356,9 @@ const formatTime = (value?: string | null) => {
             <span class=":uno: min-w-0 flex-1 truncate" @click="toggleType(t.metadata.name)">
               {{ t.spec.displayName || t.metadata.name }}
             </span>
+            <span v-if="t.metadata.deletionTimestamp" class=":uno: flex items-center">
+              <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+            </span>
             <span class=":uno: hidden items-center gap-1 group-hover:flex">
               <button
                 class=":uno: rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
@@ -492,6 +474,11 @@ const formatTime = (value?: string | null) => {
               </VEntityField>
             </template>
             <template #end>
+              <VEntityField v-if="notice.metadata.deletionTimestamp">
+                <template #description>
+                  <VStatusDot v-tooltip="'删除中'" state="warning" text="删除中" />
+                </template>
+              </VEntityField>
               <VEntityField>
                 <template #description>
                   <span

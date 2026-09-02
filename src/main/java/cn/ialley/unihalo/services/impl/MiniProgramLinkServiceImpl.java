@@ -23,7 +23,9 @@ import run.halo.app.extension.ListResult;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
+import static run.halo.app.extension.index.query.Queries.and;
 import static run.halo.app.extension.index.query.Queries.equal;
+import static run.halo.app.extension.index.query.Queries.isNull;
 
 /**
  * 友情链接-小程序链接服务实现（决策 D2/D5/D8）。
@@ -45,6 +47,22 @@ public class MiniProgramLinkServiceImpl implements MiniProgramLinkService {
         }
         ListOptions listOptions = builder.build();
         return client.listAll(MiniProgramLink.class, listOptions,
+                        Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))
+                .filter(link -> matches(link, group, keyword))
+                .collectList()
+                .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+    }
+
+    @Override
+    public Mono<ListResult<MiniProgramLink>> listPublic(String group, String keyword,
+            int page, int size) {
+        // 公开读路径：visible=true 且排除删除中对象（决策 D7）
+        return client.listAll(MiniProgramLink.class,
+                        ListOptions.builder()
+                                .fieldQuery(and(
+                                        equal("spec.visible", true),
+                                        isNull("metadata.deletionTimestamp")))
+                                .build(),
                         Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))
                 .filter(link -> matches(link, group, keyword))
                 .collectList()
@@ -110,7 +128,10 @@ public class MiniProgramLinkServiceImpl implements MiniProgramLinkService {
         return listAllFiltered(visible, keyword)
                 .collectList()
                 .flatMap(links -> client.listAll(MiniProgramLinkGroup.class,
-                                ListOptions.builder().build(),
+                                // 公开读路径：排除删除中对象（决策 D7）
+                                ListOptions.builder()
+                                        .fieldQuery(isNull("metadata.deletionTimestamp"))
+                                        .build(),
                                 Sort.by(Sort.Direction.DESC, "spec.priority",
                                         "metadata.creationTimestamp"))
                         .collectList()
@@ -119,12 +140,14 @@ public class MiniProgramLinkServiceImpl implements MiniProgramLinkService {
 
     /**
      * 按可见性与关键字过滤后的全量流（组内/组间排序在分组阶段完成）。
+     * 供公开 listGroups/listGrouped 聚合使用：排除删除中对象（决策 D7）。
      */
     private Flux<MiniProgramLink> listAllFiltered(Boolean visible, String keyword) {
         var builder = ListOptions.builder();
         if (visible != null) {
             builder.fieldQuery(equal("spec.visible", visible));
         }
+        builder.fieldQuery(isNull("metadata.deletionTimestamp"));
         ListOptions listOptions = builder.build();
         return client.listAll(MiniProgramLink.class, listOptions,
                 Sort.by(Sort.Direction.DESC, "spec.priority", "metadata.creationTimestamp"))

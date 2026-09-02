@@ -121,7 +121,7 @@ public class LovePublicEndpoint implements CustomEndpoint {
     private Mono<ServerResponse> listStories(ServerRequest request) {
         int page = queryPage(request);
         int size = querySize(request);
-        return loveStoryService.list("", page, size)
+        return loveStoryService.listPublic(page, size)
                 .flatMap(body -> ServerResponse.ok().bodyValue(body));
     }
 
@@ -131,7 +131,7 @@ public class LovePublicEndpoint implements CustomEndpoint {
     private Mono<ServerResponse> listAlbums(ServerRequest request) {
         int page = queryPage(request);
         int size = querySize(request);
-        return loveAlbumService.list("", page, size)
+        return loveAlbumService.listPublic(page, size)
                 .map(result -> {
                     List<LoveAlbumVo> items = result.getItems().stream()
                             .map(album -> LoveAlbumVo.from(album, isLocked(album)))
@@ -149,9 +149,13 @@ public class LovePublicEndpoint implements CustomEndpoint {
         String name = request.pathVariable("name");
         String token = request.queryParam("token").orElse("");
         return loveAlbumService.getByName(name)
+                // 公开详情：删除中对象视为不存在（决策 D7）
+                .filter(album -> album.getMetadata() == null
+                        || album.getMetadata().getDeletionTimestamp() == null)
                 .map(album -> LoveAlbumVo.from(album,
                         isLocked(album) && !albumTokenManager.verify(name, token)))
-                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+                .flatMap(body -> ServerResponse.ok().bodyValue(body))
+                .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));
     }
 
     /**
@@ -200,7 +204,7 @@ public class LovePublicEndpoint implements CustomEndpoint {
         int page = queryPage(request);
         int size = querySize(request);
         String status = request.queryParam("status").orElse("").trim();
-        return loveDailyItemService.list(status, "", page, size)
+        return loveDailyItemService.listPublic(status, page, size)
                 .flatMap(body -> ServerResponse.ok().bodyValue(body));
     }
 

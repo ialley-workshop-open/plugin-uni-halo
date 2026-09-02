@@ -18,6 +18,8 @@ import run.halo.app.extension.ListResult;
 import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
+import static run.halo.app.extension.index.query.Queries.isNull;
+
 /**
  * 恋爱相册服务实现（自研相册，含 BCrypt 密码）
  *
@@ -39,6 +41,19 @@ public class LoveAlbumServiceImpl implements LoveAlbumService {
         return client.listAll(LoveAlbum.class, new ListOptions(),
                         Sort.by(Sort.Direction.DESC, "metadata.creationTimestamp"))
                 .filter(album -> matchesKeyword(album, keyword))
+                .map(this::maskPassword)
+                .collectList()
+                .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+    }
+
+    @Override
+    public Mono<ListResult<LoveAlbum>> listPublic(int page, int size) {
+        // 公开读路径：排除删除中对象（决策 D7）
+        return client.listAll(LoveAlbum.class,
+                        ListOptions.builder()
+                                .fieldQuery(isNull("metadata.deletionTimestamp"))
+                                .build(),
+                        Sort.by(Sort.Direction.DESC, "metadata.creationTimestamp"))
                 .map(this::maskPassword)
                 .collectList()
                 .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
