@@ -23,6 +23,7 @@ import run.halo.app.extension.Metadata;
 import run.halo.app.extension.ReactiveExtensionClient;
 
 import static run.halo.app.extension.index.query.Queries.equal;
+import static run.halo.app.extension.index.query.Queries.isNull;
 
 /**
  * 首页轮播图服务实现
@@ -154,7 +155,12 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public Mono<List<BannerListVo>> listPublic() {
-        return client.listAll(Banner.class, ListOptions.builder().build(), defaultSort())
+        // 公开读路径排除删除中对象（决策 D7，设计见 .docs/deletion-finalizer-design.md）
+        return client.listAll(Banner.class,
+                        ListOptions.builder()
+                                .fieldQuery(isNull("metadata.deletionTimestamp"))
+                                .build(),
+                        defaultSort())
                 .map(BannerListVo::from)
                 .collectList();
     }
@@ -162,6 +168,9 @@ public class BannerServiceImpl implements BannerService {
     @Override
     public Mono<BannerDetailVo> getPublicByName(String name) {
         return client.fetch(Banner.class, name)
+                // 公开详情将删除中对象视为不存在
+                .filter(banner -> banner.getMetadata() == null
+                        || banner.getMetadata().getDeletionTimestamp() == null)
                 .switchIfEmpty(Mono.error(new NotFoundException("轮播图不存在")))
                 .map(BannerDetailVo::from);
     }

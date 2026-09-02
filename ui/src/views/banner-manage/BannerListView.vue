@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {
-  Dialog,
   IconAddCircle,
   IconRefreshLine,
   Toast,
@@ -14,15 +13,18 @@ import {
   VPageHeader,
   VPagination,
   VSpace,
+  VStatusDot,
   VDropdownItem,
 } from "@halo-dev/components";
-import { useQuery, useQueryClient } from "@tanstack/vue-query";
+import { useQuery } from "@tanstack/vue-query";
 import { VueDraggable } from "vue-draggable-plus";
 import { ref, watch } from "vue";
 import BannerEditingModal from "@/components/banner-manage/BannerEditingModal.vue";
 import BannerCandidatesModal from "@/components/banner-manage/BannerCandidatesModal.vue";
 import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
+import { useDeletionFlow } from "@/composables/useDeletionFlow";
+import { deletingRefetchInterval } from "@/utils/query";
 import RiDragMove2Line from "~icons/ri/drag-move-2-line";
 import RiImageLine from "~icons/ri/image-line";
 import RiRefreshLine from "~icons/ri/refresh-line";
@@ -35,7 +37,7 @@ import {
   type BannerCandidate,
 } from "@/types";
 
-const queryClient = useQueryClient();
+const { confirmDelete } = useDeletionFlow(["uni-halo:banners"]);
 
 const page = ref(1);
 const size = ref(20);
@@ -74,6 +76,8 @@ const { data: banners, isLoading, isFetching, refetch } = useQuery({
     total.value = result.total;
     return result;
   },
+  // 删除中对象存在时每 1s 自动重取，直到对象消失（设计见 .docs/deletion-finalizer-design.md）
+  refetchInterval: (data) => deletingRefetchInterval(data),
 });
 
 // 拖拽排序用可变数组（VueDraggable 需要；非手动排序时手柄不渲染，列表不可拖）
@@ -192,26 +196,15 @@ const handleChangePost = (banner: Banner) => {
 };
 
 const handleDelete = (banner: Banner) => {
-  Dialog.warning({
+  confirmDelete({
     title: "确定要删除这张轮播图吗？",
     description: "删除后 app 端首页立即不可见，该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      try {
-        await bannerApi.delete(banner.metadata.name);
-        Toast.success("删除成功");
-        // 删除当前页最后一条后回退页码，避免停留在空页；否则显式刷新列表
-        if (page.value > 1 && banners.value?.items.length === 1) {
-          page.value -= 1;
-        } else {
-          refetch();
-        }
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:banners"] });
+    names: [banner.metadata.name],
+    doDelete: (name) => bannerApi.delete(name),
+    onSuccess: () => {
+      // 删除当前页最后一条后回退页码，避免停留在空页
+      if (page.value > 1 && banners.value?.items.length === 1) {
+        page.value -= 1;
       }
     },
   });
@@ -220,28 +213,16 @@ const handleDelete = (banner: Banner) => {
 // ===== 批量操作 =====
 
 const handleDeleteInBatch = () => {
-  Dialog.warning({
+  const names = [...selectedBannerNames.value];
+  confirmDelete({
     title: "确定要删除选中的轮播图吗？",
-    description: "该操作不可恢复。",
-    confirmType: "danger",
-    confirmText: "确定",
-    cancelText: "取消",
-    onConfirm: async () => {
-      const names = [...selectedBannerNames.value];
-      try {
-        await Promise.all(names.map((name) => bannerApi.delete(name)));
-        selectedBannerNames.value = [];
-        Toast.success("删除成功");
-        // 删除覆盖当前页全部条目时回退页码，否则显式刷新列表
-        if (page.value > 1 && banners.value?.items.length === names.length) {
-          page.value -= 1;
-        } else {
-          refetch();
-        }
-      } catch (error) {
-        Toast.error((error as Error).message);
-      } finally {
-        queryClient.invalidateQueries({ queryKey: ["uni-halo:banners"] });
+    names,
+    doDelete: (name) => bannerApi.delete(name),
+    onSuccess: () => {
+      selectedBannerNames.value = [];
+      // 删除覆盖当前页全部条目时回退页码，否则由 invalidate 触发刷新
+      if (page.value > 1 && banners.value?.items.length === names.length) {
+        page.value -= 1;
       }
     },
   });
@@ -497,6 +478,15 @@ const sourceBadgeClass = (source?: string) =>
                 </VEntityField>
               </template>
               <template #end>
+                <VEntityField v-if="banner.metadata.deletionTimestamp">
+                  <template #description>
+                    <VStatusDot
+                      v-tooltip="'删除中'"
+                      state="warning"
+                      text="删除中"
+                    />
+                  </template>
+                </VEntityField>
                 <VEntityField v-if="banner.spec.remark">
                   <template #description>
                     <span class=":uno: truncate text-xs text-gray-400" style="max-width: 12rem">
