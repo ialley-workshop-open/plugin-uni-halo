@@ -926,7 +926,7 @@ spec:
           name: enabled
           id: captchaEnabled
           label: 开启验证码
-          help: 开启后小程序端提交链接申请、解锁恋爱相册时需要输入验证码，防止暴力/垃圾提交。
+          help: 总开关。关闭后所有功能都不要求验证码；开启后仅对下方「生效范围」勾选的功能要求输入验证码，防止暴力/垃圾提交。
           value: true
           options:
             - label: 开启
@@ -934,6 +934,37 @@ spec:
             - label: 关闭
               value: false
           validation: required
+        - $formkit: group
+          if: "$get(captchaEnabled).value === true"
+          name: scope
+          label: 生效范围
+          help: 选择需要输入验证码的功能；未勾选的功能即使总开关开启也无需验证码。
+          value:
+            linkSubmission: true
+            loveAlbumUnlock: true
+          children:
+            - $formkit: select
+              name: linkSubmission
+              label: 链接申请提交
+              value: true
+              options:
+                - label: 开启
+                  value: true
+                - label: 关闭
+                  value: false
+              help: 开启后，小程序端提交链接申请时需要输入验证码，防止垃圾申请堆积。
+              validation: required
+            - $formkit: select
+              name: loveAlbumUnlock
+              label: 恋爱相册解锁
+              value: true
+              options:
+                - label: 开启
+                  value: true
+                - label: 关闭
+                  value: false
+              help: 开启后，加密恋爱相册解锁时需要输入验证码，防止暴力试密码。
+              validation: required
         - $formkit: select
           if: "$get(captchaEnabled).value === true"
           name: type
