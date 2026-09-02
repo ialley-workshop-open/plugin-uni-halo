@@ -10,21 +10,27 @@ import type {GeneralConfig, GeneralConfigSpec} from "@/types";
 
 const queryClient = useQueryClient();
 
-type BigGroup = "profile" | "pages" | "assets";
+type BigGroup = "profile" | "preferences" | "pages" | "assets";
 
 const GROUP_ITEMS: Array<{id: BigGroup; label: string; desc: string}> = [
-  {id: "profile", label: "站点资料", desc: "博主 / 社交 / 版权与声明"},
+  {id: "profile", label: "应用资料", desc: "应用信息 / 博主 / 社交 / 版权与声明"},
+  {id: "preferences", label: "偏好设置", desc: "列表布局 / 封面位置 / 头像"},
   {id: "pages", label: "页面与排版", desc: "首页 / 图库 / 关于页"},
   {id: "assets", label: "资源与兜底", desc: "默认图 / 加载占位"},
 ];
 
 const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
   profile: [
+    {id: "appInfo", label: "应用信息"},
     {id: "blogger", label: "博主资料"},
     {id: "social", label: "社交信息"},
     {id: "copyright", label: "页脚版权"},
     {id: "disclaimers", label: "免责声明"},
     {id: "about", label: "关于与详情"},
+  ],
+  preferences: [
+    {id: "layout", label: "列表与卡片"},
+    {id: "avatar", label: "评论头像"},
   ],
   pages: [
     {id: "home", label: "首页"},
@@ -38,7 +44,7 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
 };
 
 const bigGroup = ref<BigGroup>("profile");
-const subTab = ref<string>("blogger");
+const subTab = ref<string>("appInfo");
 
 watch(bigGroup, (group) => {
   const first = SUB_TABS[group][0];
@@ -66,6 +72,7 @@ function defaultConfig(): GeneralConfig {
 function defaultSpec(): GeneralConfigSpec {
   return {
     profile: {
+      appInfo: {name: "uni-halo", logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"},
       blogger: {nickname: "uni-halo", avatar: "", email: "", description: ""},
       social: {
         enabled: true,
@@ -121,6 +128,11 @@ function defaultSpec(): GeneralConfigSpec {
       loadingGifUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_img_lazyload.gif",
       loadingErrUrl: "https://uni-halo.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif",
       loadingEmptyUrl: "",
+    },
+    preferences: {
+      homeListLayout: "h_row_col1",
+      articleCardType: "lr_image_text",
+      avatarRadius: true,
     },
   };
 }
@@ -190,7 +202,7 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <VPageHeader title="通用配置">
+  <VPageHeader title="UniHalo-通用配置">
     <template #actions>
       <div class=":uno: flex items-center">
         <VSpace>
@@ -233,7 +245,13 @@ const handleSave = async () => {
           </div>
         </template>
 
-        <!-- 站点资料 → 博主资料 -->
+        <!-- 应用资料 → 应用信息 -->
+        <template v-if="bigGroup === 'profile' && subTab === 'appInfo'">
+          <FormKit v-model="formState.spec.profile.appInfo.name" name="appinfo_name" label="应用名称" type="text" help="小程序应用展示名称，如关于页标题等处使用" />
+          <FormKit v-model="formState.spec.profile.appInfo.logo" name="appinfo_logo" label="应用图标" type="attachment" :accepts="['image/*']" help="小程序应用图标" />
+        </template>
+
+        <!-- 应用资料 → 博主资料 -->
         <template v-if="bigGroup === 'profile' && subTab === 'blogger'">
           <FormKit v-model="formState.spec.profile.blogger.nickname" name="blogger_nickname" label="昵称" type="text" />
           <FormKit v-model="formState.spec.profile.blogger.email" name="blogger_email" label="邮箱" type="text" />
@@ -241,7 +259,7 @@ const handleSave = async () => {
           <FormKit v-model="formState.spec.profile.blogger.description" name="blogger_description" label="简介" type="textarea" />
         </template>
 
-        <!-- 站点资料 → 社交信息 -->
+        <!-- 应用资料 → 社交信息 -->
         <template v-if="bigGroup === 'profile' && subTab === 'social'">
           <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
             <div>
@@ -250,9 +268,8 @@ const handleSave = async () => {
             </div>
             <VSwitch v-model="formState.spec.profile.social.enabled" />
           </div>
-          <template v-if="formState.spec.profile.social.enabled">
-            <div class=":uno: mt-3">
-              <FormKit v-model="formState.spec.profile.social.qq" name="social_qq" label="QQ号" type="text" />
+          <div class=":uno: mt-3">
+            <FormKit v-model="formState.spec.profile.social.qq" name="social_qq" label="QQ号" type="text" />
               <FormKit v-model="formState.spec.profile.social.wechat" name="social_wechat" label="微信号" type="text" />
               <FormKit v-model="formState.spec.profile.social.weibo" name="social_weibo" label="微博地址" type="text" />
               <FormKit v-model="formState.spec.profile.social.email" name="social_email" label="邮箱" type="text" />
@@ -263,10 +280,9 @@ const handleSave = async () => {
               <FormKit v-model="formState.spec.profile.social.gitee" name="social_gitee" label="Gitee" type="text" />
               <FormKit v-model="formState.spec.profile.social.github" name="social_github" label="GitHub" type="text" />
             </div>
-          </template>
         </template>
 
-        <!-- 站点资料 → 页脚版权 -->
+        <!-- 应用资料 → 页脚版权 -->
         <template v-if="bigGroup === 'profile' && subTab === 'copyright'">
           <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
             <div>
@@ -275,12 +291,12 @@ const handleSave = async () => {
             </div>
             <VSwitch v-model="formState.spec.profile.copyrightConfig.enabled" />
           </div>
-          <div v-if="formState.spec.profile.copyrightConfig.enabled" class=":uno: mt-3">
+          <div class=":uno: mt-3">
             <FormKit v-model="formState.spec.profile.copyrightConfig.content" name="copyright_content" label="版权内容" type="textarea" />
           </div>
         </template>
 
-        <!-- 站点资料 → 免责声明（Halo 富文本） -->
+        <!-- 应用资料 → 免责声明（Halo 富文本） -->
         <template v-if="bigGroup === 'profile' && subTab === 'disclaimers'">
           <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
             <div>
@@ -289,12 +305,12 @@ const handleSave = async () => {
             </div>
             <VSwitch v-model="formState.spec.profile.disclaimers.enabled" />
           </div>
-          <div v-if="formState.spec.profile.disclaimers.enabled" class=":uno: mt-3">
+          <div class=":uno: mt-3">
             <RichTextEditorField v-model="formState.spec.profile.disclaimers.content" placeholder="输入免责声明内容，支持图文混排……留空使用默认模板" />
           </div>
         </template>
 
-        <!-- 站点资料 → 关于与详情 -->
+        <!-- 应用资料 → 关于与详情 -->
         <template v-if="bigGroup === 'profile' && subTab === 'about'">
           <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
             <div>
@@ -320,13 +336,11 @@ const handleSave = async () => {
               </div>
               <VSwitch v-model="formState.spec.profile.postDetailConfig.copyrightEnabled" />
             </div>
-            <template v-if="formState.spec.profile.postDetailConfig.copyrightEnabled">
-              <div class=":uno: mt-3">
-                <FormKit v-model="formState.spec.profile.postDetailConfig.copyrightAuthor" name="post_copyright_author" label="文章版权作者" type="text" />
+            <div class=":uno: mt-3">
+              <FormKit v-model="formState.spec.profile.postDetailConfig.copyrightAuthor" name="post_copyright_author" label="文章版权作者" type="text" />
                 <FormKit v-model="formState.spec.profile.postDetailConfig.copyrightDesc" name="post_copyright_desc" label="文章版权描述" type="textarea" />
                 <FormKit v-model="formState.spec.profile.postDetailConfig.copyrightViolation" name="post_copyright_violation" label="文章侵权说明" type="textarea" />
               </div>
-            </template>
           </div>
         </template>
 
@@ -364,7 +378,18 @@ const handleSave = async () => {
               <VSwitch v-model="formState.spec.pages.homeConfig.bannerConfig.showIndicator" />
             </div>
             <FormKit v-model="formState.spec.pages.homeConfig.bannerConfig.height" name="banner_height" label="轮播图高度" type="text" help="单位为 rpx" />
-            <FormKit v-model="formState.spec.pages.homeConfig.bannerConfig.dotPosition" name="banner_dot_position" label="指示器位置" type="select" :options="['left', 'right', 'top', 'bottom']" />
+            <FormKit
+              v-model="formState.spec.pages.homeConfig.bannerConfig.dotPosition"
+              name="banner_dot_position"
+              label="指示器位置"
+              type="select"
+              :options="[
+                {label: '左', value: 'left'},
+                {label: '右', value: 'right'},
+                {label: '上', value: 'top'},
+                {label: '下', value: 'bottom'},
+              ]"
+            />
           </div>
         </template>
 
@@ -400,6 +425,47 @@ const handleSave = async () => {
           <FormKit v-model="formState.spec.assets.loadingGifUrl" name="assets_loading_gif" label="加载中的图片" type="attachment" :accepts="['image/*']" />
           <FormKit v-model="formState.spec.assets.loadingErrUrl" name="assets_loading_err" label="加载失败图片" type="attachment" :accepts="['image/*']" />
           <FormKit v-model="formState.spec.assets.loadingEmptyUrl" name="assets_loading_empty" label="空图片（可选）" type="attachment" :accepts="['image/*']" />
+        </template>
+
+        <!-- 偏好设置 → 列表与卡片（L0 站点默认，用户可在小程序端偏好覆盖） -->
+        <template v-if="bigGroup === 'preferences' && subTab === 'layout'">
+          <p class=":uno: mb-3 text-xs text-gray-400">小程序端用户可在「我的-设置」中按个人偏好覆盖。</p>
+          <FormKit
+            v-model="formState.spec.preferences.homeListLayout"
+            name="pref_home_layout"
+            label="首页列表布局"
+            type="select"
+            :options="[
+              {label: '一行一列（单列）', value: 'h_row_col1'},
+              {label: '一行两列（双列）', value: 'h_row_col2'},
+            ]"
+            help="首页文章列表默认展示方式"
+          />
+          <FormKit
+            v-model="formState.spec.preferences.articleCardType"
+            name="pref_card_type"
+            label="文章卡片排版（封面位置）"
+            type="select"
+            :options="[
+              {label: '左图右文', value: 'lr_image_text'},
+              {label: '左文右图', value: 'lr_text_image'},
+              {label: '上图下文', value: 'tb_image_text'},
+              {label: '上文下图', value: 'tb_text_image'},
+              {label: '仅文字', value: 'only_text'},
+            ]"
+            help="文章卡片中封面图与文字的位置关系"
+          />
+        </template>
+
+        <!-- 偏好设置 → 评论头像 -->
+        <template v-if="bigGroup === 'preferences' && subTab === 'avatar'">
+          <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
+            <div>
+              <div class=":uno: text-sm text-gray-700">评论头像圆角</div>
+              <div class=":uno: mt-0.5 text-xs text-gray-400">评论列表中头像是否以圆形展示</div>
+            </div>
+            <VSwitch v-model="formState.spec.preferences.avatarRadius" />
+          </div>
         </template>
       </VCard>
     </div>

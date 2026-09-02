@@ -123,6 +123,21 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                     pick(author, profile, "blogger", "social");
                     pick(basic, profile, "copyrightConfig", "showAboutSystem", "disclaimers",
                             "postDetailConfig");
+                    // 应用信息（名称/图标）：优先取「基本配置」baseConfig.appInfo，
+                    // 回退旧 appConfig.appInfo（历史组已从 setting.yaml 移除）
+                    JsonNode appInfo = null;
+                    JsonNode baseCfg = values.get("baseConfig");
+                    if (baseCfg != null && baseCfg.isObject() && baseCfg.has("appInfo")) {
+                        appInfo = baseCfg.get("appInfo");
+                    } else {
+                        JsonNode appCfg = values.get("appConfig");
+                        if (appCfg != null && appCfg.isObject() && appCfg.has("appInfo")) {
+                            appInfo = appCfg.get("appInfo");
+                        }
+                    }
+                    if (appInfo != null && !appInfo.isNull()) {
+                        profile.set("appInfo", appInfo);
+                    }
                     if (profile.size() > 0) {
                         overlay.set("profile", profile);
                     }
@@ -191,11 +206,25 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         spec.setProfile(buildDefaultProfile());
         spec.setPages(buildDefaultPages());
         spec.setAssets(buildDefaultAssets());
+        spec.setPreferences(buildDefaultPreferences());
         return spec;
+    }
+
+    private static GeneralConfig.Preferences buildDefaultPreferences() {
+        GeneralConfig.Preferences preferences = new GeneralConfig.Preferences();
+        preferences.setHomeListLayout("h_row_col1");
+        preferences.setArticleCardType("lr_image_text");
+        preferences.setAvatarRadius(true);
+        return preferences;
     }
 
     private static Profile buildDefaultProfile() {
         Profile profile = new Profile();
+
+        GeneralConfig.AppInfo appInfo = new GeneralConfig.AppInfo();
+        appInfo.setName("uni-halo");
+        appInfo.setLogo("https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png");
+        profile.setAppInfo(appInfo);
 
         Blogger blogger = new Blogger();
         blogger.setNickname("uni-halo");

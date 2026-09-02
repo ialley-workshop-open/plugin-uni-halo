@@ -4,26 +4,6 @@ metadata:
   name: plugin-uni-halo-settings
 spec:
   forms:
-    - group: baseConfig
-      label: 基本配置
-      formSchema:
-        - $formkit: group
-          name: appInfo
-          label: 应用信息
-          value:
-            name: "uni-halo v2.0"
-            logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
-          children:
-            - $formkit: text
-              name: name
-              label: 应用名称
-              value: "uni-halo v2.0"
-              validation: required
-            - $formkit: attachment
-              name: logo
-              label: 应用图标
-              value: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"
-              validation: required
     - group: featureConfig
       label: 功能模块
       formSchema:
@@ -43,19 +23,6 @@ spec:
                   value: false
               validation: required
               help: 启用恋爱日记功能后，可以在我的页面导航找到相关入口
-            - $formkit: text
-              if: "$get(loveEnabled).value === true"
-              name: loveDateTitle
-              label: 纪念日标题
-              value: 这是我们一起走过的
-              validation: required
-            - $formkit: date
-              if: "$get(loveEnabled).value === true"
-              name: loveDate
-              label: 恋爱纪念日
-              value: ""
-              validation: required
-              help: 恋爱纪念日，用于计算恋爱天数，同时这可是一个非常重要的节日呢，可不能忘记哦~
             - $formkit: group
               if: "$get(loveEnabled).value === true"
               name: pageImages
@@ -78,37 +45,6 @@ spec:
                 - $formkit: attachment
                   name: heartImageUrl
                   label: 爱心图片
-                  value: ""
-                  validation: required
-            - $formkit: group
-              if: "$get(loveEnabled).value === true"
-              name: loveInfo
-              label: 恋人信息
-              value:
-                boyNickname: ""
-                boyAvatar: ""
-                girlNickname: ""
-                girlAvatar: ""
-                loveDate: ""
-              children:
-                - $formkit: text
-                  name: boyNickname
-                  label: 男生昵称
-                  value: ""
-                  validation: required
-                - $formkit: attachment
-                  name: boyAvatar
-                  label: 男生头像
-                  value: ""
-                  validation: required
-                - $formkit: text
-                  name: girlNickname
-                  label: 女生昵称
-                  value: ""
-                  validation: required
-                - $formkit: attachment
-                  name: girlAvatar
-                  label: 女生头像
                   value: ""
                   validation: required
             - $formkit: group
@@ -137,14 +73,6 @@ spec:
                   value: ""
                   validation: required
                   help: 功能图标图片地址
-                - $formkit: code
-                  if: "$get(ourStoryEnabled).value === true"
-                  name: content
-                  label: 故事经历
-                  value: ""
-                  language: html
-                  height: 200px
-                  help: 可以写下彼此的恋爱经过哦，支持 html 语法。
             - $formkit: group
               if: "$get(loveEnabled).value === true"
               name: lovePhoto
@@ -172,13 +100,6 @@ spec:
                   value: ""
                   validation: required
                   help: 功能图标图片地址
-                - $formkit: text
-                  if: "$get(lovePhotoEnabled).value === true"
-                  name: groupName
-                  label: 相册标识
-                  value: ""
-                  validation: required
-                  help: 相册标识（从图库中获取），具体获取方式请参考 uni-halo（v2） 官方文档。
             - $formkit: group
               if: "$get(loveEnabled).value === true"
               name: loveDaily
@@ -205,39 +126,6 @@ spec:
                   value: ""
                   validation: required
                   help: 功能图标图片地址
-                - $formkit: repeater
-                  if: "$get(loveListEnabled).value === true"
-                  name: list
-                  label: 恋爱清单
-                  value: [ ]
-                  children:
-                    - $formkit: text
-                      name: title
-                      label: 标题
-                      value: ""
-                      validation: required
-                    - $formkit: textarea
-                      name: content
-                      label: 内容
-                      value: ""
-                    - $formkit: select
-                      name: status
-                      label: 状态
-                      value: wait
-                      options:
-                        - label: 未开始
-                          value: wait
-                        - label: 进行中
-                          value: doing
-                        - label: 已完成
-                          value: complete
-                      validation: required
-                    - $formkit: date
-                      if: "$value.status === 'complete'"
-                      name: completeDate
-                      label: 完成时间
-                      value: ""
-                      validation: required
         - $formkit: group
           name: linkConfig
           label: 友情链接

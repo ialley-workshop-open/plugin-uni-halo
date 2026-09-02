@@ -538,9 +538,14 @@ export interface GeneralConfigSpec {
   profile: GeneralConfigProfile;
   pages: GeneralConfigPages;
   assets: GeneralConfigAssets;
+  preferences: GeneralConfigPreferences;
 }
 
 export interface GeneralConfigProfile {
+  appInfo: {
+    name?: string;
+    logo?: string;
+  };
   blogger: {
     nickname?: string;
     avatar?: string;
@@ -610,4 +615,18 @@ export interface GeneralConfigAssets {
   loadingGifUrl?: string;
   loadingErrUrl?: string;
   loadingEmptyUrl?: string;
+}
+
+export interface GeneralConfigPreferences {
+  /** 首页列表布局（L0 默认，客户端 layout.home）：h_row_col1 单列 / h_row_col2 双列 */
+  homeListLayout?: "h_row_col1" | "h_row_col2";
+  /** 文章卡片排版/封面位置（L0 默认，客户端 layout.cardType） */
+  articleCardType?:
+    | "lr_image_text"
+    | "lr_text_image"
+    | "tb_image_text"
+    | "tb_text_image"
+    | "only_text";
+  /** 评论头像是否圆角（L0 默认，客户端 isAvatarRadius） */
+  avatarRadius?: boolean;
 }

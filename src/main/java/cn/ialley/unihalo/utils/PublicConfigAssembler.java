@@ -76,6 +76,13 @@ public class PublicConfigAssembler {
             if (basicConfig.size() > 0) {
                 root.set("basicConfig", basicConfig);
             }
+            JsonNode appInfo = profile.get("appInfo");
+            if (appInfo != null && !appInfo.isNull()) {
+                // 应用信息（名称/图标）→ 旧 appConfig.appInfo 形态（覆盖历史遗留设置值，
+                // 如旧 ConfigMap 中 baseConfig/appConfig 组残留）
+                root.set("appConfig",
+                        JsonNodeFactory.instance.objectNode().set("appInfo", appInfo));
+            }
         }
         JsonNode pages = spec.get("pages");
         if (pages != null && pages.isObject()) {
@@ -88,6 +95,12 @@ public class PublicConfigAssembler {
         JsonNode assets = spec.get("assets");
         if (assets != null && !assets.isNull()) {
             root.set("imagesConfig", assets);
+        }
+        // 站点级展示偏好默认（L0，additive 顶层键）：客户端 layout.home/cardType/
+        // isAvatarRadius 的站点默认来源（客户端可本地覆盖）
+        JsonNode preferences = spec.get("preferences");
+        if (preferences != null && !preferences.isNull()) {
+            root.set("preferences", preferences);
         }
         return root;
     }

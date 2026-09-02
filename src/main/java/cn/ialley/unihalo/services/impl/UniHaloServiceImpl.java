@@ -2,6 +2,7 @@ package cn.ialley.unihalo.services.impl;
 
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.JsonNodeFactory;
+import tools.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import net.minidev.json.JSONObject;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import cn.ialley.unihalo.scheme.GeneralConfig;
 import cn.ialley.unihalo.scheme.QRCodeInfo;
 import cn.ialley.unihalo.services.GeneralConfigService;
 import cn.ialley.unihalo.services.QRCodeInfoService;
@@ -96,11 +98,26 @@ public class UniHaloServiceImpl implements UniHaloService {
      * 内部专用原始读取（不经公开过滤）。
      *
      * <p>动态小程序码/海报功能已下线（2026-09-02）：应用信息仅剩 名称/图标，
-     * 存放于「基本配置」baseConfig.appInfo；此处读取该节点供历史海报流程
-     * 兼容降级（字段缺失时不再执行，见 getAccessToken / uploadMedia）。</p>
+     * 已随「基本配置」迁入通用配置模型（应用资料.appInfo）；此处读取该节点供
+     * 历史海报流程兼容降级（凭证字段缺失时不再执行，见 getAccessToken / uploadMedia）。</p>
      */
     private Mono<JsonNode> rawAppConfig() {
-        return SettingGroupResolver.group(settingFetcher, "baseConfig", "appInfo");
+        return generalConfigService.get().map(config -> {
+            GeneralConfig.AppInfo appInfo = config.getSpec() != null
+                    && config.getSpec().getProfile() != null
+                            ? config.getSpec().getProfile().getAppInfo() : null;
+            if (appInfo == null) {
+                return null;
+            }
+            ObjectNode node = JsonNodeFactory.instance.objectNode();
+            if (appInfo.getName() != null) {
+                node.put("name", appInfo.getName());
+            }
+            if (appInfo.getLogo() != null) {
+                node.put("logo", appInfo.getLogo());
+            }
+            return (JsonNode) node;
+        });
     }
 
     @Override

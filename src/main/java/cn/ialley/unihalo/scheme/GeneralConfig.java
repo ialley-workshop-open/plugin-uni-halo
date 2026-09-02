@@ -14,9 +14,12 @@ import static cn.ialley.unihalo.constants.Constants.PLUGIN_API_VERSION;
  * <p>承载原 setting.yaml 中迁出的「小程序通用内容与外观」配置（决策见
  * {@code .docs/config-system-v2-redesign.md} v2.3 / X1 单例形态），分三块：</p>
  * <ul>
- *   <li>{@link Profile} profile：博主信息、社交信息、页脚版权、免责声明、关于项目与文章详情版权文案；</li>
+ *   <li>{@link Profile} profile：应用资料——应用信息（名称/图标，原基本配置）、博主信息、
+ *       社交信息、页脚版权、免责声明、关于项目与文章详情版权文案；</li>
  *   <li>{@link Pages} pages：首页（含轮播图渲染参数）、图库、关于页的视觉配置；</li>
- *   <li>{@link Assets} assets：全局默认图片/封面/头像/加载占位等兜底资源。</li>
+ *   <li>{@link Assets} assets：全局默认图片/封面/头像/加载占位等兜底资源；</li>
+ *   <li>{@link Preferences} preferences：站点级展示偏好默认（L0，经 getConfigs 顶层
+ *       {@code preferences} 下发，与客户端 layout.home/cardType/isAvatarRadius 对齐）。</li>
  * </ul>
  *
  * <p>本模型是控制台「通用配置」页的写端事实源；小程序端仍通过 {@code getConfigs}
@@ -37,11 +40,15 @@ public class GeneralConfig extends AbstractExtension {
         private Profile profile;
         private Pages pages;
         private Assets assets;
+        private Preferences preferences;
     }
 
-    /** 站点资料：博主/社交/版权/免责/文章详情文案（原 authorConfig + basicConfig 内容部分） */
+    /** 应用资料：应用信息（名称/图标，原基本配置 appInfo）+ 博主/社交/版权/免责/文章详情文案
+     * （原 authorConfig + basicConfig 内容部分） */
     @Data
     public static class Profile {
+        /** 应用信息（原 setting「基本配置」baseConfig.appInfo，2026-09-02 并入） */
+        private AppInfo appInfo;
         private Blogger blogger;
         private Social social;
         private Copyright copyrightConfig;
@@ -49,6 +56,13 @@ public class GeneralConfig extends AbstractExtension {
         /** 显示关于项目页面入口（【关于】导航页） */
         private Boolean showAboutSystem;
         private PostDetail postDetailConfig;
+    }
+
+    /** 应用信息（应用名称/图标；原 setting「基本配置」应用信息，2026-09-02 并入） */
+    @Data
+    public static class AppInfo {
+        private String name;
+        private String logo;
     }
 
     /** 博主信息（原 authorConfig.blogger） */
@@ -162,5 +176,17 @@ public class GeneralConfig extends AbstractExtension {
         private String loadingGifUrl;
         private String loadingErrUrl;
         private String loadingEmptyUrl;
+    }
+
+    /** 站点级展示偏好默认（L0；客户端本地偏好可覆盖，值枚举与 IAppSettings 键对齐） */
+    @Data
+    public static class Preferences {
+        /** 首页列表布局：h_row_col1 单列 / h_row_col2 双列（客户端 layout.home） */
+        private String homeListLayout;
+        /** 文章卡片排版（封面位置）：lr_image_text/lr_text_image/tb_image_text/
+         * tb_text_image/only_text（客户端 layout.cardType） */
+        private String articleCardType;
+        /** 评论头像是否圆角（客户端 isAvatarRadius） */
+        private Boolean avatarRadius;
     }
 }
