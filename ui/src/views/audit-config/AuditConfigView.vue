@@ -248,7 +248,7 @@ const handleSave = async () => {
     </template>
   </VPageHeader>
 
-  <div class=":uno: m-0 flex flex-col gap-4 p-4 md:m-4 md:mt-0">
+  <div class=":uno: m-0 flex flex-col gap-4 pt-4 md:m-4 md:mt-0">
     <!-- 说明 -->
     <VCard>
       <div class=":uno: flex items-start gap-3 py-1">
@@ -353,7 +353,16 @@ const handleSave = async () => {
             </div>
             <div class=":uno: min-w-0 flex-1">
               <div class=":uno: flex items-center gap-2">
-                <span class=":uno: truncate text-sm text-gray-700">
+                <!-- 瞬间内容为富文本 HTML，v-html 渲染保留格式；其余类型纯文本插值 -->
+                <span
+                  v-if="block.type === 'moment'"
+                  class=":uno: block min-w-0 flex-1 truncate text-sm font-medium text-gray-700 [&_p]:inline [&_p]:m-0"
+                  v-html="item.title"
+                />
+                <span
+                  v-else
+                  class=":uno: block min-w-0 flex-1 truncate text-sm font-medium text-gray-700"
+                >
                   {{ item.title || item.name }}
                 </span>
                 <span

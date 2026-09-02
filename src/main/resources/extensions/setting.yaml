@@ -470,46 +470,7 @@ spec:
                     - label: 底部
                       value: "bottom"
                   help: 指示器位置
-                - $formkit: select
-                  name: type
-                  id: bannerType
-                  label: 轮播图数据
-                  value: "post"
-                  options:
-                    - label: 文章
-                      value: "post"
-                    - label: 自定义
-                      value: "custom"
-                  help: 轮播图数据说明： 文章=默认使用置顶的文章、自定义=自定义轮播图列表
-                - $formkit: repeater
-                  if: "$get(bannerType).value === 'custom'"
-                  name: list
-                  label: 轮播图数据
-                  value: [ ]
-                  children:
-                    - $formkit: text
-                      name: title
-                      label: 标题
-                      value: ""
-                      validation: required
-                    - $formkit: attachment
-                      name: cover
-                      label: 封面图片
-                      value: ""
-                      validation: required
-                    - $formkit: text
-                      name: url
-                      label: 跳转链接
-                      value: ""
-                      help: 跳转链接，留空则不跳转，如果填写了内容详情，会先弹窗显示内容详情，然后详情里显示链接。
-                    - $formkit: code
-                      name: content
-                      label: 内容详情
-                      value: ""
-                      language: html
-                      height: 100px
-                      help: 轮播图内容详情，支持 html/markdown 语法。
-              help: 说明：配置首页的轮播图
+              help: 说明：配置首页轮播图的渲染参数；轮播图数据请在「轮播图」菜单中维护
         - $formkit: group
           name: galleryConfig
           label: 图库配置
@@ -958,6 +919,47 @@ spec:
               language: json
               height: 350px
               help: "这里填写的是json内容，json内容格式查看上方【模拟数据说明】"
+    - group: captchaConfig
+      label: 防刷验证码
+      formSchema:
+        - $formkit: radio
+          name: enabled
+          id: captchaEnabled
+          label: 开启验证码
+          help: 开启后小程序端提交链接申请、解锁恋爱相册时需要输入验证码，防止暴力/垃圾提交。
+          value: true
+          options:
+            - label: 开启
+              value: true
+            - label: 关闭
+              value: false
+          validation: required
+        - $formkit: select
+          if: "$get(captchaEnabled).value === true"
+          name: type
+          id: captchaType
+          label: 验证码类型
+          value: "ALPHANUMERIC"
+          options:
+            - label: 图形字符
+              value: "ALPHANUMERIC"
+            - label: 算术题
+              value: "ARITHMETIC"
+          validation: required
+        - $formkit: number
+          if: "$get(captchaEnabled).value === true && $get(captchaType).value === 'ALPHANUMERIC'"
+          name: captchaLength
+          label: 字符长度
+          value: 4
+          help: 图形字符验证码的字符个数
+          validation: required
+        - $formkit: number
+          if: "$get(captchaEnabled).value === true && $get(captchaType).value === 'ARITHMETIC'"
+          name: arithmeticRange
+          label: 算术范围
+          value: 10
+          help: 算术题运算数的取值范围（1~N）
+          validation: required
     - group: pluginConfig
       label: 第三方插件配置
       formSchema:

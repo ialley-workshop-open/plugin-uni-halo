@@ -22,6 +22,8 @@ import type {
   AuditDataConfigDetail,
   AuditDataCandidateResult,
   AuditCandidateType,
+  Banner,
+  BannerCandidate,
 } from "@/types";
 
 const CONSOLE_API_GROUP = "console.api.unihalo.ialley.cn/v1alpha1";
@@ -236,4 +238,30 @@ export const auditDataApi = {
   /** 公开读取（审核模式联动开关，供小程序端二期接入） */
   getPublic: () =>
     http.get<{ enabled: boolean; spec?: AuditDataConfig["spec"] }>(`${PUBLIC_BASE}/audit-data`),
+};
+
+// ===== 轮播图 =====
+
+export const bannerApi = {
+  list: (query: {
+    page?: number;
+    size?: number;
+    source?: string;
+    keyword?: string;
+    sort?: string;
+  } = {}) => http.get<PageResult<Banner>>(`${PLUGIN_BASE}/banners`, query),
+  create: (data: Banner) => http.post<Banner>(`${PLUGIN_BASE}/banners`, data),
+  update: (name: string, data: Banner) =>
+    http.put<Banner>(`${PLUGIN_BASE}/banners/${name}`, data),
+  delete: (name: string) =>
+    http.delete<{ success: boolean }>(`${PLUGIN_BASE}/banners/${name}`),
+  /** 同步文章快照（仅文章来源）：重新拉取 Post/User 覆盖快照字段 */
+  sync: (name: string) =>
+    http.post<Banner>(`${PLUGIN_BASE}/banners/${name}/sync`),
+  /** 拖拽排序保存：names 为按新顺序排列的轮播图 name 列表 */
+  sortOrder: (names: string[]) =>
+    http.put<{ success: boolean }>(`${PLUGIN_BASE}/banners/order`, names),
+  /** 文章候选（文章选择器数据源，仅已发布文章） */
+  candidates: (query: { keyword?: string; page?: number; size?: number } = {}) =>
+    http.get<PageResult<BannerCandidate>>(`${PLUGIN_BASE}/banners/candidates`, query),
 };

@@ -62,9 +62,19 @@ public class Constants {
     public static final String NOTICE_TYPE_API_BASE_PATH = "plugins/plugin-uni-halo/notice-types";
 
     /**
+     * 轮播图（console/公开）接口基础路径
+     */
+    public static final String BANNER_API_BASE_PATH = "plugins/plugin-uni-halo/banners";
+
+    /**
      * 审核配置（console/公开）接口基础路径
      */
     public static final String AUDIT_DATA_API_BASE_PATH = "plugins/plugin-uni-halo/audit-data";
+
+    /**
+     * 验证码（公开）接口基础路径
+     */
+    public static final String CAPTCHA_API_BASE_PATH = "plugins/plugin-uni-halo/captcha/generate";
 
     /**
      * 友情链接-小程序链接（console/公开）接口基础路径

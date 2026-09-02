@@ -5,11 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import cn.ialley.unihalo.captcha.CaptchaService;
+import cn.ialley.unihalo.captcha.CaptchaValidationException;
 import cn.ialley.unihalo.constants.Constants;
 import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
@@ -46,6 +49,7 @@ public class LovePublicEndpoint implements CustomEndpoint {
     private final LoveDailyItemService loveDailyItemService;
     private final LoveStoryService loveStoryService;
     private final AlbumTokenManager albumTokenManager;
+    private final CaptchaService captchaService;
 
     /**
      * 插件 Spring 上下文未注册 Jackson 3 ObjectMapper bean，故内部自行创建。
@@ -57,13 +61,15 @@ public class LovePublicEndpoint implements CustomEndpoint {
             LoveAlbumService loveAlbumService,
             LoveDailyItemService loveDailyItemService,
             LoveStoryService loveStoryService,
-            AlbumTokenManager albumTokenManager) {
+            AlbumTokenManager albumTokenManager,
+            CaptchaService captchaService) {
         this.settingFetcher = settingFetcher;
         this.loveConfigService = loveConfigService;
         this.loveAlbumService = loveAlbumService;
         this.loveDailyItemService = loveDailyItemService;
         this.loveStoryService = loveStoryService;
         this.albumTokenManager = albumTokenManager;
+        this.captchaService = captchaService;
     }
 
     @Override
@@ -150,29 +156,41 @@ public class LovePublicEndpoint implements CustomEndpoint {
 
     /**
      * 密码解锁：校验通过后签发 HMAC 签名 token 并返回相册照片。
+     * 验证码校验在密码校验之前，失败不暴露密码正确性。
      */
     private Mono<ServerResponse> unlockAlbum(ServerRequest request) {
         String name = request.pathVariable("name");
-        return request.bodyToMono(UnlockRequest.class)
-                .flatMap(body -> loveAlbumService.verifyPassword(name, body.getPassword()))
-                .flatMap(ok -> {
-                    if (!ok) {
-                        return ServerResponse.badRequest()
-                                .bodyValue(Map.of("message", "密码不正确"));
-                    }
-                    String token = albumTokenManager.issue(name);
-                    return loveAlbumService.getByName(name)
-                            .map(album -> {
-                                Map<String, Object> result = new LinkedHashMap<>();
-                                result.put("token", token);
-                                result.put("photos", album.getSpec() != null
-                                        && album.getSpec().getPhotos() != null
-                                                ? album.getSpec().getPhotos()
-                                                : List.of());
-                                return result;
-                            })
-                            .flatMap(body -> ServerResponse.ok().bodyValue(body));
-                });
+        return captchaService.requireValid(request)
+                .then(request.bodyToMono(UnlockRequest.class)
+                        .flatMap(body -> loveAlbumService.verifyPassword(name, body.getPassword()))
+                        .flatMap(ok -> {
+                            if (!ok) {
+                                return ServerResponse.badRequest()
+                                        .bodyValue(Map.of("message", "密码不正确"));
+                            }
+                            String token = albumTokenManager.issue(name);
+                            return loveAlbumService.getByName(name)
+                                    .map(album -> {
+                                        Map<String, Object> result = new LinkedHashMap<>();
+                                        result.put("token", token);
+                                        result.put("photos", album.getSpec() != null
+                                                && album.getSpec().getPhotos() != null
+                                                        ? album.getSpec().getPhotos()
+                                                        : List.of());
+                                        return result;
+                                    })
+                                    .flatMap(body -> ServerResponse.ok().bodyValue(body));
+                        }))
+                .onErrorResume(CaptchaValidationException.class, this::captchaForbidden);
+    }
+
+    /**
+     * 验证码校验失败：403 + 附新验证码（前端即时刷新重试）。
+     */
+    private Mono<ServerResponse> captchaForbidden(CaptchaValidationException e) {
+        return captchaService.generate()
+                .flatMap(captcha -> ServerResponse.status(HttpStatus.FORBIDDEN)
+                        .bodyValue(Map.of("message", e.getMessage(), "captcha", captcha)));
     }
 
     /**

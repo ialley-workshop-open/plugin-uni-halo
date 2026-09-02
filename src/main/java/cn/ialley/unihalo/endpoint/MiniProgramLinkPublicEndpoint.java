@@ -2,11 +2,14 @@ package cn.ialley.unihalo.endpoint;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import cn.ialley.unihalo.captcha.CaptchaService;
+import cn.ialley.unihalo.captcha.CaptchaValidationException;
 import cn.ialley.unihalo.constants.Constants;
 import cn.ialley.unihalo.scheme.MiniProgramLink;
 import cn.ialley.unihalo.scheme.MiniProgramLinkSubmission;
@@ -36,13 +39,16 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
     private final MiniProgramLinkService miniProgramLinkService;
     private final MiniProgramLinkSubmissionService miniProgramLinkSubmissionService;
     private final ReactiveSettingFetcher settingFetcher;
+    private final CaptchaService captchaService;
 
     public MiniProgramLinkPublicEndpoint(MiniProgramLinkService miniProgramLinkService,
             MiniProgramLinkSubmissionService miniProgramLinkSubmissionService,
-            ReactiveSettingFetcher settingFetcher) {
+            ReactiveSettingFetcher settingFetcher,
+            CaptchaService captchaService) {
         this.miniProgramLinkService = miniProgramLinkService;
         this.miniProgramLinkSubmissionService = miniProgramLinkSubmissionService;
         this.settingFetcher = settingFetcher;
+        this.captchaService = captchaService;
     }
 
     @Override
@@ -67,18 +73,30 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
     }
 
     private Mono<ServerResponse> submitApplication(ServerRequest request) {
-        return settingFetcher.getSettingValue(SETTING_GROUP_LINK_CONFIG)
-                .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
-                .flatMap(config -> {
-                    if (!config.path(SETTING_KEY_SUBMISSION_ENABLED).asBoolean(true)) {
-                        return Mono.error(new IllegalArgumentException("暂未开放提交申请"));
-                    }
-                    return request.bodyToMono(MiniProgramLinkSubmission.class)
-                            .flatMap(miniProgramLinkSubmissionService::submit)
-                            .flatMap(created -> ServerResponse.ok().bodyValue(created));
-                })
-                .onErrorResume(IllegalArgumentException.class,
-                        e -> ServerResponse.badRequest().bodyValue(Map.of("message", e.getMessage())));
+        return captchaService.requireValid(request)
+                .then(settingFetcher.getSettingValue(SETTING_GROUP_LINK_CONFIG)
+                        .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
+                        .flatMap(config -> {
+                            if (!config.path(SETTING_KEY_SUBMISSION_ENABLED).asBoolean(true)) {
+                                return Mono.error(new IllegalArgumentException("暂未开放提交申请"));
+                            }
+                            return request.bodyToMono(MiniProgramLinkSubmission.class)
+                                    .flatMap(miniProgramLinkSubmissionService::submit)
+                                    .flatMap(created -> ServerResponse.ok().bodyValue(created));
+                        })
+                        .onErrorResume(IllegalArgumentException.class,
+                                e -> ServerResponse.badRequest()
+                                        .bodyValue(Map.of("message", e.getMessage()))))
+                .onErrorResume(CaptchaValidationException.class, this::captchaForbidden);
+    }
+
+    /**
+     * 验证码校验失败：403 + 附新验证码（前端即时刷新重试）。
+     */
+    private Mono<ServerResponse> captchaForbidden(CaptchaValidationException e) {
+        return captchaService.generate()
+                .flatMap(captcha -> ServerResponse.status(HttpStatus.FORBIDDEN)
+                        .bodyValue(Map.of("message", e.getMessage(), "captcha", captcha)));
     }
 
     private Mono<ServerResponse> listLinks(ServerRequest request) {

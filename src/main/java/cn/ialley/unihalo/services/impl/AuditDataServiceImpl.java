@@ -230,8 +230,11 @@ public class AuditDataServiceImpl implements AuditDataService {
                 var spec = ((MomentRef) extension).getSpec();
                 if (spec != null && spec.getContent() != null) {
                     var content = spec.getContent();
-                    String text = content.getRaw() != null ? content.getRaw() : content.getHtml();
-                    ref.setTitle(truncate(text, SUMMARY_MAX_LENGTH));
+                    // 取值保持 raw 优先（纯文本），raw 为空回退 html；
+                    // 不截断，避免截断破坏 HTML 标签。
+                    String text = content.getRaw() != null
+                            ? content.getRaw() : content.getHtml();
+                    ref.setTitle(text);
                     if (content.getMedium() != null && !content.getMedium().isEmpty()) {
                         ref.setCover(content.getMedium().get(0).getUrl());
                     }
@@ -268,13 +271,6 @@ public class AuditDataServiceImpl implements AuditDataService {
 
     private static String firstOf(List<String> values) {
         return values == null || values.isEmpty() ? null : values.get(0);
-    }
-
-    private static String truncate(String value, int maxLength) {
-        if (value == null || value.length() <= maxLength) {
-            return value;
-        }
-        return value.substring(0, maxLength) + "…";
     }
 
     private static boolean isBlank(String value) {

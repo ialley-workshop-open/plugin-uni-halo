@@ -3,6 +3,7 @@ package cn.ialley.unihalo;
 import cn.ialley.unihalo.scheme.AppInfo;
 import cn.ialley.unihalo.scheme.AppVersion;
 import cn.ialley.unihalo.scheme.AuditDataConfig;
+import cn.ialley.unihalo.scheme.Banner;
 import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
 import cn.ialley.unihalo.scheme.LoveDailyItem;
@@ -121,6 +122,19 @@ public class UniHaloPlugin extends BasePlugin {
                             : type.getSpec().getPriority()));
         });
 
+        schemeManager.register(Banner.class, indexSpecs -> {
+            indexSpecs.add(IndexSpecs.<Banner, Integer>single("spec.priority", Integer.class)
+                    .indexFunc(banner -> banner.getSpec() == null ? null
+                            : banner.getSpec().getPriority()));
+            // 来源筛选（fieldQuery equal spec.source）与日期排序（sort spec.date）依赖索引
+            indexSpecs.add(IndexSpecs.<Banner, String>single("spec.source", String.class)
+                    .indexFunc(banner -> banner.getSpec() == null ? null
+                            : banner.getSpec().getSource()));
+            indexSpecs.add(IndexSpecs.<Banner, String>single("spec.date", String.class)
+                    .indexFunc(banner -> banner.getSpec() == null ? null
+                            : banner.getSpec().getDate()));
+        });
+
         schemeManager.register(MiniProgramLinkGroup.class, indexSpecs -> {
             indexSpecs.add(IndexSpecs.<MiniProgramLinkGroup, Integer>single("spec.priority",
                             Integer.class)
@@ -168,6 +182,7 @@ public class UniHaloPlugin extends BasePlugin {
         schemeManager.unregister(schemeManager.get(LoveStory.class));
         schemeManager.unregister(schemeManager.get(Notice.class));
         schemeManager.unregister(schemeManager.get(NoticeType.class));
+        schemeManager.unregister(schemeManager.get(Banner.class));
         schemeManager.unregister(schemeManager.get(MiniProgramLink.class));
         schemeManager.unregister(schemeManager.get(MiniProgramLinkGroup.class));
         schemeManager.unregister(schemeManager.get(MiniProgramLinkSubmission.class));

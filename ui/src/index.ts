@@ -9,6 +9,7 @@ import RiMegaphoneLine from '~icons/ri/megaphone-line'
 import RiLink from '~icons/ri/link'
 import RiFileList3Line from '~icons/ri/file-list-3-line'
 import RiShieldCheckLine from '~icons/ri/shield-check-line'
+import RiSlideshowLine from '~icons/ri/slideshow-line'
 import WelcomeView from './views/WelcomeView.vue'
 
 function baseRoutePath(path: string) {
@@ -271,6 +272,26 @@ export default definePlugin({
             group: 'UniHalo',
             icon: markRaw(RiShieldCheckLine),
             priority: 5,
+          },
+        },
+      },
+    },
+    {
+      parentName: 'Root',
+      route: {
+        path: baseRoutePath('/banners'),
+        name: 'BannerList',
+        component: () => import('@/views/banner-manage/BannerListView.vue'),
+        meta: {
+          title: '轮播管理',
+          searchable: true,
+          hideFooter: false,
+          permissions: ["plugin:uni-halo:banner:view"],
+          menu: {
+            name: '轮播管理',
+            group: 'UniHalo',
+            icon: markRaw(RiSlideshowLine),
+            priority: 6,
           },
         },
       },

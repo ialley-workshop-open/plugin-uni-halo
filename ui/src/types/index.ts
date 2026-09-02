@@ -264,6 +264,69 @@ export const NOTICE_STATUS_OPTIONS: { label: string; value: string }[] = [
   { label: "已下线", value: "offline" },
 ];
 
+// ===== 轮播图 =====
+
+export type BannerSource = "post" | "custom";
+
+export interface BannerSpec {
+  /** 标题（必填；文章模式为快照的文章标题） */
+  title?: string;
+  /** 封面图（必填；文章模式为快照的文章封面） */
+  cover?: string;
+  /** 展示日期（ISO；文章模式快照文章发布时间，自定义手填可选，留空不展示） */
+  date?: string;
+  /** 作者昵称（文章模式快照作者，User 缺失时回退 owner 用户名） */
+  authorName?: string;
+  /** 作者头像 */
+  authorAvatar?: string;
+  /** 来源：post/custom，服务端按 postId 非空自动判定，无需手动设置 */
+  source?: BannerSource;
+  /** 内容（富文本 HTML，仅自定义模式；文章模式恒为空） */
+  content?: string;
+  /** 备注（仅管理端可见，不对外展示） */
+  remark?: string;
+  /** 文章 id（Post 的 metadata.name；文章模式必填，小程序端据此跳转文章详情） */
+  postId?: string;
+  /** 外链（可选，自定义模式可填跳转链接） */
+  link?: string;
+  /** 排序，越大越靠前 */
+  priority?: number;
+}
+
+export interface Banner {
+  metadata: Metadata;
+  spec: BannerSpec;
+}
+
+/** 文章候选（管理端文章选择器数据源，仅已发布文章） */
+export interface BannerCandidate {
+  /** Post 的 metadata.name（保存时写入 Banner.spec.postId） */
+  name: string;
+  title?: string;
+  cover?: string;
+  publishTime?: string;
+  categories?: string[];
+}
+
+/** 来源标签映射（列表展示用） */
+export const BANNER_SOURCE_LABELS: Record<string, string> = {
+  post: "文章",
+  custom: "自定义",
+};
+
+/** 来源筛选选项（列表 header 下拉） */
+export const BANNER_SOURCE_OPTIONS: { label: string; value: string }[] = [
+  { label: "文章", value: "post" },
+  { label: "自定义", value: "custom" },
+];
+
+/** 列表排序选项（默认手动排序=拖拽顺序） */
+export const BANNER_SORT_OPTIONS: { label: string; value: string }[] = [
+  { label: "手动排序", value: "manual" },
+  { label: "日期 · 最新在前", value: "date_desc" },
+  { label: "日期 · 最早在前", value: "date_asc" },
+];
+
 /** 公告列表排序选项（右侧列表 header 使用） */
 export const NOTICE_SORT_OPTIONS: { label: string; value: string }[] = [
   { label: "日期 · 最新在前", value: "date_desc" },

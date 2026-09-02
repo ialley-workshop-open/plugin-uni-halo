@@ -1,33 +1,32 @@
 <script setup lang="ts">
 import { VButton, VEmpty, VLoading, VModal, VPagination, VSpace } from "@halo-dev/components";
 import { useQuery } from "@tanstack/vue-query";
-import { computed, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import RiImageLine from "~icons/ri/image-line";
-import { auditDataApi } from "@/api";
-import {
-  AUDIT_CANDIDATE_PLUGIN_HINTS,
-  AUDIT_CANDIDATE_TYPE_LABELS,
-  type AuditCandidateType,
-  type AuditDataRef,
-} from "@/types";
+import { bannerApi } from "@/api";
+import type { BannerCandidate } from "@/types";
 
 const props = withDefaults(
   defineProps<{
-    type: AuditCandidateType;
-    selected?: AuditDataRef[];
+    /** 多选模式（新建-从文章批量添加）；false 为单选（更换文章） */
+    multiSelect?: boolean;
+    selected?: BannerCandidate[];
   }>(),
-  { selected: () => [] }
+  {
+    multiSelect: true,
+    selected: () => [],
+  }
 );
 
 const emit = defineEmits<{
   (event: "update:visible", value: boolean): void;
-  (event: "confirm", selected: AuditDataRef[]): void;
+  (event: "confirm", selected: BannerCandidate[]): void;
 }>();
 
 const PAGE_SIZE = 8;
 const keyword = ref("");
 const page = ref(1);
-const localSelected = ref<AuditDataRef[]>([]);
+const localSelected = ref<BannerCandidate[]>([]);
 
 // 父组件 v-if 挂载，挂载即打开：重置搜索与已选回显
 onMounted(() => {
@@ -37,9 +36,9 @@ onMounted(() => {
 });
 
 const { data, isLoading } = useQuery({
-  queryKey: ["uni-halo:audit-candidates", props.type, keyword, page],
+  queryKey: ["uni-halo:banner-candidates", keyword, page],
   queryFn: async () => {
-    return auditDataApi.candidates(props.type, {
+    return bannerApi.candidates({
       keyword: keyword.value || undefined,
       page: page.value,
       size: PAGE_SIZE,
@@ -47,12 +46,15 @@ const { data, isLoading } = useQuery({
   },
 });
 
-const label = computed(() => AUDIT_CANDIDATE_TYPE_LABELS[props.type]);
-
-const isChecked = (candidate: AuditDataRef) =>
+const isChecked = (candidate: BannerCandidate) =>
   localSelected.value.some((item) => item.name === candidate.name);
 
-const toggleItem = (candidate: AuditDataRef) => {
+const toggleItem = (candidate: BannerCandidate) => {
+  if (!props.multiSelect) {
+    // 单选模式：点击即选中，再次点击取消
+    localSelected.value = isChecked(candidate) ? [] : [candidate];
+    return;
+  }
   const index = localSelected.value.findIndex((item) => item.name === candidate.name);
   if (index >= 0) {
     localSelected.value.splice(index, 1);
@@ -69,23 +71,23 @@ const handleConfirm = () => {
 const handleClose = () => {
   emit("update:visible", false);
 };
+
+const formatTime = (value?: string) => {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+};
 </script>
 
 <template>
-  <VModal
-    :title="`选择${label}`"
-    :width="720"
-    @close="handleClose"
-  >
+  <VModal :title="`选择文章`" :width="720" @close="handleClose">
     <div class=":uno: flex flex-col gap-3">
-      <!-- 搜索 + 已选计数 -->
+      <!-- 搜索（Halo SearchInput 全局组件） + 已选计数 -->
       <div class=":uno: flex items-center gap-3">
-        <input
-          v-model="keyword"
-          class=":uno: h-9 w-full flex-1 rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-          :placeholder="`输入关键字搜索${label}…`"
-          @keyup.enter="page = 1"
-        />
+        <SearchInput v-model="keyword" class=":uno: flex-1" placeholder="输入关键字搜索文章…" />
         <span class=":uno: shrink-0 text-sm text-gray-500">
           已选 <b class=":uno: text-primary">{{ localSelected.length }}</b> 条
         </span>
@@ -93,15 +95,8 @@ const handleClose = () => {
 
       <VLoading v-if="isLoading" />
 
-      <!-- 数据源插件未安装 -->
-      <VEmpty
-        v-else-if="data?.pluginMissing"
-        :title="`未检测到${label}数据源`"
-        :message="AUDIT_CANDIDATE_PLUGIN_HINTS[type] || '请确认对应插件已安装并启用'"
-      />
-
       <template v-else>
-        <!-- 候选列表 -->
+        <!-- 候选列表（多选/单选） -->
         <div class=":uno: max-h-96 overflow-y-auto rounded-md border border-gray-100">
           <div
             v-for="candidate in data?.items || []"
@@ -132,25 +127,20 @@ const handleClose = () => {
               <RiImageLine v-else class=":uno: h-5 w-5 text-gray-300" />
             </div>
             <div class=":uno: min-w-0 flex-1">
-              <!-- 瞬间内容为富文本 HTML，v-html 渲染保留格式；其余类型纯文本插值 -->
-              <div
-                v-if="type === 'moment'"
-                class=":uno: truncate text-sm font-medium text-gray-800 [&_p]:inline [&_p]:m-0"
-                v-html="candidate.title"
-              />
-              <div
-                v-else
-                class=":uno: truncate text-sm font-medium text-gray-800"
-              >
+              <div class=":uno: truncate text-sm font-medium text-gray-800">
                 {{ candidate.title || candidate.name }}
               </div>
               <div class=":uno: mt-0.5 truncate text-xs text-gray-400">
-                {{ [candidate.subTitle, candidate.extra].filter(Boolean).join(" · ") }}
+                {{
+                  [formatTime(candidate.publishTime), candidate.categories?.[0]]
+                    .filter(Boolean)
+                    .join(" · ")
+                }}
               </div>
             </div>
           </div>
           <div v-if="!data?.items?.length" class=":uno: py-8">
-            <VEmpty title="没有匹配的数据" message="换个关键字试试" />
+            <VEmpty title="没有匹配的文章" message="换个关键字试试" />
           </div>
         </div>
 
@@ -165,12 +155,17 @@ const handleClose = () => {
           />
         </div>
       </template>
+
+      <!-- 快照语义提示 -->
+      <div class=":uno: rounded-md bg-blue-50 px-3 py-2 text-xs text-blue-600">
+        选择后将保存文章当前快照（标题/封面/日期/作者），文章后续修改不影响轮播图展示
+      </div>
     </div>
 
     <template #footer>
       <VSpace>
-        <VButton type="secondary" @click="emit('update:visible', false)">取消</VButton>
-        <VButton type="primary" @click="handleConfirm">
+        <VButton type="secondary" @click="handleClose">取消</VButton>
+        <VButton type="primary" :disabled="!localSelected.length" @click="handleConfirm">
           确认选择（{{ localSelected.length }}）
         </VButton>
       </VSpace>

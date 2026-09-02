@@ -29,6 +29,12 @@ public class PostRef extends AbstractExtension {
         private String cover;
         private String summary;
         private String publishTime;
+        private Boolean publish;
         private List<String> categories;
+
+        /**
+         * 文章作者（Post.spec.owner，用户名；快照作者信息时据此查 User）
+         */
+        private String owner;
     }
 }
