@@ -72,7 +72,7 @@ function defaultConfig(): GeneralConfig {
 function defaultSpec(): GeneralConfigSpec {
   return {
     profile: {
-      appInfo: {name: "uni-halo", logo: "https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png"},
+      appInfo: {name: "uni-halo", logo: "/plugins/uni-halo/assets/logo.png"},
       blogger: {nickname: "uni-halo", avatar: "", email: "", description: ""},
       social: {
         enabled: true,
@@ -116,17 +116,18 @@ function defaultSpec(): GeneralConfigSpec {
       galleryConfig: {pageTitle: "图库", useWaterfall: true},
       aboutConfig: {
         pageTitle: "关于博主",
-        bgImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_profile_bg.jpg",
-        waveImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif",
+        bgImageUrl: "/plugins/uni-halo/assets/uni_halo_profile_bg.jpg",
+        waveImageUrl: "/plugins/uni-halo/assets/uni_halo_about_wave.gif",
       },
     },
     assets: {
-      defaultImageUrl: "https://api.7trees.cn/img",
-      defaultThumbnailUrl: "https://tenapi.cn/v2/acg",
+      // 默认图片地址默认值：仅加载占位 gif 内置插件资源，其余留空由站长配置
+      defaultImageUrl: "",
+      defaultThumbnailUrl: "",
       defaultStaticThumbnailUrl: "",
-      defaultAvatarUrl: "https://api.qjqq.cn/api/MiYouShe",
-      loadingGifUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_img_lazyload.gif",
-      loadingErrUrl: "https://uni-halo.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif",
+      defaultAvatarUrl: "",
+      loadingGifUrl: "/plugins/uni-halo/assets/uni_halo_img_lazyload.gif",
+      loadingErrUrl: "",
       loadingEmptyUrl: "",
     },
     preferences: {
@@ -414,6 +415,11 @@ const handleSave = async () => {
 
         <!-- 资源与兜底 → 默认图片 -->
         <template v-if="bigGroup === 'assets' && subTab === 'defaults'">
+          <p class=":uno: mb-3 text-xs text-gray-400">
+            以上为小程序端兜底/默认图资源，留空时由客户端内置回退处理；也可引用插件内置资源，如
+            <code class=":uno: rounded bg-gray-100 px-1">/plugins/uni-halo/assets/uni_halo_profile_bg.jpg</code>
+            （素材放插件 <code class=":uno: rounded bg-gray-100 px-1">src/main/resources/static/assets/</code>，同名替换即生效）。
+          </p>
           <FormKit v-model="formState.spec.assets.defaultImageUrl" name="assets_default_image" label="默认图片" type="attachment" :accepts="['image/*', 'application/json']" help="支持静态图片与随机图 API" />
           <FormKit v-model="formState.spec.assets.defaultThumbnailUrl" name="assets_default_thumbnail" label="文章默认封面" type="attachment" :accepts="['image/*', 'application/json']" />
           <FormKit v-model="formState.spec.assets.defaultStaticThumbnailUrl" name="assets_default_static_thumbnail" label="文章默认静态封面" type="attachment" :accepts="['image/*']" />

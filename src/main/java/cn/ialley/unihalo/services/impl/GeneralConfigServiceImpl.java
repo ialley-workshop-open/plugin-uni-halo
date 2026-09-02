@@ -223,7 +223,8 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
         GeneralConfig.AppInfo appInfo = new GeneralConfig.AppInfo();
         appInfo.setName("uni-halo");
-        appInfo.setLogo("https://uni-halo.925i.cn/uni_halo/uni_halo_logo.png");
+        // 应用图标默认引用插件内置静态资源（ReverseProxy：/plugins/uni-halo/assets/**）
+        appInfo.setLogo("/plugins/uni-halo/assets/logo.png");
         profile.setAppInfo(appInfo);
 
         Blogger blogger = new Blogger();
@@ -284,20 +285,24 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
         About about = new About();
         about.setPageTitle("关于博主");
-        about.setBgImageUrl("https://uni-halo.925i.cn/uni_halo/uni_halo_profile_bg.jpg");
-        about.setWaveImageUrl("https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif");
+        about.setBgImageUrl("/plugins/uni-halo/assets/uni_halo_profile_bg.jpg");
+        about.setWaveImageUrl("/plugins/uni-halo/assets/uni_halo_about_wave.gif");
         pages.setAboutConfig(about);
         return pages;
     }
 
+    /**
+     * 默认 assets：外链默认图已去除（2026-09-02）；唯一内置默认 = 加载占位动图
+     * （插件静态资源 /plugins/uni-halo/assets/…），其余留空由站长自行配置或走客户端回退。
+     */
     private static Assets buildDefaultAssets() {
         Assets assets = new Assets();
-        assets.setDefaultImageUrl("https://api.7trees.cn/img");
-        assets.setDefaultThumbnailUrl("https://tenapi.cn/v2/acg");
+        assets.setDefaultImageUrl("");
+        assets.setDefaultThumbnailUrl("");
         assets.setDefaultStaticThumbnailUrl("");
-        assets.setDefaultAvatarUrl("https://api.qjqq.cn/api/MiYouShe");
-        assets.setLoadingGifUrl("https://uni-halo.925i.cn/uni_halo/uni_halo_img_lazyload.gif");
-        assets.setLoadingErrUrl("https://uni-halo.925i.cn/uni_halo/3gVrtNeEDFeuMK14Vtytb9ml73TZj3dX.gif");
+        assets.setDefaultAvatarUrl("");
+        assets.setLoadingGifUrl("/plugins/uni-halo/assets/uni_halo_img_lazyload.gif");
+        assets.setLoadingErrUrl("");
         assets.setLoadingEmptyUrl("");
         return assets;
     }

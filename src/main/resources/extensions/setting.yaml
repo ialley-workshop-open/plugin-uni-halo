@@ -29,7 +29,7 @@ spec:
               label: 图片配置
               value:
                 bgImageUrl: "https://uni-halo.925i.cn/uni_halo_love/love_bg1.png"
-                waveImageUrl: "https://uni-halo.925i.cn/uni_halo/uni_halo_about_wave.gif"
+                waveImageUrl: "/plugins/uni-halo/assets/uni_halo_about_wave.gif"
                 heartImageUrl: "https://uni-halo.925i.cn/uni_halo_love/like.png"
               children:
                 - $formkit: attachment
