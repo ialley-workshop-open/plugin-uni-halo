@@ -24,6 +24,7 @@ import type {
   AuditCandidateType,
   Banner,
   BannerCandidate,
+  GeneralConfig,
 } from "@/types";
 
 const CONSOLE_API_GROUP = "console.api.unihalo.ialley.cn/v1alpha1";
@@ -53,6 +54,13 @@ export const appVersionsApi = {
 export const loveConfigApi = {
   get: () => http.get<LoveConfig>(`${PLUGIN_BASE}/love-config`),
   save: (data: LoveConfig) => http.put<LoveConfig>(`${PLUGIN_BASE}/love-config`, data),
+};
+
+// ===== 通用配置（GeneralConfig 单例）=====
+
+export const generalConfigApi = {
+  get: () => http.get<GeneralConfig>(`${PLUGIN_BASE}/general-config`),
+  save: (data: GeneralConfig) => http.put<GeneralConfig>(`${PLUGIN_BASE}/general-config`, data),
 };
 
 export interface LoveAlbumWriteRequest {

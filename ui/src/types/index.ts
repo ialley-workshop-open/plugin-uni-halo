@@ -526,3 +526,88 @@ export const AUDIT_CANDIDATE_PLUGIN_HINTS: Partial<Record<AuditCandidateType, st
   moment: "请先安装 plugin-moments（瞬间插件）",
   linkGroup: "请先安装 plugin-links（链接管理插件）",
 };
+
+// ===== 通用配置（GeneralConfig 单例，name 固定 general-config）=====
+
+export interface GeneralConfig {
+  metadata?: { name?: string };
+  spec: GeneralConfigSpec;
+}
+
+export interface GeneralConfigSpec {
+  profile: GeneralConfigProfile;
+  pages: GeneralConfigPages;
+  assets: GeneralConfigAssets;
+}
+
+export interface GeneralConfigProfile {
+  blogger: {
+    nickname?: string;
+    avatar?: string;
+    email?: string;
+    description?: string;
+  };
+  social: {
+    enabled?: boolean;
+    qq?: string;
+    wechat?: string;
+    weibo?: string;
+    email?: string;
+    blog?: string;
+    bilibili?: string;
+    juejin?: string;
+    csdn?: string;
+    gitee?: string;
+    github?: string;
+  };
+  copyrightConfig: {
+    enabled?: boolean;
+    content?: string;
+  };
+  disclaimers: {
+    enabled?: boolean;
+    content?: string;
+  };
+  showAboutSystem?: boolean;
+  postDetailConfig: {
+    showComment?: boolean;
+    copyrightEnabled?: boolean;
+    copyrightAuthor?: string;
+    copyrightDesc?: string;
+    copyrightViolation?: string;
+  };
+}
+
+export interface GeneralConfigPages {
+  homeConfig: {
+    pageTitle?: string;
+    useQuickNavigation?: boolean;
+    useCategory?: boolean;
+    bannerConfig: {
+      enabled?: boolean;
+      showTitle?: boolean;
+      showIndicator?: boolean;
+      height?: string;
+      dotPosition?: "left" | "right" | "top" | "bottom";
+    };
+  };
+  galleryConfig: {
+    pageTitle?: string;
+    useWaterfall?: boolean;
+  };
+  aboutConfig: {
+    pageTitle?: string;
+    bgImageUrl?: string;
+    waveImageUrl?: string;
+  };
+}
+
+export interface GeneralConfigAssets {
+  defaultImageUrl?: string;
+  defaultThumbnailUrl?: string;
+  defaultStaticThumbnailUrl?: string;
+  defaultAvatarUrl?: string;
+  loadingGifUrl?: string;
+  loadingErrUrl?: string;
+  loadingEmptyUrl?: string;
+}

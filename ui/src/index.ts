@@ -10,6 +10,7 @@ import RiLink from '~icons/ri/link'
 import RiFileList3Line from '~icons/ri/file-list-3-line'
 import RiShieldCheckLine from '~icons/ri/shield-check-line'
 import RiSlideshowLine from '~icons/ri/slideshow-line'
+import RiSettings3Line from '~icons/ri/settings-3-line'
 import WelcomeView from './views/WelcomeView.vue'
 
 function baseRoutePath(path: string) {
@@ -292,6 +293,26 @@ export default definePlugin({
             group: 'UniHalo',
             icon: markRaw(RiSlideshowLine),
             priority: 6,
+          },
+        },
+      },
+    },
+    {
+      parentName: 'Root',
+      route: {
+        path: baseRoutePath('/general-config'),
+        name: 'GeneralConfig',
+        component: () => import('@/views/general-config/GeneralConfigView.vue'),
+        meta: {
+          title: '通用配置',
+          searchable: true,
+          hideFooter: false,
+          permissions: ["plugin:uni-halo:general-config:view"],
+          menu: {
+            name: '通用配置',
+            group: 'UniHalo',
+            icon: markRaw(RiSettings3Line),
+            priority: 7,
           },
         },
       },

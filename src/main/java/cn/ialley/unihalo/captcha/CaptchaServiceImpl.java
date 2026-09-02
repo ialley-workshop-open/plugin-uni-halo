@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import reactor.core.publisher.Mono;
+import cn.ialley.unihalo.utils.SettingGroupResolver;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import tools.jackson.databind.node.JsonNodeFactory;
 
@@ -61,7 +62,8 @@ public class CaptchaServiceImpl implements CaptchaService {
     }
 
     private Mono<CaptchaConfig> captchaConfig() {
-        return settingFetcher.getSettingValue(SETTING_GROUP_CAPTCHA)
+        return SettingGroupResolver.group(settingFetcher, "safetyConfig",
+                SETTING_GROUP_CAPTCHA)
                 .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
                 .map(node -> new CaptchaConfig(
                         node.path(KEY_ENABLED).asBoolean(true),

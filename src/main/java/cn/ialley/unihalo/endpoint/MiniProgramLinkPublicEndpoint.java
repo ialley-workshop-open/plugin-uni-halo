@@ -18,6 +18,7 @@ import cn.ialley.unihalo.services.MiniProgramLinkSubmissionService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
+import cn.ialley.unihalo.utils.SettingGroupResolver;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import tools.jackson.databind.node.JsonNodeFactory;
 
@@ -74,7 +75,8 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
 
     private Mono<ServerResponse> submitApplication(ServerRequest request) {
         return captchaService.requireValid(request)
-                .then(settingFetcher.getSettingValue(SETTING_GROUP_LINK_CONFIG)
+                .then(SettingGroupResolver.group(settingFetcher, "featureConfig",
+                                SETTING_GROUP_LINK_CONFIG)
                         .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
                         .flatMap(config -> {
                             if (!config.path(SETTING_KEY_SUBMISSION_ENABLED).asBoolean(true)) {

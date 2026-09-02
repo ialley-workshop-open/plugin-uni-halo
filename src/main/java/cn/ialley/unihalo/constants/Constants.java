@@ -105,6 +105,17 @@ public class Constants {
     public static final String AUDIT_DATA_CONFIG_SINGLETON_NAME = "audit-data-config";
 
     /**
+     * 通用配置（GeneralConfig）单例名称（metadata.name 固定值）
+     */
+    public static final String GENERAL_CONFIG_SINGLETON_NAME = "general-config";
+
+    /**
+     * 通用配置（console）接口基础路径
+     */
+    public static final String GENERAL_CONFIG_API_BASE_PATH =
+        "plugins/plugin-uni-halo/general-config";
+
+    /**
      * 基础的域名地址
      */
     public static final String BASIC_DOMAIN_NAME = "unihalo.ialley.cn";

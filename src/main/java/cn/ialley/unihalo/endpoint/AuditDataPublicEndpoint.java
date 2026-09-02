@@ -13,6 +13,7 @@ import cn.ialley.unihalo.services.AuditDataService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
+import cn.ialley.unihalo.utils.SettingGroupResolver;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import tools.jackson.databind.node.JsonNodeFactory;
 
@@ -53,7 +54,8 @@ public class AuditDataPublicEndpoint implements CustomEndpoint {
     }
 
     private Mono<ServerResponse> getAuditData(ServerRequest request) {
-        return settingFetcher.getSettingValue(SETTING_GROUP_AUDIT_CONFIG)
+        return SettingGroupResolver.group(settingFetcher, "safetyConfig",
+                SETTING_GROUP_AUDIT_CONFIG)
                 .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
                 .flatMap(config -> {
                     boolean enabled = config.path(SETTING_KEY_AUDIT_MODE_ENABLED).asBoolean(false);

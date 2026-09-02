@@ -11,6 +11,7 @@ import cn.ialley.unihalo.scheme.MiniProgramLinkSubmission;
 import reactor.core.publisher.Mono;
 import run.halo.app.extension.ReactiveExtensionClient;
 import run.halo.app.extension.Secret;
+import cn.ialley.unihalo.utils.SettingGroupResolver;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -61,7 +62,8 @@ public class EmailService {
         if (spec == null || isBlank(spec.getEmail())) {
             return Mono.empty();
         }
-        return settingFetcher.getSettingValue(SETTING_GROUP_LINK_CONFIG)
+        return SettingGroupResolver.group(settingFetcher, "featureConfig",
+                SETTING_GROUP_LINK_CONFIG)
                 .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
                 .flatMap(config -> {
                     boolean sendEmail = config.path(SETTING_KEY_SEND_EMAIL).asBoolean(false);

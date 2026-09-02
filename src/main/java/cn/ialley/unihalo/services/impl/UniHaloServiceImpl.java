@@ -1,6 +1,7 @@
 package cn.ialley.unihalo.services.impl;
 
 import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 import lombok.RequiredArgsConstructor;
 import net.minidev.json.JSONObject;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -12,8 +13,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import cn.ialley.unihalo.scheme.QRCodeInfo;
+import cn.ialley.unihalo.services.GeneralConfigService;
 import cn.ialley.unihalo.services.QRCodeInfoService;
 import cn.ialley.unihalo.services.UniHaloService;
+import cn.ialley.unihalo.utils.PublicConfigAssembler;
+import cn.ialley.unihalo.utils.SettingGroupResolver;
 import cn.ialley.unihalo.utils.TokenManager;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,9 +43,11 @@ public class UniHaloServiceImpl implements UniHaloService {
 
     private final QRCodeInfoService qrCodeInfoService;
     private final ReactiveSettingFetcher settingFetcher;
+    private final GeneralConfigService generalConfigService;
     private final TokenManager tokenManager;
     private final AttachmentService attachmentService;
     private final ExternalLinkProcessor externalLinkProcessor;
+    private final PublicConfigAssembler publicConfigAssembler = new PublicConfigAssembler();
     private static final WebClient WEB_CLIENT = WebClient.builder().build();
     public static String TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token";
     public static String GET_WXA_CODE_URL = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=";
@@ -53,7 +59,11 @@ public class UniHaloServiceImpl implements UniHaloService {
      */
     @Override
     public Mono<Map<String, JsonNode>> getAppConfigs() {
-        return this.settingFetcher.getSettingValues();
+        return settingFetcher.getSettingValues()
+                .defaultIfEmpty(Map.of())
+                .flatMap(settings -> generalConfigService.get()
+                        .map(generalConfig -> toMap(
+                                publicConfigAssembler.assemble(settings, generalConfig))));
     }
 
     /*
@@ -64,7 +74,33 @@ public class UniHaloServiceImpl implements UniHaloService {
      */
     @Override
     public Mono<JsonNode> getAppConfigsByGroupName(String groupName) {
-        return this.settingFetcher.getSettingValue(groupName);
+        return settingFetcher.getSettingValues()
+                .defaultIfEmpty(Map.of())
+                .flatMap(settings -> generalConfigService.get()
+                        .map(generalConfig -> {
+                            JsonNode root = publicConfigAssembler.assemble(settings, generalConfig);
+                            JsonNode group = root.get(groupName);
+                            return group == null ? JsonNodeFactory.instance.objectNode() : group;
+                        }));
+    }
+
+    private static Map<String, JsonNode> toMap(JsonNode root) {
+        Map<String, JsonNode> result = new HashMap<>();
+        if (root != null && root.isObject()) {
+            root.properties().forEach(entry -> result.put(entry.getKey(), entry.getValue()));
+        }
+        return result;
+    }
+
+    /**
+     * 内部专用原始读取（不经公开过滤）。
+     *
+     * <p>动态小程序码/海报功能已下线（2026-09-02）：应用信息仅剩 名称/图标，
+     * 存放于「基本配置」baseConfig.appInfo；此处读取该节点供历史海报流程
+     * 兼容降级（字段缺失时不再执行，见 getAccessToken / uploadMedia）。</p>
+     */
+    private Mono<JsonNode> rawAppConfig() {
+        return SettingGroupResolver.group(settingFetcher, "baseConfig", "appInfo");
     }
 
     @Override
@@ -139,8 +175,11 @@ public class UniHaloServiceImpl implements UniHaloService {
     }
 
     private Mono<JsonNode> getAccessToken() {
-        return this.getAppConfigsByGroupName("appConfig").flatMap(config -> {
-            JsonNode appInfo = config.get("appInfo");
+        return rawAppConfig().flatMap(appInfo -> {
+            // 动态小程序码配置已下线（2026-09-02），字段缺失时静默降级（不再生成海报）
+            if (appInfo == null || !appInfo.hasNonNull("appId") || !appInfo.hasNonNull("appSecret")) {
+                return Mono.empty();
+            }
             String appId = appInfo.get("appId").asString();
             String appSecret = appInfo.get("appSecret").asString();
             String url = TOKEN_URL + "?grant_type=client_credential&appid=" + appId + "&secret=" + appSecret;
@@ -151,8 +190,12 @@ public class UniHaloServiceImpl implements UniHaloService {
     private Mono<Attachment> uploadMedia(String postId, byte[] mediaData) {
         FilePart filePart = new SimpleFilePart(postId + "." + MediaType.IMAGE_PNG.getSubtype(), byteArrayToFlux(mediaData), MediaType.IMAGE_PNG);
 
-        return this.getAppConfigsByGroupName("appConfig").flatMap(config -> {
-            JsonNode appInfo = config.get("appInfo");
+        return rawAppConfig().flatMap(appInfo -> {
+            // 动态小程序码配置已下线（2026-09-02），字段缺失时静默降级
+            if (appInfo == null || !appInfo.hasNonNull("policyName")
+                    || !appInfo.hasNonNull("fileGroupName")) {
+                return Mono.empty();
+            }
             String policyName = appInfo.get("policyName").asString();
             String fileGroupName = appInfo.get("fileGroupName").asString();
 

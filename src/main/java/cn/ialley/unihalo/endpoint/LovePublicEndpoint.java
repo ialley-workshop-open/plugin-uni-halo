@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
 import run.halo.app.extension.ListResult;
+import cn.ialley.unihalo.utils.SettingGroupResolver;
 import run.halo.app.plugin.ReactiveSettingFetcher;
 import tools.jackson.databind.ObjectMapper;
 
@@ -209,7 +210,8 @@ public class LovePublicEndpoint implements CustomEndpoint {
     }
 
     private Mono<Boolean> fetchLoveEnabled() {
-        return settingFetcher.getSettingValue(SETTING_GROUP_LOVE_CONFIG)
+        return SettingGroupResolver.group(settingFetcher, "featureConfig",
+                SETTING_GROUP_LOVE_CONFIG)
                 .map(node -> node.hasNonNull(SETTING_KEY_LOVE_ENABLED)
                         && node.get(SETTING_KEY_LOVE_ENABLED).asBoolean())
                 .defaultIfEmpty(false);
