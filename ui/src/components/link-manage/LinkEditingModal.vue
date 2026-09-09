@@ -132,8 +132,6 @@ const handleSave = async () => {
     :width="760"
     @close="emit('close')"
   >
-    <!-- 仅渲染设计字段，不含 metadata/annotations 等冗余信息；
-         分块填写（参考 plugin-links 新增弹窗）：基本信息 / 作者信息 / 其他 -->
     <FormKit
       id="link-form"
       type="form"
@@ -142,13 +140,13 @@ const handleSave = async () => {
       @submit="handleSave"
     >
       <!-- 基本信息 -->
-      <div class=":uno: md:grid md:grid-cols-4 md:gap-6">
+      <div class=":uno: md:grid md:grid-cols-4 md:gap-6 mb-6">
         <div class=":uno: md:col-span-1">
           <div class=":uno: sticky top-0">
             <span class=":uno: text-base font-medium text-gray-900">基本信息</span>
           </div>
         </div>
-        <div class=":uno: mt-5 md:col-span-3 md:mt-0 divide-y divide-gray-100">
+        <div class=":uno: mt-5 md:col-span-3 md:mt-0">
           <FormKit
             v-model="formState.spec.displayName"
             name="displayName"
@@ -209,18 +207,14 @@ const handleSave = async () => {
         </div>
       </div>
 
-      <div class=":uno: py-5">
-        <div class=":uno: border-t border-gray-200"></div>
-      </div>
-
       <!-- 作者信息（顺序：头像、昵称、网站） -->
-      <div class=":uno: md:grid md:grid-cols-4 md:gap-6">
+      <div class=":uno: md:grid md:grid-cols-4 md:gap-6 pt-6 mb-6">
         <div class=":uno: md:col-span-1">
           <div class=":uno: sticky top-0">
             <span class=":uno: text-base font-medium text-gray-900">作者信息</span>
           </div>
         </div>
-        <div class=":uno: mt-5 md:col-span-3 md:mt-0 divide-y divide-gray-100">
+        <div class=":uno: mt-5 md:col-span-3 md:mt-0">
           <FormKit
             v-model="formState.spec.avatar"
             name="avatar"
@@ -246,18 +240,14 @@ const handleSave = async () => {
         </div>
       </div>
 
-      <div class=":uno: py-5">
-        <div class=":uno: border-t border-gray-200"></div>
-      </div>
-
       <!-- 其他 -->
-      <div class=":uno: md:grid md:grid-cols-4 md:gap-6">
+      <div class=":uno: md:grid md:grid-cols-4 md:gap-6 pt-6">
         <div class=":uno: md:col-span-1">
           <div class=":uno: sticky top-0">
             <span class=":uno: text-base font-medium text-gray-900">其他</span>
           </div>
         </div>
-        <div class=":uno: mt-5 md:col-span-3 md:mt-0 divide-y divide-gray-100">
+        <div class=":uno: mt-5 md:col-span-3 md:mt-0">
           <FormKit
             v-model="visibleText"
             name="visible"

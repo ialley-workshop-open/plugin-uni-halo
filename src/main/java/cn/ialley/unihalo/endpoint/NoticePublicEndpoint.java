@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -82,13 +83,18 @@ public class NoticePublicEndpoint implements CustomEndpoint {
     }
 
     /**
-     * 最新一条已发布公告；无则 200 + null。
+     * 最新一条已发布公告；无则 200 + JSON null（决策 D6）。
+     * 注意：不能 bodyValue(null)（WebFlux 不允许 null body 会抛错成 500），
+     * 空数据以 JsonNode.nullNode() 序列化为 JSON null（2026-09-03 修复）。
      */
     private Mono<ServerResponse> getLatestNotice(ServerRequest request) {
         return noticeService.getLatestPublished()
                 .flatMap(this::toListVo)
-                .defaultIfEmpty(null)
-                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+                .map(vo -> (Object) vo)
+                .defaultIfEmpty(objectMapper.nullNode())
+                .flatMap(body -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(body));
     }
 
     /**

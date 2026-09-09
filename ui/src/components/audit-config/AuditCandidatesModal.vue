@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VButton, VEmpty, VLoading, VModal, VPagination, VSpace } from "@halo-dev/components";
+import { Toast, VButton, VEmpty, VLoading, VModal, VPagination, VSpace } from "@halo-dev/components";
 import { useQuery } from "@tanstack/vue-query";
 import { computed, onMounted, ref } from "vue";
 import RiImageLine from "~icons/ri/image-line";
@@ -15,8 +15,10 @@ const props = withDefaults(
   defineProps<{
     type: AuditCandidateType;
     selected?: AuditDataRef[];
+    /** 最大可选数量（默认不限；首页分类栏固定 3 个时传 3） */
+    max?: number;
   }>(),
-  { selected: () => [] }
+  { selected: () => [], max: Infinity }
 );
 
 const emit = defineEmits<{
@@ -56,9 +58,13 @@ const toggleItem = (candidate: AuditDataRef) => {
   const index = localSelected.value.findIndex((item) => item.name === candidate.name);
   if (index >= 0) {
     localSelected.value.splice(index, 1);
-  } else {
-    localSelected.value.push({ ...candidate });
+    return;
   }
+  if (props.max > 0 && localSelected.value.length >= props.max) {
+    Toast.warning(`最多选择 ${props.max} 个`);
+    return;
+  }
+  localSelected.value.push({ ...candidate });
 };
 
 const handleConfirm = () => {

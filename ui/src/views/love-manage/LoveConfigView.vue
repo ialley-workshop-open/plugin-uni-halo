@@ -3,7 +3,7 @@ import {Toast, VCard, VPageHeader, VSpace} from "@halo-dev/components";
 import {useQuery, useQueryClient} from "@tanstack/vue-query";
 import {submitForm} from "@formkit/core";
 import {cloneDeep} from "lodash-es";
-import {ref, watch} from "vue";
+import {nextTick, ref, watch} from "vue";
 import SubmitButton from "@/components/button/SubmitButton.vue";
 import {loveConfigApi} from "@/api";
 import type {LoveConfig} from "@/types";
@@ -28,6 +28,10 @@ function defaultForm(): LoveConfig {
   };
 }
 
+/** 回显/加载期间抑制脏标记；加载完成后开启变更追踪 */
+let suppressDirty = true;
+const dirty = ref(false);
+
 watch(
         () => config.value,
         (value) => {
@@ -45,9 +49,24 @@ watch(
           };
           spec.loveDateTitle = spec.loveDateTitle || "这是我们一起走过的";
           loaded.spec = spec;
+          suppressDirty = true;
           formState.value = loaded;
+          dirty.value = false;
+          nextTick(() => {
+            suppressDirty = false;
+          });
         },
         {immediate: true}
+);
+
+watch(
+        formState,
+        () => {
+          if (!suppressDirty) {
+            dirty.value = true;
+          }
+        },
+        {deep: true}
 );
 
 const handleSubmit = () => {
@@ -66,7 +85,15 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <VPageHeader title="UniHalo-恋爱配置"/>
+  <VPageHeader title="UniHalo-恋爱配置">
+    <template #actions>
+      <div class=":uno: flex items-center">
+        <VSpace>
+          <SubmitButton type="secondary" :loading="isLoading" :disabled="!dirty" text="保存" @submit="handleSubmit"/>
+        </VSpace>
+      </div>
+    </template>
+  </VPageHeader>
   <div class=":uno: m-0 flex flex-col gap-4 md:m-4">
     <VCard :loading="isLoading">
       <FormKit
@@ -147,14 +174,6 @@ const handleSave = async () => {
           </div>
         </div>
       </FormKit>
-
-      <template #footer>
-        <div class=":uno: flex justify-end">
-          <VSpace>
-            <SubmitButton type="secondary" text="保存" @submit="handleSubmit"/>
-          </VSpace>
-        </div>
-      </template>
     </VCard>
   </div>
 </template>

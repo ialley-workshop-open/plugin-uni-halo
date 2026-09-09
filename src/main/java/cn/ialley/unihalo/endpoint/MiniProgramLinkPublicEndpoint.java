@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import cn.ialley.unihalo.captcha.CaptchaScope;
 import cn.ialley.unihalo.captcha.CaptchaService;
 import cn.ialley.unihalo.captcha.CaptchaValidationException;
 import cn.ialley.unihalo.constants.Constants;
@@ -74,7 +75,7 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
     }
 
     private Mono<ServerResponse> submitApplication(ServerRequest request) {
-        return captchaService.requireValid(request)
+        return captchaService.requireValid(request, CaptchaScope.LINK_SUBMISSION)
                 .then(SettingGroupResolver.group(settingFetcher, "featureConfig",
                                 SETTING_GROUP_LINK_CONFIG)
                         .defaultIfEmpty(JsonNodeFactory.instance.objectNode())

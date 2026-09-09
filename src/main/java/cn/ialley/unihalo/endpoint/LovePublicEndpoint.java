@@ -11,45 +11,53 @@ import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import cn.ialley.unihalo.captcha.CaptchaScope;
 import cn.ialley.unihalo.captcha.CaptchaService;
 import cn.ialley.unihalo.captcha.CaptchaValidationException;
 import cn.ialley.unihalo.constants.Constants;
+import cn.ialley.unihalo.scheme.GeneralConfig;
 import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
+import cn.ialley.unihalo.services.GeneralConfigService;
 import cn.ialley.unihalo.services.LoveAlbumService;
 import cn.ialley.unihalo.services.LoveConfigService;
 import cn.ialley.unihalo.services.LoveDailyItemService;
 import cn.ialley.unihalo.services.LoveStoryService;
 import cn.ialley.unihalo.utils.AlbumTokenManager;
+import cn.ialley.unihalo.utils.LoveModuleTokenManager;
 import cn.ialley.unihalo.vo.LoveAlbumVo;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
 import run.halo.app.extension.ListResult;
-import cn.ialley.unihalo.utils.SettingGroupResolver;
-import run.halo.app.plugin.ReactiveSettingFetcher;
 import tools.jackson.databind.ObjectMapper;
 
 /**
  * 恋爱功能公开接口（小程序端，匿名可访问）。
  *
- * <p>聚合接口 GET /love-config 合并 settings 中的 loveEnabled（总开关仍保留在
- * 配置中，控制小程序端"我的页面"入口显示）；相册接口按锁定状态脱敏。</p>
+ * <p>聚合接口 GET /love-config 合并通用配置中的 loveEnabled（总开关 2026-09-03 起
+ * 由 setting 迁入 {@link GeneralConfig} spec.love，控制小程序端"我的页面"入口显示）；
+ * 相册接口按锁定状态脱敏。</p>
+ *
+ * <p>恋爱模块入口密码（2026-09-08）：恋爱故事/相册/清单三个入口可在通用配置
+ * 「恋爱设置-模块入口」分别设置密码，设置后对应数据接口（love-stories /
+ * love-albums / love-daily-items）要求携带 {@code ?token=}（经
+ * {@code POST /love-modules/unlock} 校验密码换取，30 分钟有效），未带或无效返回
+ * 401 {@code {reason: "locked"}}；未设置密码的模块不校验（老客户端无感）。
+ * 相册级密码保持现状（外层模块锁 + 内层相册锁）。</p>
  *
  * @author 小莫唐尼
  */
 @Component
 public class LovePublicEndpoint implements CustomEndpoint {
 
-    private static final String SETTING_GROUP_LOVE_CONFIG = "loveConfig";
-    private static final String SETTING_KEY_LOVE_ENABLED = "loveEnabled";
-
-    private final ReactiveSettingFetcher settingFetcher;
+    private final GeneralConfigService generalConfigService;
     private final LoveConfigService loveConfigService;
     private final LoveAlbumService loveAlbumService;
     private final LoveDailyItemService loveDailyItemService;
     private final LoveStoryService loveStoryService;
     private final AlbumTokenManager albumTokenManager;
+    private final LoveModuleTokenManager loveModuleTokenManager;
     private final CaptchaService captchaService;
 
     /**
@@ -57,19 +65,21 @@ public class LovePublicEndpoint implements CustomEndpoint {
      */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public LovePublicEndpoint(ReactiveSettingFetcher settingFetcher,
+    public LovePublicEndpoint(GeneralConfigService generalConfigService,
             LoveConfigService loveConfigService,
             LoveAlbumService loveAlbumService,
             LoveDailyItemService loveDailyItemService,
             LoveStoryService loveStoryService,
             AlbumTokenManager albumTokenManager,
+            LoveModuleTokenManager loveModuleTokenManager,
             CaptchaService captchaService) {
-        this.settingFetcher = settingFetcher;
+        this.generalConfigService = generalConfigService;
         this.loveConfigService = loveConfigService;
         this.loveAlbumService = loveAlbumService;
         this.loveDailyItemService = loveDailyItemService;
         this.loveStoryService = loveStoryService;
         this.albumTokenManager = albumTokenManager;
+        this.loveModuleTokenManager = loveModuleTokenManager;
         this.captchaService = captchaService;
     }
 
@@ -87,14 +97,16 @@ public class LovePublicEndpoint implements CustomEndpoint {
                 .GET(Constants.END_POINT_API_BASE_PATH + "/love-albums/{name}", this::getAlbum)
                 .POST(Constants.END_POINT_API_BASE_PATH + "/love-albums/{name}/unlock",
                         this::unlockAlbum)
+                .POST(Constants.END_POINT_API_BASE_PATH + "/love-modules/unlock",
+                        this::unlockLoveModule)
                 .GET(Constants.END_POINT_API_BASE_PATH + "/love-daily-items", this::listDailyItems)
                 .build();
     }
 
     /**
-     * 恋爱配置：loveEnabled（来自 settings 总开关）+ LoveConfig 模型内容
-     * （纪念日 + 恋人信息）。决策 D4：图片配置与模块开关不在此返回，
-     * 小程序端继续从 getConfigs（loveConfig 组）读取。
+     * 恋爱配置：loveEnabled（来自通用配置总开关）+ LoveConfig 模型内容
+     * （纪念日 + 恋人信息）。恋爱页图片与模块开关 2026-09-03 起随通用配置
+     * spec.love 下发（getConfigs loveConfig 组），不在本接口重复返回。
      */
     private Mono<ServerResponse> getLoveConfig(ServerRequest request) {
         return Mono.zip(loveConfigService.get(), fetchLoveEnabled())
@@ -117,76 +129,124 @@ public class LovePublicEndpoint implements CustomEndpoint {
     }
 
     /**
-     * 故事列表（多条目，决策 D5）。
+     * 故事列表（多条目，决策 D5；恋爱故事入口设置密码时要求携带模块 token）。
      */
     private Mono<ServerResponse> listStories(ServerRequest request) {
         int page = queryPage(request);
         int size = querySize(request);
-        return loveStoryService.listPublic(page, size)
-                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+        return requireModuleAccess(request, "ourStory",
+                loveStoryService.listPublic(page, size)
+                        .flatMap(body -> ServerResponse.ok().bodyValue(body)));
     }
 
     /**
-     * 相册列表：加密相册 locked=true 且不含 photos。
+     * 相册列表：加密相册 locked=true 且不含 photos；恋爱相册入口设置密码时
+     * 要求携带模块 token（外层模块锁 + 内层相册锁）。
      */
     private Mono<ServerResponse> listAlbums(ServerRequest request) {
         int page = queryPage(request);
         int size = querySize(request);
-        return loveAlbumService.listPublic(page, size)
-                .map(result -> {
-                    List<LoveAlbumVo> items = result.getItems().stream()
-                            .map(album -> LoveAlbumVo.from(album, isLocked(album)))
-                            .toList();
-                    return new ListResult<>(result.getPage(), result.getSize(),
-                            result.getTotal(), items);
-                })
-                .flatMap(body -> ServerResponse.ok().bodyValue(body));
+        return requireModuleAccess(request, "lovePhoto",
+                loveAlbumService.listPublic(page, size)
+                        .map(result -> {
+                            List<LoveAlbumVo> items = result.getItems().stream()
+                                    .map(album -> LoveAlbumVo.from(album, isLocked(album)))
+                                    .toList();
+                            return new ListResult<>(result.getPage(), result.getSize(),
+                                    result.getTotal(), items);
+                        })
+                        .flatMap(body -> ServerResponse.ok().bodyValue(body)));
     }
 
     /**
-     * 相册详情：加密相册需携带解锁 token 才返回 photos。
+     * 相册详情：加密相册需携带解锁 token 才返回 photos；恋爱相册入口设置密码时
+     * 同样要求模块 token。
      */
     private Mono<ServerResponse> getAlbum(ServerRequest request) {
         String name = request.pathVariable("name");
         String token = request.queryParam("token").orElse("");
-        return loveAlbumService.getByName(name)
-                // 公开详情：删除中对象视为不存在（决策 D7）
-                .filter(album -> album.getMetadata() == null
-                        || album.getMetadata().getDeletionTimestamp() == null)
-                .map(album -> LoveAlbumVo.from(album,
-                        isLocked(album) && !albumTokenManager.verify(name, token)))
-                .flatMap(body -> ServerResponse.ok().bodyValue(body))
-                .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build()));
+        return requireModuleAccess(request, "lovePhoto",
+                loveAlbumService.getByName(name)
+                        // 公开详情：删除中对象视为不存在（决策 D7）
+                        .filter(album -> album.getMetadata() == null
+                                || album.getMetadata().getDeletionTimestamp() == null)
+                        .map(album -> LoveAlbumVo.from(album,
+                                isLocked(album) && !albumTokenManager.verify(name, token)))
+                        .flatMap(body -> ServerResponse.ok().bodyValue(body))
+                        .switchIfEmpty(Mono.defer(() -> ServerResponse.notFound().build())));
     }
 
     /**
      * 密码解锁：校验通过后签发 HMAC 签名 token 并返回相册照片。
-     * 验证码校验在密码校验之前，失败不暴露密码正确性。
+     * 验证码校验在密码校验之前，失败不暴露密码正确性；相册入口模块锁先行校验。
      */
     private Mono<ServerResponse> unlockAlbum(ServerRequest request) {
         String name = request.pathVariable("name");
-        return captchaService.requireValid(request)
-                .then(request.bodyToMono(UnlockRequest.class)
-                        .flatMap(body -> loveAlbumService.verifyPassword(name, body.getPassword()))
+        return requireModuleAccess(request, "lovePhoto",
+                captchaService.requireValid(request, CaptchaScope.LOVE_ALBUM_UNLOCK)
+                        .then(request.bodyToMono(UnlockRequest.class)
+                                .flatMap(body -> loveAlbumService
+                                        .verifyPassword(name, body.getPassword()))
+                                .flatMap(ok -> {
+                                    if (!ok) {
+                                        return ServerResponse.badRequest()
+                                                .bodyValue(Map.of("message", "密码不正确"));
+                                    }
+                                    String token = albumTokenManager.issue(name);
+                                    return loveAlbumService.getByName(name)
+                                            .map(album -> {
+                                                Map<String, Object> result = new LinkedHashMap<>();
+                                                result.put("token", token);
+                                                result.put("photos", album.getSpec() != null
+                                                        && album.getSpec().getPhotos() != null
+                                                                ? album.getSpec().getPhotos()
+                                                                : List.of());
+                                                return result;
+                                            })
+                                            .flatMap(body -> ServerResponse.ok().bodyValue(body));
+                                }))
+                        .onErrorResume(CaptchaValidationException.class, this::captchaForbidden));
+    }
+
+    /**
+     * 恋爱模块入口解锁：校验模块存在且密码匹配后签发 HMAC 签名 token
+     * （scope = 模块名，30 分钟有效；未设置密码的模块一律拒绝，不暴露是否已设置）。
+     */
+    private Mono<ServerResponse> unlockLoveModule(ServerRequest request) {
+        return request.bodyToMono(LoveModuleUnlockRequest.class)
+                .flatMap(body -> generalConfigService
+                        .verifyLoveModulePassword(body.getModule(), body.getPassword())
                         .flatMap(ok -> {
                             if (!ok) {
                                 return ServerResponse.badRequest()
                                         .bodyValue(Map.of("message", "密码不正确"));
                             }
-                            String token = albumTokenManager.issue(name);
-                            return loveAlbumService.getByName(name)
-                                    .map(album -> {
-                                        Map<String, Object> result = new LinkedHashMap<>();
-                                        result.put("token", token);
-                                        result.put("photos", album.getSpec() != null
-                                                && album.getSpec().getPhotos() != null
-                                                        ? album.getSpec().getPhotos()
-                                                        : List.of());
-                                        return result;
-                                    })
-                                    .flatMap(body -> ServerResponse.ok().bodyValue(body));
-                        }))
-                .onErrorResume(CaptchaValidationException.class, this::captchaForbidden);
+                            return ServerResponse.ok()
+                                    .bodyValue(Map.of("token",
+                                            loveModuleTokenManager.issue(body.getModule())));
+                        }));
+    }
+
+    /**
+     * 恋爱模块入口访问控制：模块设置密码（锁定）时校验 {@code ?token=}，
+     * 未带或无效返回 401 {@code {reason: "locked"}}（语义决策见
+     * {@code .docs/module-lock-reminder-wechat-login-design.md} §3.4）；
+     * 未锁定直接放行（老客户端无感）。
+     */
+    private Mono<ServerResponse> requireModuleAccess(ServerRequest request, String module,
+            Mono<ServerResponse> body) {
+        return generalConfigService.isLoveModuleLocked(module)
+                .flatMap(locked -> {
+                    if (!locked) {
+                        return body;
+                    }
+                    String token = request.queryParam("token").orElse("");
+                    if (loveModuleTokenManager.verify(module, token)) {
+                        return body;
+                    }
+                    return ServerResponse.status(HttpStatus.UNAUTHORIZED)
+                            .bodyValue(Map.of("reason", "locked"));
+                });
     }
 
     /**
@@ -210,10 +270,12 @@ public class LovePublicEndpoint implements CustomEndpoint {
     }
 
     private Mono<Boolean> fetchLoveEnabled() {
-        return SettingGroupResolver.group(settingFetcher, "featureConfig",
-                SETTING_GROUP_LOVE_CONFIG)
-                .map(node -> node.hasNonNull(SETTING_KEY_LOVE_ENABLED)
-                        && node.get(SETTING_KEY_LOVE_ENABLED).asBoolean())
+        return generalConfigService.get()
+                .map(config -> {
+                    GeneralConfig.Love love = config.getSpec() != null
+                            ? config.getSpec().getLove() : null;
+                    return love != null && Boolean.TRUE.equals(love.getLoveEnabled());
+                })
                 .defaultIfEmpty(false);
     }
 
@@ -235,6 +297,15 @@ public class LovePublicEndpoint implements CustomEndpoint {
      */
     @Data
     public static class UnlockRequest {
+        private String password;
+    }
+
+    /**
+     * 恋爱模块入口解锁请求体（module = ourStory/lovePhoto/loveDaily）
+     */
+    @Data
+    public static class LoveModuleUnlockRequest {
+        private String module;
         private String password;
     }
 }

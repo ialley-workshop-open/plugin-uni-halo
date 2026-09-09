@@ -46,7 +46,8 @@ class CaptchaServiceImplTest {
         when(settingFetcher.getSettingValue(anyString()))
                 .thenReturn(Mono.just(settings(false)));
 
-        assertThatCode(() -> service.requireValid(mock(ServerRequest.class)).block())
+        assertThatCode(() -> service.requireValid(mock(ServerRequest.class),
+                CaptchaScope.LINK_SUBMISSION).block())
                 .doesNotThrowAnyException();
     }
 
@@ -59,7 +60,7 @@ class CaptchaServiceImplTest {
         var request = mock(ServerRequest.class);
         when(request.queryParam("captchaId")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.requireValid(request).block())
+        assertThatThrownBy(() -> service.requireValid(request, CaptchaScope.LINK_SUBMISSION).block())
                 .isInstanceOf(CaptchaValidationException.class);
     }
 
@@ -74,7 +75,7 @@ class CaptchaServiceImplTest {
         when(request.queryParam("captchaCode")).thenReturn(Optional.of("wrong"));
         when(captchaManager.verify("id1", "wrong", true)).thenReturn(Mono.just(false));
 
-        assertThatThrownBy(() -> service.requireValid(request).block())
+        assertThatThrownBy(() -> service.requireValid(request, CaptchaScope.LINK_SUBMISSION).block())
                 .isInstanceOf(CaptchaValidationException.class);
     }
 
@@ -90,7 +91,7 @@ class CaptchaServiceImplTest {
         when(captchaManager.verify("id1", "code1", true)).thenReturn(Mono.just(true));
         when(captchaManager.invalidate("id1")).thenReturn(Mono.empty());
 
-        assertThatCode(() -> service.requireValid(request).block())
+        assertThatCode(() -> service.requireValid(request, CaptchaScope.LINK_SUBMISSION).block())
                 .doesNotThrowAnyException();
 
         verify(captchaManager).invalidate("id1");
@@ -107,7 +108,7 @@ class CaptchaServiceImplTest {
         when(request.queryParam("captchaCode")).thenReturn(Optional.of("bad"));
         when(captchaManager.verify("id1", "bad", true)).thenReturn(Mono.just(false));
 
-        assertThatThrownBy(() -> service.requireValid(request).block())
+        assertThatThrownBy(() -> service.requireValid(request, CaptchaScope.LINK_SUBMISSION).block())
                 .isInstanceOf(CaptchaValidationException.class);
 
         verify(captchaManager, never()).invalidate(anyString());
@@ -130,11 +131,65 @@ class CaptchaServiceImplTest {
         assertThat(vo.imageBase64()).isEqualTo("data:image/png;base64,xxx");
     }
 
+    // ===== scope 生效范围（2026-09-03 起接口侧按范围生效）=====
+
+    @Test
+    void requireValidPassesWhenScopeDisabled() {
+        // 总开关开启但 linkSubmission scope 关闭：LINK_SUBMISSION 直接放行
+        when(settingFetcher.getSettingValue(anyString()))
+                .thenReturn(Mono.just(settings(true, false, true)));
+
+        assertThatCode(() -> service.requireValid(mock(ServerRequest.class),
+                CaptchaScope.LINK_SUBMISSION).block())
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void requireValidScopeDisabledDoesNotAffectOtherScopes() {
+        // linkSubmission 关闭不影响 loveAlbumUnlock：LOVE_ALBUM_UNLOCK 仍要求验证码
+        when(settingFetcher.getSettingValue(anyString()))
+                .thenReturn(Mono.just(settings(true, false, true)));
+        var request = mock(ServerRequest.class);
+        when(request.queryParam("captchaId")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.requireValid(request,
+                CaptchaScope.LOVE_ALBUM_UNLOCK).block())
+                .isInstanceOf(CaptchaValidationException.class);
+    }
+
+    @Test
+    void requireValidDefaultsScopeToEnabledWhenScopeMissing() {
+        // 旧 ConfigMap 无 scope 配置：缺省视为开启，仍要求验证码
+        when(settingFetcher.getSettingValue(anyString()))
+                .thenReturn(Mono.just(settings(true)));
+        var request = mock(ServerRequest.class);
+        when(request.queryParam("captchaId")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.requireValid(request,
+                CaptchaScope.LOVE_ALBUM_UNLOCK).block())
+                .isInstanceOf(CaptchaValidationException.class);
+    }
+
     // ===== 工具 =====
 
     private static tools.jackson.databind.JsonNode settings(boolean enabled) {
+        return settings(enabled, null, null);
+    }
+
+    private static tools.jackson.databind.JsonNode settings(boolean enabled,
+            Boolean linkSubmission, Boolean loveAlbumUnlock) {
         var node = JsonNodeFactory.instance.objectNode();
         node.put("enabled", enabled);
+        if (linkSubmission != null || loveAlbumUnlock != null) {
+            var scope = JsonNodeFactory.instance.objectNode();
+            if (linkSubmission != null) {
+                scope.put("linkSubmission", linkSubmission);
+            }
+            if (loveAlbumUnlock != null) {
+                scope.put("loveAlbumUnlock", loveAlbumUnlock);
+            }
+            node.set("scope", scope);
+        }
         return node;
     }
 }

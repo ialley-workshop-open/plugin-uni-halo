@@ -84,3 +84,4 @@ application-local.properties
 /workplace/
 /src/main/resources/ui/
 .docs/
+.design/

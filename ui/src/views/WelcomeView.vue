@@ -91,7 +91,7 @@ const features = [
 const steps = [
   {
     title: '下载源码',
-    desc: '从 GitHub 下载 uni-halo v2.0 小程序源码到本地，解压后导入微信开发者工具即可运行',
+    desc: '从 GitHub 下载 UniHalo v3.x 小程序源码到本地，解压后导入微信开发者工具即可运行',
   },
   {
     title: '安装插件',
@@ -160,7 +160,7 @@ const contacts = [
         </h1>
 
         <p class="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          为免费开源的 uni-halo v2.0 微信小程序/App提供配套的配置插件
+          为免费开源的 UniHalo v3.x 微信小程序/App提供配套的配置插件
         </p>
 
         <div class="flex flex-wrap justify-center gap-4 mb-10">
@@ -409,7 +409,7 @@ const contacts = [
             </div>
             <div class="flex-1 min-w-0">
               <div class="font-semibold text-slate-800 text-sm">小程序源码</div>
-              <div class="text-xs text-slate-400 truncate">uni-halo v2.0 开源代码</div>
+              <div class="text-xs text-slate-400 truncate">UniHalo v3.x 开源代码</div>
             </div>
             <RiArrowRightSLine class="w-4 h-4 text-slate-300 flex-shrink-0" />
           </a>

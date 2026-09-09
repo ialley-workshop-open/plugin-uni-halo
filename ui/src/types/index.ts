@@ -539,6 +539,38 @@ export interface GeneralConfigSpec {
   pages: GeneralConfigPages;
   assets: GeneralConfigAssets;
   preferences: GeneralConfigPreferences;
+  /** 恋爱模块（2026-09-03 由 setting.featureConfig.loveConfig 迁入；经 getConfigs
+   * loveConfig 组下发，结构与旧 loveConfig 一致） */
+  love: GeneralConfigLove;
+  /** 链接配置（2026-09-08 新增）：站长小程序展示信息，经 getConfigs 覆盖
+   * pluginConfig.linksSubmitPlugin 对应键下发，供小程序端「申请信息」弹窗展示 */
+  linkInfo: GeneralConfigLinkInfo;
+  /** 维护模式（2026-09-04 新增，见 .docs/maintenance-config-design.md） */
+  maintenance: GeneralConfigMaintenance;
+}
+
+/**
+ * 链接配置：站长小程序展示信息（字段与客户端 uh-links-mini-info「申请信息」弹窗展示项对齐；
+ * 服务端输出映射：displayName→blogName / miniProgramCode→blogLogo / link→blogUrl /
+ * description→blogDesc，其余同名，写入 pluginConfig.linksSubmitPlugin）
+ */
+export interface GeneralConfigLinkInfo {
+  /** 小程序名称 */
+  displayName?: string;
+  /** 太阳码/小程序码图片 */
+  miniProgramCode?: string;
+  /** 跳转地址 */
+  link?: string;
+  /** 作者昵称 */
+  authorName?: string;
+  /** 作者头像 */
+  avatar?: string;
+  /** 作者网站 */
+  website?: string;
+  /** 小程序描述 */
+  description?: string;
+  /** 申请说明 */
+  applyRemark?: string;
 }
 
 export interface GeneralConfigProfile {
@@ -585,48 +617,142 @@ export interface GeneralConfigProfile {
 
 export interface GeneralConfigPages {
   homeConfig: {
+    /** 首页标题（2026-09-08 起控制台不再提供配置项，保留字段由客户端读取默认） */
     pageTitle?: string;
     useQuickNavigation?: boolean;
+    /** 快捷导航项列表（2026-09-08 新增：每项可配置名称/排序/显示隐藏，排序=数组顺序） */
+    quickNavigation?: GeneralConfigQuickNavigationItem[];
     useCategory?: boolean;
-    bannerConfig: {
-      enabled?: boolean;
-      showTitle?: boolean;
-      showIndicator?: boolean;
-      height?: string;
-      dotPosition?: "left" | "right" | "top" | "bottom";
-    };
+    /** 首页分类栏展示的分类引用（2026-09-08 新增：固定 3 个，数据在「分类管理」维护） */
+    categories?: GeneralConfigCategoryItem[];
   };
   galleryConfig: {
+    /** 图库页标题（2026-09-08 起瀑布流配置下线） */
     pageTitle?: string;
-    useWaterfall?: boolean;
   };
   aboutConfig: {
     pageTitle?: string;
     bgImageUrl?: string;
     waveImageUrl?: string;
   };
+  /** 分类页（2026-09-08 新增：分类页标题，客户端 pageConfig.categoryConfig） */
+  categoryConfig?: {
+    pageTitle?: string;
+  };
+  /** 瞬间页（2026-09-08 新增：瞬间页标题，客户端 pageConfig.momentConfig） */
+  momentConfig?: {
+    pageTitle?: string;
+  };
+}
+
+/** 快捷导航项（2026-09-08 新增；字段与客户端 uh-home-quick-nav 对齐，
+ * bgColor 原 bgGlass、visible 原 show） */
+export interface GeneralConfigQuickNavigationItem {
+  key?: string;
+  title?: string;
+  /** 图标颜色（十六进制色值，如 #03A9F4） */
+  color?: string;
+  /** 背景色（原 bgGlass，rgba 半透明值） */
+  bgColor?: string;
+  /** 图标字体前缀（如 uhemoji2-icon） */
+  iconPrefix?: string;
+  /** 图标名（如 -mask） */
+  icon?: string;
+  /** 跳转路径（小程序页面路径） */
+  path?: string;
+  /** 是否显示（原 show） */
+  visible?: boolean;
+}
+
+/** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name） */
+export interface GeneralConfigCategoryItem {
+  name?: string;
+  /** 分类名称（展示用冗余快照） */
+  displayName?: string;
 }
 
 export interface GeneralConfigAssets {
-  defaultImageUrl?: string;
-  defaultThumbnailUrl?: string;
-  defaultStaticThumbnailUrl?: string;
-  defaultAvatarUrl?: string;
+  /** 加载中的图片 */
   loadingGifUrl?: string;
+  /** 加载失败图片 */
   loadingErrUrl?: string;
-  loadingEmptyUrl?: string;
 }
 
 export interface GeneralConfigPreferences {
-  /** 首页列表布局（L0 默认，客户端 layout.home）：h_row_col1 单列 / h_row_col2 双列 */
-  homeListLayout?: "h_row_col1" | "h_row_col2";
-  /** 文章卡片排版/封面位置（L0 默认，客户端 layout.cardType） */
-  articleCardType?:
-    | "lr_image_text"
-    | "lr_text_image"
-    | "tb_image_text"
-    | "tb_text_image"
-    | "only_text";
+  /** 首页列表布局（L0 默认，客户端 layout.home.listLayout）：single 单列 / double 双列 */
+  homeListLayout?: "single" | "double";
+  /** 首页卡片样式（L0 默认，客户端 layout.home.cardType） */
+  homeCardType?: "image_top" | "image_right" | "image_bottom" | "image_left";
+  /** 文章列表页列表布局（L0 默认，客户端 layout.articles.listLayout）：single / double */
+  articlesListLayout?: "single" | "double";
+  /** 文章列表页卡片样式（L0 默认，客户端 layout.articles.cardType，沿用旧字段名） */
+  articleCardType?: "image_top" | "image_right" | "image_bottom" | "image_left";
+  /** 文章归档页列表布局（L0 默认，客户端 layout.archives.listLayout）：single / double */
+  archivesListLayout?: "single" | "double";
+  /** 文章归档页卡片样式（L0 默认，客户端 layout.archives.cardType） */
+  archivesCardType?: "image_top" | "image_right" | "image_bottom" | "image_left";
   /** 评论头像是否圆角（L0 默认，客户端 isAvatarRadius） */
   avatarRadius?: boolean;
+}
+
+/** 恋爱模块（原 setting.featureConfig.loveConfig 剩余字段，2026-09-03 迁入通用配置） */
+export interface GeneralConfigLove {
+  /** 总开关：启用后小程序端「我的页面」导航出现恋爱入口 */
+  loveEnabled?: boolean;
+  /** 恋爱页图片（2026-09-08 起仅保留背景图，波浪/爱心图配置已下线） */
+  pageImages?: {
+    /** 背景图片 */
+    bgImageUrl?: string;
+  };
+  /** 恋爱故事模块入口开关（数据在「恋爱管理-恋爱故事」维护） */
+  ourStory?: GeneralConfigLoveModule;
+  /** 恋爱相册模块入口开关（数据在「恋爱管理-恋爱相册」维护） */
+  lovePhoto?: GeneralConfigLoveModule;
+  /** 恋爱清单模块入口开关（数据在「恋爱管理-恋爱清单」维护） */
+  loveDaily?: GeneralConfigLoveModule;
+}
+
+/**
+ * 恋爱模块入口开关（2026-09-08 起无图标配置）。
+ * 密码语义与恋爱相册一致：passwordEnabled 为「已设置密码」视图状态（由后端按哈希
+ * 派生，保存时忽略）；password 为新密码（留空 = 保持原密码）；passwordRemoved=true
+ * = 清除该入口密码。后端一律不回显哈希，故无 passwordHash 字段。
+ */
+export interface GeneralConfigLoveModule {
+  enabled?: boolean;
+  /** 是否已设置密码（控制台 GET 返回，由后端派生；保存时忽略） */
+  passwordEnabled?: boolean;
+  /** 新密码（仅写请求；留空表示保持原密码不变） */
+  password?: string;
+  /** 是否清除密码（仅写请求；true = 保存后清除该入口密码并关闭验证） */
+  passwordRemoved?: boolean;
+}
+
+/** 维护模式（2026-09-04 新增）：维护页标题/富文本说明与排期窗口；实际状态由服务端
+ * 按 enabled + startTime/endTime 与当前时间计算（scheduled/active 时 getConfigs
+ * 顶层下发 maintenance 键，enabled=false 或到点自动结束则不输出，键缺失即未维护） */
+export interface GeneralConfigMaintenance {
+  /** 安排开关：开启后按时间窗口即时生效（startTime 为空/已过 = 立即进入维护中） */
+  enabled?: boolean;
+  /** 维护页标题（默认「站点维护中」） */
+  title?: string;
+  /** 维护说明（纯文本，textarea 编辑；小程序端维护页标题下方直接展示，留空则展示默认文案） */
+  notice?: string;
+  /** 维护详情（富文本 HTML，RichTextEditorField 编辑；小程序端「维护详情」弹窗展示） */
+  description?: string;
+  /** 维护开始时间（RFC3339 UTC，如 2026-09-05T02:00:00Z）；空 = 立即维护 */
+  startTime?: string;
+  /** 预计恢复时间（RFC3339 UTC）；空 = 持续至手动关闭；到点自动结束 */
+  endTime?: string;
+}
+
+/** getConfigs 顶层 maintenance 键（additive，仅 scheduled/active 时由服务端输出；
+ * status 判定权威在服务端，客户端只算倒计时差值） */
+export interface PublicMaintenance {
+  /** scheduled 维护预告（倒计时至 startTime）/ active 维护中（倒计时至 endTime） */
+  status: "scheduled" | "active";
+  title?: string;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
 }

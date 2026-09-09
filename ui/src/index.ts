@@ -17,6 +17,8 @@ function baseRoutePath(path: string) {
   return `/uni-halo${path}`
 }
 
+const GROUP_NAME = 'UniHalo v3.x'
+
 export default definePlugin({
   components: {},
   routes: [
@@ -33,8 +35,28 @@ export default definePlugin({
           permissions: [],
           menu: {
             name: '欢迎使用',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(IconDashboard),
+            priority: 0,
+          },
+        },
+      },
+    },
+    {
+      parentName: 'Root',
+      route: {
+        path: baseRoutePath('/general-config'),
+        name: 'GeneralConfig',
+        component: () => import('@/views/general-config/GeneralConfigView.vue'),
+        meta: {
+          title: '通用配置',
+          searchable: true,
+          hideFooter: false,
+          permissions: ["plugin:uni-halo:general-config:view"],
+          menu: {
+            name: '通用配置',
+            group: GROUP_NAME,
+            icon: markRaw(RiSettings3Line),
             priority: 0,
           },
         },
@@ -54,7 +76,7 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:app:view"],
           menu: {
             name: '应用管理',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(IconGrid),
             priority: 0,
           },
@@ -109,7 +131,7 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:love:view"],
           menu: {
             name: '恋爱管理',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(RiHeartLine),
             priority: 2,
           },
@@ -195,7 +217,7 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:notice:view"],
           menu: {
             name: '公告管理',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(RiMegaphoneLine),
             priority: 3,
           },
@@ -216,7 +238,7 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:link:view"],
           menu: {
             name: '链接管理',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(RiLink),
             priority: 4,
           },
@@ -270,7 +292,7 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:audit-data:view"],
           menu: {
             name: '审核配置',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(RiShieldCheckLine),
             priority: 5,
           },
@@ -290,29 +312,9 @@ export default definePlugin({
           permissions: ["plugin:uni-halo:banner:view"],
           menu: {
             name: '轮播管理',
-            group: 'UniHalo',
+            group: GROUP_NAME,
             icon: markRaw(RiSlideshowLine),
             priority: 6,
-          },
-        },
-      },
-    },
-    {
-      parentName: 'Root',
-      route: {
-        path: baseRoutePath('/general-config'),
-        name: 'GeneralConfig',
-        component: () => import('@/views/general-config/GeneralConfigView.vue'),
-        meta: {
-          title: '通用配置',
-          searchable: true,
-          hideFooter: false,
-          permissions: ["plugin:uni-halo:general-config:view"],
-          menu: {
-            name: '通用配置',
-            group: 'UniHalo',
-            icon: markRaw(RiSettings3Line),
-            priority: 7,
           },
         },
       },
