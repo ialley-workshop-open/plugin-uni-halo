@@ -97,10 +97,10 @@ const removeCategory = (item: GeneralConfigCategoryItem) => {
 
 // ===== 快捷导航项（仅维护名称/背景色/显示，key 固定、不可增删，拖拽排序） =====
 
-/** rgba(...) → #rrggbb（取 RGB 部分，供原生颜色选择器显示）；hex 原样返回 */
+/** rgba(...) → #rrggbb（取 RGB 部分，供 FormKit color 回显）；hex 原样返回 */
 function toHexInput(value?: string): string {
   if (!value) {
-    return "#000000";
+    return "#cccccc";
   }
   const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
   if (match) {
@@ -108,15 +108,14 @@ function toHexInput(value?: string): string {
     // 正则已保证存在 3 个捕获组（noUncheckedIndexedAccess 下用非空断言）
     return `#${toHex(match[1]!)}${toHex(match[2]!)}${toHex(match[3]!)}`;
   }
-  return /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#000000";
+  return /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#cccccc";
 }
 
-/** 颜色选择器取值（hex）直接写入 bgColor（客户端 backgroundColor 接受 hex） */
-function onBgColorInput(
-  item: GeneralConfigQuickNavigationItem,
-  event: Event
-) {
-  item.bgColor = (event.target as HTMLInputElement).value;
+/** FormKit type="color" 选色（hex）写回 bgColor（参考 plugin-announcement editor；客户端 backgroundColor 接受 hex） */
+function onNavBgColor(item: GeneralConfigQuickNavigationItem, value: unknown) {
+  if (typeof value === "string") {
+    item.bgColor = value;
+  }
 }
 
 const GROUP_ITEMS: Array<{id: BigGroup; label: string; desc: string}> = [
@@ -701,42 +700,48 @@ const endMaintenanceNow = async () => {
               <div
                 v-for="(item, index) in homeQuickNavigation"
                 :key="index"
-                class=":uno: mb-2 flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-3 py-2 last:mb-0"
+                class=":uno: mb-2"
               >
-                <span class=":uno: nav-drag-handle shrink-0 cursor-move text-gray-300 hover:text-gray-500">
-                  <RiDragMove2Line class=":uno: h-4 w-4" />
-                </span>
-                <!-- 标识 key（禁用，不可修改） -->
-                <input
-                  :value="item.key"
-                  disabled
-                  class=":uno: h-7 w-28 shrink-0 rounded-md border border-gray-200 bg-gray-50 px-2 text-xs text-gray-500"
-                  title="标识 key（不可修改）"
-                />
-                <!-- 名称（label 左右布局） -->
-                <label class=":uno: flex min-w-0 flex-1 items-center gap-2 text-xs text-gray-700">
-                  <span class=":uno: w-8 shrink-0">名称</span>
-                  <input
-                    v-model="item.title"
-                    class=":uno: h-7 min-w-0 flex-1 rounded-md border border-gray-200 px-2 text-sm outline-none transition focus:border-primary"
-                    placeholder="导航名称"
-                  />
-                </label>
-                <!-- 背景色（颜色选择器，选中值存 hex） -->
-                <label class=":uno: flex shrink-0 items-center gap-2 text-xs text-gray-700">
-                  <span>背景色</span>
-                  <input
-                    type="color"
-                    :value="toHexInput(item.bgColor)"
-                    class=":uno: h-7 w-9 cursor-pointer rounded border border-gray-200 bg-white p-0.5"
-                    title="选择背景色"
-                    @input="onBgColorInput(item, $event)"
-                  />
-                </label>
-                <!-- 显示开关 -->
-                <div class=":uno: flex shrink-0 items-center gap-1 text-xs text-gray-500">
-                  <span>显示</span>
-                  <VSwitch v-model="item.visible" />
+                <div class=":uno: flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-gray-100 bg-white px-3 py-2">
+                  <span class=":uno: nav-drag-handle cursor-move shrink-0 text-gray-400 hover:text-gray-600">
+                    <RiDragMove2Line class=":uno: h-4 w-4" />
+                  </span>
+                  <!-- 标识 key（禁用；FormKit label 置空，label 用 CSS 自定义左侧布局） -->
+                  <div class=":uno: flex w-32 shrink-0 items-center gap-2">
+                    <span class=":uno: w-10 shrink-0 text-xs text-gray-700">标识</span>
+                    <FormKit
+                      v-model="item.key"
+                      :name="`nav_key_${index}`"
+                      type="text"
+                      disabled
+                      outer-class=":uno: min-w-0 flex-1 !pt-0"
+                    />
+                  </div>
+                  <!-- 名称 -->
+                  <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
+                    <span class=":uno: w-10 shrink-0 text-xs text-gray-700">名称</span>
+                    <FormKit
+                      v-model="item.title"
+                      :name="`nav_title_${index}`"
+                      type="text"
+                      placeholder="导航名称"
+                      outer-class=":uno: min-w-0 flex-1 !pt-0"
+                    />
+                  </div>
+                  <div class=":uno: flex shrink-0 items-center gap-2 mr-12">
+                    <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
+                    <FormKit
+                      type="color"
+                      :model-value="toHexInput(item.bgColor)"
+                      @update:model-value="onNavBgColor(item, $event)"
+                      outer-class=":uno: w-14 shrink-0 !pt-0"
+                    />
+                  </div>
+                  <!-- 显示开关 -->
+                  <div class=":uno: flex shrink-0 items-center gap-2 text-xs text-gray-500">
+                    <span>显示</span>
+                    <VSwitch v-model="item.visible" />
+                  </div>
                 </div>
               </div>
             </VueDraggable>
