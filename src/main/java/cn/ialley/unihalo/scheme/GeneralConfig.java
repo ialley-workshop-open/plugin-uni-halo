@@ -176,7 +176,7 @@ public class GeneralConfig extends AbstractExtension {
         private Boolean visible;
     }
 
-    /** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序，
+    /** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序/文章数，
      * 数组顺序 = 展示排序；app 端直接按快照渲染，不发请求） */
     @Data
     public static class CategoryItem {
@@ -187,6 +187,8 @@ public class GeneralConfig extends AbstractExtension {
         private String cover;
         /** 分类排序权重（Halo Category.spec.priority 冗余快照，越大越靠前） */
         private Integer priority;
+        /** 分类文章数（Halo Category.status.postCount 冗余快照，缺失默认 0） */
+        private Integer postCount;
     }
 
     /** 图库页（原 pageConfig.galleryConfig；2026-09-08 起瀑布流配置下线，app 端默认） */
@@ -299,30 +301,69 @@ public class GeneralConfig extends AbstractExtension {
     }
 
     /**
-     * 链接配置：站长小程序展示信息（2026-09-08 新增）。字段与小程序端「申请信息」
-     * 弹窗（客户端 {@code uh-links-mini-info} 组件）展示项对齐；getConfigs 输出时
-     * 由装配器映射覆盖 {@code pluginConfig.linksSubmitPlugin} 对应键
-     * （displayName→blogName / miniProgramCode→blogLogo / link→blogUrl /
-     * description→blogDesc，其余同名），客户端读取 shape 不变。
+     * 链接配置（2026-09-08 拆分为三个子配置；不再使用 linksSubmitPlugin）：
+     * <ul>
+     *   <li>{@link MiniInfo} 小程序信息：小程序端「申请信息」弹窗（uh-links-mini-info）展示；</li>
+     *   <li>{@link SiteInfo} 站点信息：本站站点名片，字段对齐 Halo 官方友链提交 API
+     *       （plugin-links {@code link-applications} 请求体：displayName/url/logo/description/email/backlink/feedUrls）；</li>
+     *   <li>{@link AuthorInfo} 作者信息：小程序端作者区展示（authorName/avatar/website，
+     *       官方申请接口无作者字段，保持原字段）。</li>
+     * </ul>
+     * getConfigs 输出经装配器直接下发 {@code pluginConfig.linkInfo}（字段名无映射）。
      */
     @Data
     public static class LinkInfo {
-        /** 小程序名称（linksSubmitPlugin.blogName） */
+        /** 小程序信息（原 linkInfo 主体：小程序名称/太阳码/跳转地址/描述/申请说明） */
+        private MiniInfo miniInfo;
+        /** 站点信息（本站站点名片，字段对齐 Halo 官方友链提交 API） */
+        private SiteInfo siteInfo;
+        /** 作者信息（小程序端作者区：昵称/头像/网站） */
+        private AuthorInfo authorInfo;
+    }
+
+    /** 小程序信息（app 端「申请信息」弹窗展示项） */
+    @Data
+    public static class MiniInfo {
+        /** 小程序名称 */
         private String displayName;
-        /** 太阳码/小程序码图片（blogLogo） */
+        /** 太阳码/小程序码图片 */
         private String miniProgramCode;
-        /** 跳转地址（blogUrl） */
+        /** 跳转地址 */
         private String link;
-        /** 作者昵称（authorName） */
-        private String authorName;
-        /** 作者头像（avatar） */
-        private String avatar;
-        /** 作者网站（website） */
-        private String website;
-        /** 小程序描述（blogDesc） */
+        /** 小程序描述 */
         private String description;
-        /** 申请说明（applyRemark） */
+        /** 申请说明 */
         private String applyRemark;
+    }
+
+    /** 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API：link-applications 请求体） */
+    @Data
+    public static class SiteInfo {
+        /** 网站名称（官方 displayName） */
+        private String displayName;
+        /** 网站地址（官方 url，HTTP/HTTPS） */
+        private String url;
+        /** 网站 Logo 地址（官方 logo） */
+        private String logo;
+        /** 网站描述（官方 description） */
+        private String description;
+        /** 联系邮箱（官方 email） */
+        private String email;
+        /** 反链页面地址（官方 backlink） */
+        private String backlink;
+        /** RSS/Atom 订阅地址（官方 feedUrls；配置表单换行分隔，存储为数组） */
+        private List<String> feedUrls;
+    }
+
+    /** 作者信息（小程序端作者区展示；官方申请接口无作者字段，保持原字段） */
+    @Data
+    public static class AuthorInfo {
+        /** 作者昵称 */
+        private String authorName;
+        /** 作者头像 */
+        private String avatar;
+        /** 作者网站 */
+        private String website;
     }
 
     /** 维护模式（2026-09-04 新增）。维护页展示内容与排期窗口；实际状态（未维护/预告/维护中）

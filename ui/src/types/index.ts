@@ -467,6 +467,8 @@ export interface AuditDataRef {
   extra?: string;
   /** 排序权重（分类=spec.priority，精选分类快照排序用；其余类型可空） */
   priority?: number;
+  /** 文章数（分类=status.postCount，缺失默认 0；app 端审核模式免请求复用） */
+  postCount?: number;
 }
 
 /** 审核模式模拟数据的选中引用（对象快照存储，数组顺序即展示顺序） */
@@ -552,27 +554,59 @@ export interface GeneralConfigSpec {
 }
 
 /**
- * 链接配置：站长小程序展示信息（字段与客户端 uh-links-mini-info「申请信息」弹窗展示项对齐；
- * 服务端输出映射：displayName→blogName / miniProgramCode→blogLogo / link→blogUrl /
- * description→blogDesc，其余同名，写入 pluginConfig.linksSubmitPlugin）
+ * 链接配置（2026-09-08 拆分为三个子配置，不再使用 linksSubmitPlugin）：
+ * miniInfo 小程序信息 / siteInfo 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API）/
+ * authorInfo 作者信息；经 getConfigs 直接下发 pluginConfig.linkInfo（字段名无映射）
  */
 export interface GeneralConfigLinkInfo {
+  /** 小程序信息（原 linkInfo 主体：小程序名称/太阳码/跳转地址/描述/申请说明） */
+  miniInfo?: GeneralConfigMiniInfo;
+  /** 站点信息（本站站点名片，对齐 Halo 官方友链提交 API 字段） */
+  siteInfo?: GeneralConfigSiteInfo;
+  /** 作者信息（小程序端作者区：昵称/头像/网站） */
+  authorInfo?: GeneralConfigAuthorInfo;
+}
+
+/** 小程序信息（app 端「申请信息」弹窗展示项） */
+export interface GeneralConfigMiniInfo {
   /** 小程序名称 */
   displayName?: string;
   /** 太阳码/小程序码图片 */
   miniProgramCode?: string;
   /** 跳转地址 */
   link?: string;
+  /** 小程序描述 */
+  description?: string;
+  /** 申请说明 */
+  applyRemark?: string;
+}
+
+/** 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API：link-applications 请求体） */
+export interface GeneralConfigSiteInfo {
+  /** 网站名称（官方 displayName） */
+  displayName?: string;
+  /** 网站地址（官方 url，HTTP/HTTPS） */
+  url?: string;
+  /** 网站 Logo 地址（官方 logo） */
+  logo?: string;
+  /** 网站描述（官方 description） */
+  description?: string;
+  /** 联系邮箱（官方 email） */
+  email?: string;
+  /** 反链页面地址（官方 backlink） */
+  backlink?: string;
+  /** RSS/Atom 订阅地址（官方 feedUrls；表单换行分隔存数组） */
+  feedUrls?: string[];
+}
+
+/** 作者信息（小程序端作者区展示；官方申请接口无作者字段，保持原字段） */
+export interface GeneralConfigAuthorInfo {
   /** 作者昵称 */
   authorName?: string;
   /** 作者头像 */
   avatar?: string;
   /** 作者网站 */
   website?: string;
-  /** 小程序描述 */
-  description?: string;
-  /** 申请说明 */
-  applyRemark?: string;
 }
 
 export interface GeneralConfigProfile {
@@ -666,7 +700,7 @@ export interface GeneralConfigQuickNavigationItem {
   visible?: boolean;
 }
 
-/** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序，
+/** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序/文章数，
  * 数组顺序 = 展示排序；app 端直接按快照渲染，不发请求） */
 export interface GeneralConfigCategoryItem {
   name?: string;
@@ -676,6 +710,8 @@ export interface GeneralConfigCategoryItem {
   cover?: string;
   /** 分类排序权重（Halo Category.spec.priority 冗余快照，越大越靠前） */
   priority?: number;
+  /** 分类文章数（Halo Category.status.postCount 冗余快照，缺失默认 0） */
+  postCount?: number;
 }
 
 export interface GeneralConfigAssets {

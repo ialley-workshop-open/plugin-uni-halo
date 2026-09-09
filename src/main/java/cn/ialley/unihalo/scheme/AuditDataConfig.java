@@ -78,5 +78,7 @@ public class AuditDataConfig extends AbstractExtension {
         private String extra;
         /** 排序权重（分类=spec.priority，精选分类快照排序用；其余类型可空） */
         private Integer priority;
+        /** 文章数（分类=status.postCount，缺失默认 0；app 端审核模式免请求复用） */
+        private Integer postCount;
     }
 }

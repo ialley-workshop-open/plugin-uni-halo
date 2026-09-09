@@ -21,6 +21,9 @@ public class CategoryRef extends AbstractExtension {
 
     private CategoryRefSpec spec;
 
+    /** 分类状态（Halo Category status，候选/快照展示用） */
+    private CategoryRefStatus status;
+
     @Data
     public static class CategoryRefSpec {
         private String displayName;
@@ -29,5 +32,15 @@ public class CategoryRef extends AbstractExtension {
         private String cover;
         /** 分类排序权重（Halo Category.spec.priority，越大越靠前） */
         private Integer priority;
+    }
+
+    @Data
+    public static class CategoryRefStatus {
+        /** 分类文章数（Halo Category.status.postCount，缺失时按 0 处理） */
+        private Integer postCount;
+        /** 分类永久链接 */
+        private String permalink;
+        /** 可见文章数 */
+        private Integer visiblePostCount;
     }
 }

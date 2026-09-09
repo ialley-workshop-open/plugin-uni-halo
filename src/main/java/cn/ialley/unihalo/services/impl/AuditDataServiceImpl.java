@@ -220,6 +220,7 @@ public class AuditDataServiceImpl implements AuditDataService {
             }
             case category -> {
                 var spec = ((CategoryRef) extension).getSpec();
+                var status = ((CategoryRef) extension).getStatus();
                 if (spec != null) {
                     ref.setTitle(spec.getDisplayName());
                     ref.setSubTitle(spec.getSlug());
@@ -227,6 +228,8 @@ public class AuditDataServiceImpl implements AuditDataService {
                     ref.setCover(spec.getCover());
                     ref.setPriority(spec.getPriority());
                 }
+                // 分类文章数（status.postCount，缺失默认 0；app 端审核模式免请求复用）
+                ref.setPostCount(status == null || status.getPostCount() == null ? 0 : status.getPostCount());
             }
             case galleryGroup -> {
                 var group = (PhotoGroupRef) extension;

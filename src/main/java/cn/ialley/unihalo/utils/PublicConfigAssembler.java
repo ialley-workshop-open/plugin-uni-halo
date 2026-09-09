@@ -144,29 +144,21 @@ public class PublicConfigAssembler {
                 root.set("maintenance", maintenanceOut);
             }
         }
-        // 链接配置（2026-09-08 新增）：spec.linkInfo → 覆盖 pluginConfig.linksSubmitPlugin
-        // 对应键（blogName/blogLogo/blogUrl/blogDesc/authorName/avatar/website/applyRemark），
-        // 供小程序端「申请信息」弹窗（uh-links-mini-info）读取；linkInfo 全部留空时
-        // 不输出/不覆盖（setting 透传的旧值保持原样）
+        // 链接配置（2026-09-08 起去映射 + 拆分子结构）：spec.linkInfo 直接下发到
+        // pluginConfig.linkInfo，结构 = {miniInfo, siteInfo, authorInfo}：
+        // - miniInfo（小程序信息）供小程序端「申请信息」弹窗（uh-links-mini-info）读取；
+        // - siteInfo（站点信息）字段对齐 Halo 官方 plugin-links 友链提交 API
+        //   （link-applications 请求体：displayName/url/logo/description/email/backlink/feedUrls）；
+        // - authorInfo（作者信息）小程序端作者区展示（authorName/avatar/website）。
+        // linkInfo 全部留空时不输出（app 端展示「暂未配置」占位）。
+        // 旧 linksSubmitPlugin（blogName/blogLogo/blogUrl/blogDesc 等键）映射已移除，不再下发。
         JsonNode linkInfo = spec.get("linkInfo");
         if (linkInfo != null && linkInfo.isObject() && hasNonBlankText(linkInfo)) {
             JsonNode pluginConfigNode = root.get("pluginConfig");
             ObjectNode pluginConfig = pluginConfigNode != null && pluginConfigNode.isObject()
                     ? (ObjectNode) pluginConfigNode.deepCopy()
                     : JsonNodeFactory.instance.objectNode();
-            JsonNode submit = pluginConfig.get("linksSubmitPlugin");
-            ObjectNode submitOut = submit != null && submit.isObject()
-                    ? (ObjectNode) submit.deepCopy()
-                    : JsonNodeFactory.instance.objectNode();
-            putMapped(linkInfo, submitOut, "blogName", "displayName");
-            putMapped(linkInfo, submitOut, "blogLogo", "miniProgramCode");
-            putMapped(linkInfo, submitOut, "blogUrl", "link");
-            putMapped(linkInfo, submitOut, "authorName", "authorName");
-            putMapped(linkInfo, submitOut, "avatar", "avatar");
-            putMapped(linkInfo, submitOut, "website", "website");
-            putMapped(linkInfo, submitOut, "blogDesc", "description");
-            putMapped(linkInfo, submitOut, "applyRemark", "applyRemark");
-            pluginConfig.set("linksSubmitPlugin", submitOut);
+            pluginConfig.set("linkInfo", linkInfo);
             root.set("pluginConfig", pluginConfig);
         }
         return root;
@@ -261,17 +253,6 @@ public class PublicConfigAssembler {
         return "authorConfig".equals(group) || "pageConfig".equals(group)
                 || "basicConfig".equals(group) || "imagesConfig".equals(group)
                 || "loveConfig".equals(group);
-    }
-
-    /**
-     * 链接配置映射：source 中 sourceKey 非空时写入 target[targetKey]（空值不覆盖）。
-     */
-    private static void putMapped(JsonNode source, ObjectNode target,
-            String targetKey, String sourceKey) {
-        JsonNode value = source.get(sourceKey);
-        if (value != null && !value.isNull() && !value.asText().isBlank()) {
-            target.put(targetKey, value.asText());
-        }
     }
 
     /** 对象中是否存在至少一个非空文本字段（用于判断链接配置是否值得覆盖输出） */

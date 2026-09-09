@@ -64,13 +64,14 @@ const homeCategories = computed(
   () => formState.value.spec.pages.homeConfig.categories || []
 );
 
-/** 回显给候选弹窗的 AuditDataRef 形态（title ← displayName、cover ← cover、priority ← priority 快照） */
+/** 回显给候选弹窗的 AuditDataRef 形态（title ← displayName、cover ← cover、priority/postCount ← 快照） */
 const categoryModalSelected = computed<AuditDataRef[]>(() =>
   homeCategories.value.map((item) => ({
     name: item.name || "",
     title: item.displayName,
     cover: item.cover,
     priority: item.priority,
+    postCount: item.postCount,
   }))
 );
 
@@ -90,13 +91,14 @@ const homeCategoriesSortable = computed({
   },
 });
 
-/** 弹窗确认：映射回 {name, displayName, cover, priority} 快照并关闭（候选弹窗已限制最多 3 个） */
+/** 弹窗确认：映射回 {name, displayName, cover, priority, postCount} 快照并关闭（候选弹窗已限制最多 3 个） */
 const handleCategoryConfirm = (selected: AuditDataRef[]) => {
   formState.value.spec.pages.homeConfig.categories = selected.map((item) => ({
     name: item.name,
     displayName: item.title || item.name,
     cover: item.cover,
     priority: item.priority,
+    postCount: item.postCount,
   }));
   categoryModalVisible.value = false;
 };
@@ -110,21 +112,12 @@ const removeCategory = (item: GeneralConfigCategoryItem) => {
 
 // ===== 快捷导航项（仅维护名称/背景色/显示，key 固定、不可增删，拖拽排序） =====
 
-/** rgba(...) → #rrggbb（取 RGB 部分，供 FormKit color 回显）；hex 原样返回 */
-function toHexInput(value?: string): string {
-  if (!value) {
-    return "#cccccc";
-  }
-  const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-  if (match) {
-    const toHex = (n: string) => Number(n).toString(16).padStart(2, "0");
-    // 正则已保证存在 3 个捕获组（noUncheckedIndexedAccess 下用非空断言）
-    return `#${toHex(match[1]!)}${toHex(match[2]!)}${toHex(match[3]!)}`;
-  }
-  return /^#[0-9a-fA-F]{6}$/.test(value) ? value : "#cccccc";
+/** FormKit type="color" 回显值：空值兜底，rgba/hex 原样透传（保留透明度供 Sketch 滑块回显） */
+function toColorInput(value?: string): string {
+  return value || "#cccccc";
 }
 
-/** FormKit type="color" 选色（hex）写回 bgColor（参考 plugin-announcement editor；客户端 backgroundColor 接受 hex） */
+/** FormKit type="color" 选色（format="hex8" 输出 #rrggbbaa 含透明度）写回 bgColor（客户端 uh-home-quick-nav 直接读该色值渲染） */
 function onNavBgColor(item: GeneralConfigQuickNavigationItem, value: unknown) {
   if (typeof value === "string") {
     item.bgColor = value;
@@ -137,7 +130,7 @@ const GROUP_ITEMS: Array<{id: BigGroup; label: string; desc: string}> = [
   {id: "pages", label: "页面设置", desc: "首页 / 图库 / 关于页"},
   {id: "assets", label: "资源设置", desc: "加载占位"},
   {id: "love", label: "恋爱设置", desc: "恋爱总开关 / 页面图片与模块入口"},
-  {id: "linkInfo", label: "链接配置", desc: "小程序信息 / 作者信息"},
+  {id: "linkInfo", label: "链接配置", desc: "站点信息 / 小程序信息 / 作者信息"},
   {id: "maintenance", label: "维护设置", desc: "维护页文案 / 排期与开关"},
 ];
 
@@ -170,6 +163,7 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
     {id: "modules", label: "模块入口"},
   ],
   linkInfo: [
+    {id: "site", label: "站点信息"},
     {id: "info", label: "小程序信息"},
     {id: "author", label: "作者信息"},
   ],
@@ -197,6 +191,21 @@ const {data: config, isLoading} = useQuery({
 });
 
 const formState = ref<GeneralConfig>(defaultConfig());
+
+/** 站点信息订阅地址（textarea 换行分隔 ↔ 数组，对齐官方 feedUrls 字段） */
+const feedUrlsText = computed({
+  get: () => (formState.value.spec.linkInfo.siteInfo?.feedUrls || []).join("\n"),
+  set: (value: string) => {
+    if (!formState.value.spec.linkInfo.siteInfo) {
+      formState.value.spec.linkInfo.siteInfo = {};
+    }
+    const list = value
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    formState.value.spec.linkInfo.siteInfo.feedUrls = list;
+  },
+});
 
 function defaultConfig(): GeneralConfig {
   return {
@@ -292,15 +301,28 @@ function defaultSpec(): GeneralConfigSpec {
       loveDaily: {enabled: false, passwordEnabled: false, password: "", passwordRemoved: false},
     },
     linkInfo: {
-      // 链接配置默认全部留空（站长配置后经 getConfigs 覆盖 pluginConfig.linksSubmitPlugin）
-      displayName: "",
-      miniProgramCode: "",
-      link: "",
-      authorName: "",
-      avatar: "",
-      website: "",
-      description: "",
-      applyRemark: "",
+      // 链接配置默认全部留空（站长配置后经 getConfigs 直接下发 pluginConfig.linkInfo）
+      miniInfo: {
+        displayName: "",
+        miniProgramCode: "",
+        link: "",
+        description: "",
+        applyRemark: "",
+      },
+      siteInfo: {
+        displayName: "",
+        url: "",
+        logo: "",
+        description: "",
+        email: "",
+        backlink: "",
+        feedUrls: [],
+      },
+      authorInfo: {
+        authorName: "",
+        avatar: "",
+        website: "",
+      },
     },
     maintenance: {
       // 维护模式默认：关闭 + 标题默认「站点维护中」（与后端 buildDefaultMaintenance 对齐）
@@ -748,7 +770,8 @@ const endMaintenanceNow = async () => {
                     <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
                     <FormKit
                       type="color"
-                      :model-value="toHexInput(item.bgColor)"
+                      format="hex8"
+                      :model-value="toColorInput(item.bgColor)"
                       @update:model-value="onNavBgColor(item, $event)"
                       outer-class=":uno: w-14 shrink-0 !pt-0"
                     />
@@ -1009,16 +1032,30 @@ const endMaintenanceNow = async () => {
           </div>
         </template>
 
-        <!-- 链接配置 → 小程序信息（2026-09-08 新增：站长小程序展示信息，小程序端「申请信息」弹窗展示） -->
+        <!-- 链接配置 → 站点信息（2026-09-08 新增：本站站点名片，字段对齐 Halo 官方友链提交 API） -->
+        <template v-if="bigGroup === 'linkInfo' && subTab === 'site'">
+          <p class=":uno: mb-3 text-xs text-gray-400">
+            配置本站站点名片信息，字段对齐 Halo 官方链接管理插件（plugin-links）的友链提交 API（网站名称 / 地址 / Logo / 描述 / 邮箱 / 反链 / 订阅地址），供展示与友链申请使用；留空的项不展示。
+          </p>
+          <FormKit v-model="formState.spec.linkInfo.siteInfo!.displayName" name="link_site_display_name" label="网站名称" type="text" placeholder="如「UniHalo 博客」" />
+          <FormKit v-model="formState.spec.linkInfo.siteInfo!.url" name="link_site_url" label="网站地址" type="text" placeholder="如 https://your-site.com" help="HTTP/HTTPS 地址" />
+          <FormKit v-model="formState.spec.linkInfo.siteInfo!.logo" name="link_site_logo" label="网站 Logo" type="attachment" :accepts="['image/*']" placeholder="选择或粘贴 Logo 图片地址" />
+          <FormKit v-model="formState.spec.linkInfo.siteInfo!.description" name="link_site_description" label="网站描述" type="textarea" placeholder="一句话介绍你的网站" />
+          <FormKit v-model="formState.spec.linkInfo.siteInfo!.email" name="link_site_email" label="联系邮箱" type="text" placeholder="如 contact@example.com" />
+          <FormKit v-model="formState.spec.linkInfo.siteInfo!.backlink" name="link_site_backlink" label="反链地址" type="text" placeholder="如 https://your-site.com/links" help="友链页面地址（反链）" />
+          <FormKit v-model="feedUrlsText" name="link_site_feed_urls" label="订阅地址" type="textarea" placeholder="每行一个 RSS/Atom 地址" help="RSS/Atom 订阅地址，每行一个（存储为数组，对齐官方 feedUrls 字段）" />
+        </template>
+
+        <!-- 链接配置 → 小程序信息（站长小程序展示信息，小程序端「申请信息」弹窗展示） -->
         <template v-if="bigGroup === 'linkInfo' && subTab === 'info'">
           <p class=":uno: mb-3 text-xs text-gray-400">
             配置你自己的小程序展示信息，用于 app 小程序端「申请信息」弹窗展示（小程序名称 / 太阳码 / 跳转地址 / 描述 / 申请说明）；留空的项不在弹窗中展示。
           </p>
-          <FormKit v-model="formState.spec.linkInfo.displayName" name="link_display_name" label="小程序名称" type="text" placeholder="如「UniHalo 博客」" />
-          <FormKit v-model="formState.spec.linkInfo.miniProgramCode" name="link_mini_program_code" label="太阳码/小程序码" type="attachment" :accepts="['image/*']" placeholder="选择或粘贴小程序码图片地址" help="小程序码图片，弹窗中点击可预览" />
-          <FormKit v-model="formState.spec.linkInfo.link" name="link_url" label="跳转地址" type="text" placeholder="如 #小程序://小莫唐尼/AGLiOpse2vi6QJC" help="说明：微信打开小程序，点击右上角三个点找到复制链接。" />
-          <FormKit v-model="formState.spec.linkInfo.description" name="link_description" label="小程序描述" type="textarea" placeholder="一句话介绍你的小程序，如「记录生活与技术的个人博客」" />
-          <FormKit v-model="formState.spec.linkInfo.applyRemark" name="link_apply_remark" label="申请说明" type="textarea" placeholder="如「欢迎友链互换，请附上你的网站信息」" help="弹窗中「申请说明」栏展示的文案" />
+          <FormKit v-model="formState.spec.linkInfo.miniInfo!.displayName" name="link_display_name" label="小程序名称" type="text" placeholder="如「UniHalo 博客」" />
+          <FormKit v-model="formState.spec.linkInfo.miniInfo!.miniProgramCode" name="link_mini_program_code" label="太阳码/小程序码" type="attachment" :accepts="['image/*']" placeholder="选择或粘贴小程序码图片地址" help="小程序码图片，弹窗中点击可预览" />
+          <FormKit v-model="formState.spec.linkInfo.miniInfo!.link" name="link_url" label="跳转地址" type="text" placeholder="如 #小程序://小莫唐尼/AGLiOpse2vi6QJC" help="说明：微信打开小程序，点击右上角三个点找到复制链接。" />
+          <FormKit v-model="formState.spec.linkInfo.miniInfo!.description" name="link_description" label="小程序描述" type="textarea" placeholder="一句话介绍你的小程序，如「记录生活与技术的个人博客」" />
+          <FormKit v-model="formState.spec.linkInfo.miniInfo!.applyRemark" name="link_apply_remark" label="申请说明" type="textarea" placeholder="如「欢迎友链互换，请附上你的网站信息」" help="弹窗中「申请说明」栏展示的文案" />
         </template>
 
         <!-- 链接配置 → 作者信息（2026-09-08 新增：作者昵称/头像/网站） -->
@@ -1026,9 +1063,9 @@ const endMaintenanceNow = async () => {
           <p class=":uno: mb-3 text-xs text-gray-400">
             配置作者展示信息，用于 app 小程序端「申请信息」弹窗中作者信息区展示；留空的项不在弹窗中展示。
           </p>
-          <FormKit v-model="formState.spec.linkInfo.authorName" name="link_author_name" label="作者昵称" type="text" placeholder="如「小莫唐尼」" />
-          <FormKit v-model="formState.spec.linkInfo.avatar" name="link_avatar" label="作者头像" type="attachment" :accepts="['image/*']" placeholder="选择或粘贴作者头像图片地址" />
-          <FormKit v-model="formState.spec.linkInfo.website" name="link_website" label="作者网站" type="text" placeholder="如 https://your-site.com" />
+          <FormKit v-model="formState.spec.linkInfo.authorInfo!.authorName" name="link_author_name" label="作者昵称" type="text" placeholder="如「小莫唐尼」" />
+          <FormKit v-model="formState.spec.linkInfo.authorInfo!.avatar" name="link_avatar" label="作者头像" type="attachment" :accepts="['image/*']" placeholder="选择或粘贴作者头像图片地址" />
+          <FormKit v-model="formState.spec.linkInfo.authorInfo!.website" name="link_website" label="作者网站" type="text" placeholder="如 https://your-site.com" />
         </template>
 
         <!-- 维护 → 维护时间（VTabbar 由右侧卡片 header 统一渲染；状态卡 + 开启开关 + 时间窗口） -->

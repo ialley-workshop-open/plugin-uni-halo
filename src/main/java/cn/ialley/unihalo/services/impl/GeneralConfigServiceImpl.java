@@ -321,19 +321,14 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
     }
 
     /**
-     * 默认链接配置：全部字段留空（2026-09-08 新增，站长配置后经 getConfigs 覆盖
-     * pluginConfig.linksSubmitPlugin 对应键；留空不覆盖 setting 透传的旧值）。
+     * 默认链接配置：三个子配置（miniInfo/siteInfo/authorInfo）全部留空（2026-09-08 拆分子结构；
+     * 站长配置后经 getConfigs 直接下发 {@code pluginConfig.linkInfo}，不再使用 linksSubmitPlugin）。
      */
     private static LinkInfo buildDefaultLinkInfo() {
         LinkInfo linkInfo = new LinkInfo();
-        linkInfo.setDisplayName("");
-        linkInfo.setMiniProgramCode("");
-        linkInfo.setLink("");
-        linkInfo.setAuthorName("");
-        linkInfo.setAvatar("");
-        linkInfo.setWebsite("");
-        linkInfo.setDescription("");
-        linkInfo.setApplyRemark("");
+        linkInfo.setMiniInfo(new GeneralConfig.MiniInfo());
+        linkInfo.setSiteInfo(new GeneralConfig.SiteInfo());
+        linkInfo.setAuthorInfo(new GeneralConfig.AuthorInfo());
         return linkInfo;
     }
 
