@@ -6,6 +6,7 @@ import {computed, nextTick, onUnmounted, ref, watch} from "vue";
 import {VueDraggable} from "vue-draggable-plus";
 import RiDragMove2Line from "~icons/ri/drag-move-2-line";
 import RiDeleteBinLine from "~icons/ri/delete-bin-6-line";
+import RiImageLine from "~icons/ri/image-line";
 import SubmitButton from "@/components/button/SubmitButton.vue";
 import RichTextEditorField from "@/components/common/RichTextEditorField.vue";
 import AuditCandidatesModal from "@/components/audit-config/AuditCandidatesModal.vue";
@@ -58,16 +59,18 @@ function cancelRemovalOnTyping(module: GeneralConfigLove["ourStory"]) {
 
 const categoryModalVisible = ref(false);
 
-/** 首页分类栏已选引用（GeneralConfigCategoryItem：name + displayName） */
+/** 首页分类栏已选引用（GeneralConfigCategoryItem：name + displayName + cover 快照） */
 const homeCategories = computed(
   () => formState.value.spec.pages.homeConfig.categories || []
 );
 
-/** 回显给候选弹窗的 AuditDataRef 形态（title ← displayName） */
+/** 回显给候选弹窗的 AuditDataRef 形态（title ← displayName、cover ← cover、priority ← priority 快照） */
 const categoryModalSelected = computed<AuditDataRef[]>(() =>
   homeCategories.value.map((item) => ({
     name: item.name || "",
     title: item.displayName,
+    cover: item.cover,
+    priority: item.priority,
   }))
 );
 
@@ -79,11 +82,21 @@ const homeQuickNavigation = computed({
   },
 });
 
-/** 弹窗确认：映射回 {name, displayName} 并关闭（候选弹窗已限制最多 3 个） */
+/** 分类栏已选快照列表（写回 formState；VueDraggable 拖拽排序，顺序 = 展示顺序） */
+const homeCategoriesSortable = computed({
+  get: () => formState.value.spec.pages.homeConfig.categories || [],
+  set: (value: GeneralConfigCategoryItem[]) => {
+    formState.value.spec.pages.homeConfig.categories = value;
+  },
+});
+
+/** 弹窗确认：映射回 {name, displayName, cover, priority} 快照并关闭（候选弹窗已限制最多 3 个） */
 const handleCategoryConfirm = (selected: AuditDataRef[]) => {
   formState.value.spec.pages.homeConfig.categories = selected.map((item) => ({
     name: item.name,
     displayName: item.title || item.name,
+    cover: item.cover,
+    priority: item.priority,
   }));
   categoryModalVisible.value = false;
 };
@@ -139,8 +152,8 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
   ],
   preferences: [
     {id: "home", label: "首页"},
-    {id: "articles", label: "文章列表"},
-    {id: "archives", label: "文章归档"},
+    {id: "articles", label: "文章页面"},
+    {id: "archives", label: "归档页面"},
   ],
   pages: [
     {id: "home", label: "首页"},
@@ -160,7 +173,10 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
     {id: "info", label: "小程序信息"},
     {id: "author", label: "作者信息"},
   ],
-  maintenance: [],
+  maintenance: [
+    {id: "time", label: "维护时间"},
+    {id: "content", label: "维护内容"},
+  ],
 };
 
 const bigGroup = ref<BigGroup>("profile");
@@ -192,7 +208,7 @@ function defaultConfig(): GeneralConfig {
 function defaultSpec(): GeneralConfigSpec {
   return {
     profile: {
-      appInfo: {name: "uni-halo", logo: "/plugins/plugin-uni-halo/assets/logo.png"},
+      appInfo: {name: "uni-halo", logo: "/plugins/plugin-uni-halo/assets/res/logo.png"},
       blogger: {nickname: "uni-halo", avatar: "", email: "", description: ""},
       social: {
         enabled: true,
@@ -243,14 +259,14 @@ function defaultSpec(): GeneralConfigSpec {
       momentConfig: {pageTitle: ""},
       aboutConfig: {
         pageTitle: "关于博主",
-        bgImageUrl: "/plugins/plugin-uni-halo/assets/uni_halo_profile_bg.jpg",
-        waveImageUrl: "/plugins/plugin-uni-halo/assets/uni_halo_about_wave.gif",
+        bgImageUrl: "/plugins/plugin-uni-halo/assets/res/uni_halo_profile_bg.jpg",
+        waveImageUrl: "/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif",
       },
     },
     assets: {
       // 资源默认：仅加载占位 gif 内置插件资源，error 图留空由客户端回退
       // （2026-09-08 起默认图片/空图片配置已下线）
-      loadingGifUrl: "/plugins/plugin-uni-halo/assets/uni_halo_img_lazyload.gif",
+      loadingGifUrl: "/plugins/plugin-uni-halo/assets/res/uni_halo_img_lazyload.gif",
       loadingErrUrl: "",
     },
     preferences: {
@@ -718,7 +734,7 @@ const endMaintenanceNow = async () => {
                     />
                   </div>
                   <!-- 名称 -->
-                  <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
+                  <div class=":uno: flex min-w-0 flex-1 items-center gap-2 px-12">
                     <span class=":uno: w-10 shrink-0 text-xs text-gray-700">名称</span>
                     <FormKit
                       v-model="item.title"
@@ -728,7 +744,7 @@ const endMaintenanceNow = async () => {
                       outer-class=":uno: min-w-0 flex-1 !pt-0"
                     />
                   </div>
-                  <div class=":uno: flex shrink-0 items-center gap-2 mr-12">
+                  <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
                     <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
                     <FormKit
                       type="color"
@@ -749,36 +765,57 @@ const endMaintenanceNow = async () => {
 
           <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 py-3">
             <div>
-              <div class=":uno: text-sm text-gray-700">显示分类</div>
-              <div class=":uno: mt-0.5 text-xs text-gray-400">首页是否展示精品文章分类</div>
+              <div class=":uno: text-sm text-gray-700">显示精选分类</div>
+              <div class=":uno: mt-0.5 text-xs text-gray-400">首页是否展示精选分类栏</div>
             </div>
             <VSwitch v-model="formState.spec.pages.homeConfig.useCategory" />
           </div>
 
-          <!-- 首页分类栏选中（固定 3 个，复用审核配置候选弹窗 AuditCandidatesModal） -->
+          <!-- 首页分类栏选中（固定 3 个，快照含封面/名称，拖拽排序；复用审核配置候选弹窗 AuditCandidatesModal） -->
           <div
             v-if="formState.spec.pages.homeConfig.useCategory"
             class=":uno: mt-4 rounded-lg bg-gray-50 p-4"
           >
             <div class=":uno: mb-2 text-sm font-medium text-gray-700">分类栏展示（固定 3 个）</div>
             <p class=":uno: mb-3 text-xs text-gray-400">
-              首页分类栏仅展示选中的分类（最多 3 个），数据在 Halo「分类」管理维护；未选择时客户端回退默认展示。
+              首页分类栏仅展示选中的分类（最多 3 个），保存后以快照（封面/名称）下发，app 端直接渲染、不再请求分类接口；数据在 Halo「分类」管理维护。
             </p>
-            <div v-if="homeCategories.length" class=":uno: mb-3 flex flex-wrap gap-2">
-              <span
-                v-for="item in homeCategories"
-                :key="item.name"
-                class=":uno: flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700"
+            <div v-if="homeCategoriesSortable.length" class=":uno: mb-3">
+              <VueDraggable
+                v-model="homeCategoriesSortable"
+                handle=".home-category-drag-handle"
               >
-                {{ item.displayName || item.name }}
-                <button
-                  class=":uno: text-gray-400 hover:text-red-500"
-                  title="移除该分类"
-                  @click="removeCategory(item)"
+                <div
+                  v-for="item in homeCategoriesSortable"
+                  :key="item.name"
+                  class=":uno: mb-2 flex items-center gap-3 rounded-md border border-gray-100 bg-white px-3 py-2 last:mb-0"
                 >
-                  <RiDeleteBinLine class=":uno: h-3.5 w-3.5" />
-                </button>
-              </span>
+                  <span class=":uno: home-category-drag-handle cursor-move text-gray-300 hover:text-gray-500">
+                    <RiDragMove2Line class=":uno: h-4 w-4" />
+                  </span>
+                  <div class=":uno: flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-gray-100 text-base">
+                    <img
+                      v-if="item.cover"
+                      :src="item.cover"
+                      class=":uno: h-full w-full object-cover"
+                      alt=""
+                    />
+                    <RiImageLine v-else class=":uno: h-5 w-5 text-gray-300" />
+                  </div>
+                  <div class=":uno: min-w-0 flex-1">
+                    <div class=":uno: truncate text-sm font-medium text-gray-700">
+                      {{ item.displayName || item.name }}
+                    </div>
+                  </div>
+                  <button
+                    class=":uno: rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
+                    title="移除该分类"
+                    @click="removeCategory(item)"
+                  >
+                    <RiDeleteBinLine class=":uno: h-4 w-4" />
+                  </button>
+                </div>
+              </VueDraggable>
             </div>
             <VButton size="sm" type="secondary" @click="categoryModalVisible = true">
               选择分类
@@ -812,7 +849,7 @@ const endMaintenanceNow = async () => {
         <template v-if="bigGroup === 'assets' && subTab === 'loading'">
           <p class=":uno: mb-3 text-xs text-gray-400">
             小程序端图片加载占位资源，留空由客户端内置回退；也可引用插件内置资源，如
-            <code class=":uno: rounded bg-gray-100 px-1">/plugins/plugin-uni-halo/assets/uni_halo_img_lazyload.gif</code>
+            <code class=":uno: rounded bg-gray-100 px-1">/plugins/plugin-uni-halo/assets/res/uni_halo_img_lazyload.gif</code>
             （素材放插件 <code class=":uno: rounded bg-gray-100 px-1">src/main/resources/static/assets/</code>，同名替换即生效）。
           </p>
           <FormKit v-model="formState.spec.assets.loadingGifUrl" name="assets_loading_gif" label="加载中的图片" type="attachment" :accepts="['image/*']" />
@@ -994,10 +1031,10 @@ const endMaintenanceNow = async () => {
           <FormKit v-model="formState.spec.linkInfo.website" name="link_website" label="作者网站" type="text" placeholder="如 https://your-site.com" />
         </template>
 
-        <!-- 维护 → 维护设置（单屏，无子 Tab） -->
-        <template v-if="bigGroup === 'maintenance'">
+        <!-- 维护 → 维护时间（VTabbar 由右侧卡片 header 统一渲染；状态卡 + 开启开关 + 时间窗口） -->
+        <template v-if="bigGroup === 'maintenance' && subTab === 'time'">
           <!-- 状态摘要卡：四态 + 实时倒计时 + 快捷操作 -->
-          <div class=":uno: mb-4 rounded-lg bg-gray-50 p-4">
+          <div class=":uno: rounded-lg bg-gray-50 p-4">
             <div class=":uno: flex flex-wrap items-center gap-x-4 gap-y-2">
               <VStatusDot :state="statusMeta.state" :text="statusMeta.label" />
               <span v-if="maintenanceCountdownText" class=":uno: text-sm text-gray-500">
@@ -1017,7 +1054,7 @@ const endMaintenanceNow = async () => {
           </div>
 
           <!-- 开启维护开关（时间窗口紧随其后） -->
-          <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
+          <div class=":uno: mt-4 flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
             <div>
               <div class=":uno: text-sm text-gray-700">开启维护</div>
               <div class=":uno: mt-0.5 text-xs text-gray-400">开启后小程序端将展示维护页；不填开始时间 = 开启即立即进入维护</div>
@@ -1025,7 +1062,7 @@ const endMaintenanceNow = async () => {
             <VSwitch v-model="formState.spec.maintenance.enabled" />
           </div>
 
-          <!-- 维护时间窗口（置于开启维护下方） -->
+          <!-- 维护时间窗口（开始时间 / 预计恢复时间） -->
           <div class=":uno: mt-4 rounded-lg bg-gray-50 p-4">
             <div class=":uno: mb-3 text-sm font-medium text-gray-700">维护时间窗口</div>
             <div class=":uno: mb-4">
@@ -1039,7 +1076,10 @@ const endMaintenanceNow = async () => {
               <p class=":uno: mt-1 text-xs text-gray-400">留空 = 持续维护直到手动关闭；填写后到点自动结束（小程序端恢复）</p>
             </div>
           </div>
+        </template>
 
+        <!-- 维护 → 维护内容（标题 / 说明 / 详情） -->
+        <template v-if="bigGroup === 'maintenance' && subTab === 'content'">
           <!-- 维护标题 -->
           <div class=":uno: mt-4">
             <FormKit v-model="formState.spec.maintenance.title" name="maintenance_title" label="维护标题" type="text" help="维护页展示的大标题，如「系统升级维护」" />

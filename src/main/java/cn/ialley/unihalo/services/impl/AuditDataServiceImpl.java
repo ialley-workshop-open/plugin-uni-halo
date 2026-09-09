@@ -223,6 +223,9 @@ public class AuditDataServiceImpl implements AuditDataService {
                 if (spec != null) {
                     ref.setTitle(spec.getDisplayName());
                     ref.setSubTitle(spec.getSlug());
+                    // 分类封面与排序权重（CategoryRef.spec.cover/priority，候选/已选列表与精选分类快照用）
+                    ref.setCover(spec.getCover());
+                    ref.setPriority(spec.getPriority());
                 }
             }
             case galleryGroup -> {

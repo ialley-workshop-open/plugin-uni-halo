@@ -25,5 +25,9 @@ public class CategoryRef extends AbstractExtension {
     public static class CategoryRefSpec {
         private String displayName;
         private String slug;
+        /** 分类封面图（Halo Category.spec.cover，审核配置候选/精选分类快照展示用） */
+        private String cover;
+        /** 分类排序权重（Halo Category.spec.priority，越大越靠前） */
+        private Integer priority;
     }
 }

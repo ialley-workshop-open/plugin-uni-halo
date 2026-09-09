@@ -76,5 +76,7 @@ public class AuditDataConfig extends AbstractExtension {
         private String cover;
         private String subTitle;
         private String extra;
+        /** 排序权重（分类=spec.priority，精选分类快照排序用；其余类型可空） */
+        private Integer priority;
     }
 }

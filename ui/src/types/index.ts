@@ -465,6 +465,8 @@ export interface AuditDataRef {
   cover?: string;
   subTitle?: string;
   extra?: string;
+  /** 排序权重（分类=spec.priority，精选分类快照排序用；其余类型可空） */
+  priority?: number;
 }
 
 /** 审核模式模拟数据的选中引用（对象快照存储，数组顺序即展示顺序） */
@@ -664,11 +666,16 @@ export interface GeneralConfigQuickNavigationItem {
   visible?: boolean;
 }
 
-/** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name） */
+/** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序，
+ * 数组顺序 = 展示排序；app 端直接按快照渲染，不发请求） */
 export interface GeneralConfigCategoryItem {
   name?: string;
   /** 分类名称（展示用冗余快照） */
   displayName?: string;
+  /** 分类封面图（展示用冗余快照，选中时保存） */
+  cover?: string;
+  /** 分类排序权重（Halo Category.spec.priority 冗余快照，越大越靠前） */
+  priority?: number;
 }
 
 export interface GeneralConfigAssets {

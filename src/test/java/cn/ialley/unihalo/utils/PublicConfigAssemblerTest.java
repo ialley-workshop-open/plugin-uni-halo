@@ -87,7 +87,7 @@ class PublicConfigAssemblerTest {
                 {"spec":{"profile":{"blogger":{"nickname":"测试博主"}},
                   "love":{"loveEnabled":true,
                     "pageImages":{"bgImageUrl":"https://img/bg.png",
-                      "waveImageUrl":"/plugins/plugin-uni-halo/assets/uni_halo_about_wave.gif"},
+                      "waveImageUrl":"/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif"},
                     "ourStory":{"enabled":true,"iconUrl":"","passwordHash":"$2a$10$fakehash"},
                     "lovePhoto":{"enabled":false,"iconUrl":""},
                     "loveDaily":{"enabled":false,"iconUrl":""}}}}
@@ -265,8 +265,8 @@ class PublicConfigAssemblerTest {
         GeneralConfig config = config("""
                 {"spec":{"love":{
                   "loveEnabled":true,
-                  "pageImages":{"bgImageUrl":"/plugins/plugin-uni-halo/assets/logo.png",
-                    "waveImageUrl":"/plugins/plugin-uni-halo/assets/uni_halo_about_wave.gif",
+                  "pageImages":{"bgImageUrl":"/plugins/plugin-uni-halo/assets/res/logo.png",
+                    "waveImageUrl":"/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif",
                     "heartImageUrl":""},
                   "ourStory":{"enabled":true,"iconUrl":"https://img/our-story.png",
                     "passwordHash":"$2a$10$fakehash","passwordEnabled":true},
@@ -281,7 +281,7 @@ class PublicConfigAssemblerTest {
         // spec.love → 旧顶层 loveConfig shape；2026-09-08 起脱敏输出：
         // pageImages 仅 bgImageUrl，模块仅 enabled + passwordEnabled（密码字段不下发）
         assertTrue(root.get("loveConfig").get("loveEnabled").asBoolean());
-        assertEquals("/plugins/plugin-uni-halo/assets/logo.png",
+        assertEquals("/plugins/plugin-uni-halo/assets/res/logo.png",
                 root.get("loveConfig").get("pageImages").get("bgImageUrl").asText());
         assertFalse(root.get("loveConfig").get("pageImages").has("waveImageUrl"));
         assertFalse(root.get("loveConfig").get("pageImages").has("heartImageUrl"));

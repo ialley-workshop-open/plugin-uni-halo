@@ -1,5 +1,6 @@
 // API 客户端分组（对齐 plugin-vote 的组织方式：按资源分组导出 client）
 
+import { consoleApiClient, type Category, type CategoryTreeNode } from "@halo-dev/api-client";
 import { http } from "./request";
 import type {
   AppInfo,
@@ -238,11 +239,47 @@ export const auditDataApi = {
   get: () => http.get<AuditDataConfigDetail>(AUDIT_DATA_BASE),
   /** 整体保存（服务端校验并剔除失效引用） */
   save: (data: AuditDataConfig) => http.put<AuditDataConfig>(AUDIT_DATA_BASE, data),
-  /** 候选数据查询（选择器数据源） */
-  candidates: (
+  /** 候选数据查询（选择器数据源；分类类型改用 @halo-dev/api-client 官方分类树，含封面/排序完整信息） */
+  candidates: async (
     type: AuditCandidateType,
     query: { keyword?: string; page?: number; size?: number } = {}
-  ) => http.get<AuditDataCandidateResult>(`${AUDIT_DATA_BASE}/candidates`, { type, ...query }),
+  ): Promise<AuditDataCandidateResult> => {
+    if (type === "category") {
+      // 官方分类树（consoleApiClient 自动处理认证）：spec 含 cover/priority 完整字段
+      const res = await consoleApiClient.content.category.listCategoryTree();
+      const flattenTree = (nodes: CategoryTreeNode[]): Category[] =>
+        nodes.flatMap((node) => [
+          node.category,
+          ...flattenTree(node.children ?? []),
+        ]);
+      const keyword = (query.keyword || "").trim().toLowerCase();
+      let list = flattenTree(res.data ?? []);
+      if (keyword) {
+        list = list.filter(
+          (c) =>
+            (c.spec?.displayName || "").toLowerCase().includes(keyword) ||
+            (c.spec?.slug || "").toLowerCase().includes(keyword)
+        );
+      }
+      const total = list.length;
+      const page = query.page || 1;
+      const size = query.size || 10;
+      const paged = list.slice((page - 1) * size, page * size);
+      return {
+        items: paged.map((c) => ({
+          name: c.metadata?.name || "",
+          title: c.spec?.displayName,
+          cover: c.spec?.cover,
+          subTitle: c.spec?.slug,
+          priority: c.spec?.priority,
+        })),
+        page,
+        size,
+        total,
+      };
+    }
+    return http.get<AuditDataCandidateResult>(`${AUDIT_DATA_BASE}/candidates`, { type, ...query });
+  },
   /** 公开读取（审核模式联动开关，供小程序端二期接入） */
   getPublic: () =>
     http.get<{ enabled: boolean; spec?: AuditDataConfig["spec"] }>(`${PUBLIC_BASE}/audit-data`),

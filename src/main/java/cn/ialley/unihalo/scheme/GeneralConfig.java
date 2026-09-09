@@ -176,12 +176,17 @@ public class GeneralConfig extends AbstractExtension {
         private Boolean visible;
     }
 
-    /** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name） */
+    /** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序，
+     * 数组顺序 = 展示排序；app 端直接按快照渲染，不发请求） */
     @Data
     public static class CategoryItem {
         private String name;
         /** 分类名称（展示用冗余快照） */
         private String displayName;
+        /** 分类封面图（展示用冗余快照，选中时保存） */
+        private String cover;
+        /** 分类排序权重（Halo Category.spec.priority 冗余快照，越大越靠前） */
+        private Integer priority;
     }
 
     /** 图库页（原 pageConfig.galleryConfig；2026-09-08 起瀑布流配置下线，app 端默认） */

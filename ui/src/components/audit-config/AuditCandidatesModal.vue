@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Toast, VButton, VEmpty, VLoading, VModal, VPagination, VSpace } from "@halo-dev/components";
 import { useQuery } from "@tanstack/vue-query";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import RiImageLine from "~icons/ri/image-line";
 import { auditDataApi } from "@/api";
 import {
@@ -36,6 +36,11 @@ onMounted(() => {
   keyword.value = "";
   page.value = 1;
   localSelected.value = [...props.selected];
+});
+
+// 关键字变化（FormKit 输入）重置到第一页（查询由 queryKey 含 keyword 自动触发）
+watch(keyword, () => {
+  page.value = 1;
 });
 
 const { data, isLoading } = useQuery({
@@ -84,13 +89,14 @@ const handleClose = () => {
     @close="handleClose"
   >
     <div class=":uno: flex flex-col gap-3">
-      <!-- 搜索 + 已选计数 -->
+      <!-- 搜索 + 已选计数（FormKit 输入，无 label；关键字变化经 watch 重置页码） -->
       <div class=":uno: flex items-center gap-3">
-        <input
+        <FormKit
           v-model="keyword"
-          class=":uno: h-9 w-full flex-1 rounded-md border border-gray-200 px-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+          type="text"
           :placeholder="`输入关键字搜索${label}…`"
-          @keyup.enter="page = 1"
+          outer-class=":uno: !pt-0"
+          class=":uno: w-full flex-1"
         />
         <span class=":uno: shrink-0 text-sm text-gray-500">
           已选 <b class=":uno: text-primary">{{ localSelected.length }}</b> 条
