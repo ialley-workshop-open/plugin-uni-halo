@@ -517,9 +517,9 @@ export interface AuditDataCandidateResult {
 export const AUDIT_CANDIDATE_TYPE_LABELS: Record<AuditCandidateType, string> = {
   post: "文章",
   category: "分类",
-  galleryGroup: "图库分组",
+  galleryGroup: "图库",
   moment: "瞬间",
-  linkGroup: "链接分组",
+  linkGroup: "友链",
 };
 
 /** 候选类型对应依赖插件提示（pluginMissing 时展示） */

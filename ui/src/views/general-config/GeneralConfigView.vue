@@ -586,7 +586,7 @@ const endMaintenanceNow = async () => {
     <div class=":uno: min-w-0 flex-1">
       <VCard :loading="isLoading">
         <template #header>
-          <div v-if="subTabItems.length > 1" class=":uno: p-2 pb-0">
+          <div class=":uno: p-2 pb-0">
             <VTabbar v-model:active-id="subTab" :items="subTabItems"/>
           </div>
         </template>

@@ -54,7 +54,7 @@ const BLOCKS: BlockDef[] = [
   },
   {
     type: "galleryGroup",
-    title: "图库分组",
+    title: "图库",
     desc: "审核模式下图库页仅展示所选分组内的照片（未分组照片不展示）· 依赖：plugin-photos",
     icon: RiGalleryLine,
   },
@@ -66,7 +66,7 @@ const BLOCKS: BlockDef[] = [
   },
   {
     type: "linkGroup",
-    title: "链接分组",
+    title: "友链",
     desc: "审核模式下友情链接页仅展示所选分组内的链接 · 依赖：plugin-links",
     icon: RiLink,
   },
