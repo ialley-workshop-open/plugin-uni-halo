@@ -139,7 +139,14 @@ function toColorInput(value?: string): string {
   return value || "#cccccc";
 }
 
-/** FormKit type="color" 选色（format="hex8" 输出 #rrggbbaa 含透明度）写回 bgColor（客户端 uh-home-quick-nav 直接读该色值渲染） */
+/** FormKit type="color" 选色（format="hex8" 输出 #rrggbbaa 含透明度）写回 color（文字颜色，app 端直接读该色值渲染文字/图标） */
+function onNavColor(item: GeneralConfigQuickNavigationItem, value: unknown) {
+  if (typeof value === "string") {
+    item.color = value;
+  }
+}
+
+/** FormKit type="color" 选色（format="hex8" 输出 #rrggbbaa 含透明度）写回 bgColor（图标背景色，app 端直接读该色值渲染） */
 function onNavBgColor(item: GeneralConfigQuickNavigationItem, value: unknown) {
   if (typeof value === "string") {
     item.bgColor = value;
@@ -257,7 +264,7 @@ function restoreMyPageDefaults(group: "common" | "other") {
           :key="index"
           class=":uno: mb-2"
         >
-          <div class=":uno: flex flex-wrap items-center gap-x-3 gap-y-2 rounded-lg border border-gray-100 bg-white px-3 py-2">
+          <div class=":uno: flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-gray-100 bg-white px-3 py-2">
             <span class=":uno: nav-drag-handle cursor-move shrink-0 text-gray-400 hover:text-gray-600">
               <RiDragMove2Line class=":uno: h-4 w-4" />
             </span>
@@ -272,14 +279,25 @@ function restoreMyPageDefaults(group: "common" | "other") {
                 outer-class=":uno: min-w-0 flex-1 !pt-0"
               />
             </div>
-            <div class=":uno: flex min-w-0 flex-1 items-center gap-2 pl-12">
-              <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
+            <!-- 文字颜色  -->
+            <div class=":uno: flex shrink-0 items-center pr-24 gap-2">
+              <span class=":uno: w-14 shrink-0 text-xs text-gray-700">文字颜色</span>
+              <FormKit
+                type="color"
+                format="hex8"
+                :model-value="toColorInput(item.color)"
+                @update:model-value="onNavColor(item, $event)"
+                outer-class=":uno: w-12 shrink-0 !pt-0"
+              />
+            </div>
+            <div class=":uno: flex shrink-0 items-center pr-24 gap-2">
+              <span class=":uno: w-16 shrink-0 text-xs text-gray-700">图标背景色</span>
               <FormKit
                 type="color"
                 format="hex8"
                 :model-value="toColorInput(item.bgColor)"
                 @update:model-value="onNavBgColor(item, $event)"
-                outer-class=":uno: w-14 shrink-0 !pt-0"
+                outer-class=":uno: w-12 shrink-0 !pt-0"
               />
             </div>
             <!-- 显示开关 -->
@@ -443,14 +461,25 @@ function restoreMyPageDefaults(group: "common" | "other") {
                   outer-class=":uno: min-w-0 flex-1 !pt-0"
                 />
               </div>
-              <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
-                <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
+              <!-- 文字颜色 + 图标背景色（2026-09-11：背景色改名图标背景色，新增文字颜色列） -->
+              <div class=":uno: flex shrink-0 items-center gap-2 pr-24">
+                <span class=":uno: w-14 shrink-0 text-xs text-gray-700">文字颜色</span>
+                <FormKit
+                  type="color"
+                  format="hex8"
+                  :model-value="toColorInput(item.color)"
+                  @update:model-value="onNavColor(item, $event)"
+                  outer-class=":uno: w-12 shrink-0 !pt-0"
+                />
+              </div>
+              <div class=":uno: flex shrink-0 items-center gap-2 pr-24">
+                <span class=":uno: w-16 shrink-0 text-xs text-gray-700">图标背景色</span>
                 <FormKit
                   type="color"
                   format="hex8"
                   :model-value="toColorInput(item.bgColor)"
                   @update:model-value="onNavBgColor(item, $event)"
-                  outer-class=":uno: w-14 shrink-0 !pt-0"
+                  outer-class=":uno: w-12 shrink-0 !pt-0"
                 />
               </div>
               <div class=":uno: flex shrink-0 items-center gap-2 text-xs text-gray-500">
@@ -517,14 +546,25 @@ function restoreMyPageDefaults(group: "common" | "other") {
                   outer-class=":uno: min-w-0 flex-1 !pt-0"
                 />
               </div>
-              <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
-                <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
+              <!-- 文字颜色 + 图标背景色（2026-09-11：背景色改名图标背景色，新增文字颜色列） -->
+              <div class=":uno: flex shrink-0 items-center gap-2 pr-24">
+                <span class=":uno: w-14 shrink-0 text-xs text-gray-700">文字颜色</span>
+                <FormKit
+                  type="color"
+                  format="hex8"
+                  :model-value="toColorInput(item.color)"
+                  @update:model-value="onNavColor(item, $event)"
+                  outer-class=":uno: w-12 shrink-0 !pt-0"
+                />
+              </div>
+              <div class=":uno: flex shrink-0 items-center gap-2 pr-24">
+                <span class=":uno: w-16 shrink-0 text-xs text-gray-700">图标背景色</span>
                 <FormKit
                   type="color"
                   format="hex8"
                   :model-value="toColorInput(item.bgColor)"
                   @update:model-value="onNavBgColor(item, $event)"
-                  outer-class=":uno: w-14 shrink-0 !pt-0"
+                  outer-class=":uno: w-12 shrink-0 !pt-0"
                 />
               </div>
               <div class=":uno: flex shrink-0 items-center gap-2 text-xs text-gray-500">

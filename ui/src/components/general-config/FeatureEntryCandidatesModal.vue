@@ -123,7 +123,7 @@ const handleClose = () => {
           </span>
           <div class=":uno: min-w-0 flex-1">
             <div class=":uno: flex items-baseline gap-2">
-              <span class=":uno: truncate text-sm font-medium text-gray-800">
+              <span class=":uno: truncate text-sm font-medium text-gray-800" :style="{ color: candidate.color}">
                 {{ candidate.title }}
               </span>
               <span v-if="candidate.subTitle" class=":uno: truncate text-xs text-gray-400">
