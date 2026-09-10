@@ -16,7 +16,7 @@
   background: rgba(255, 255, 255, 0.92);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  border: 2px solid rgba(255, 255, 255, 0.65);
   border-radius: 14px;
   box-shadow: 0 16px 60px rgba(0, 0, 0, 0.06);
   user-select: none;
@@ -58,7 +58,7 @@
   display: block;
   max-width: 100%;
   height: auto;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 .uh-fmp .uh-fmp-name {
   font-weight: 600;
