@@ -10,7 +10,10 @@ import AuditCandidatesModal from "@/components/audit-config/AuditCandidatesModal
 import FeatureEntryCandidatesModal from "@/components/general-config/FeatureEntryCandidatesModal.vue";
 import {GeneralConfigFormKey} from "@/views/general-config/form-context";
 import {
-  featureEntriesByGroup,
+  DEFAULT_MY_PAGE_COMMON_KEYS,
+  DEFAULT_MY_PAGE_OTHER_KEYS,
+  DEFAULT_QUICK_NAV_KEYS,
+  featureEntriesByKeys,
   toQuickNavigationItem,
   type FeatureEntry,
 } from "@/constant/feature-entries";
@@ -22,7 +25,7 @@ import type {
 } from "@/types";
 
 /**
- * 页面设置分区（2026-09-10 组件化拆分）：
+ * 页面设置分区
  * 首页（快捷导航逐项配置 + 分类栏固定 3 个）/ 图库页 / 分类页 / 瞬间页 / 关于页
  * （含页脚版权与功能入口两组）/ 文章详情页 / 免责声明页。
  */
@@ -31,12 +34,11 @@ defineProps<{ subTab: string }>();
 const { formState } = inject(GeneralConfigFormKey)!;
 
 /**
- * 快捷导航默认 5 项：由功能入口注册表派生（group=home，对齐客户端 uh-home-quick-nav
- * 默认 navList；bgColor 原 bgGlass、visible 原 show）。「恢复默认」数据源与「添加」
- * 候选弹窗一致（设计见 .docs/feature-entry-unified-design.md D3/D7）。
+ * 快捷导航默认 5 项（2026-09-11 起由注册表显式 key 列表派生——
+ * archives/vote/disclaimers/love/contact-blogger，与 app 端 uh-home-quick-nav 默认一致）
  */
 const DEFAULT_QUICK_NAVIGATION: GeneralConfigQuickNavigationItem[] =
-  featureEntriesByGroup("home").map(toQuickNavigationItem);
+  featureEntriesByKeys(DEFAULT_QUICK_NAV_KEYS).map(toQuickNavigationItem);
 
 /** 首页快捷导航「添加」候选弹窗（统一清单：展示全部注册表条目，已配置置灰禁选，确认后追加） */
 const quickNavModalVisible = ref(false);
@@ -197,7 +199,7 @@ const removeMyPageFeature = (group: "common" | "other", item: GeneralConfigQuick
 };
 
 /** 恢复默认：恢复为注册表对应组的默认配置（全部快照字段、排序/visible 一并恢复；
- * 常用功能=home 组条目、其他功能=other 组条目，与 defaultConfig 默认填充一致） */
+ * 2026-09-11 起对齐 app 端 about.vue navList：常用 7 项 / 其他 3 项，由显式 key 列表派生） */
 function restoreMyPageDefaults(group: "common" | "other") {
   const label = group === "common" ? "常用功能" : "其他功能";
   Dialog.warning({
@@ -206,8 +208,8 @@ function restoreMyPageDefaults(group: "common" | "other") {
     confirmText: "确定",
     cancelText: "取消",
     onConfirm: () => {
-      const defaults = featureEntriesByGroup(
-        group === "common" ? "home" : "other"
+      const defaults = featureEntriesByKeys(
+        group === "common" ? DEFAULT_MY_PAGE_COMMON_KEYS : DEFAULT_MY_PAGE_OTHER_KEYS
       ).map(toQuickNavigationItem);
       if (group === "common") {
         myPageCommonFeatures.value = defaults;
@@ -244,7 +246,7 @@ function restoreMyPageDefaults(group: "common" | "other") {
         </VSpace>
       </div>
       <p class=":uno: mb-3 text-xs text-gray-400">
-        拖拽排序，顺序即首页展示顺序；每项仅需维护名称与背景色（标识 key 不可修改）。
+        拖拽排序，顺序即首页展示顺序。
       </p>
       <VueDraggable
         v-model="homeQuickNavigation"
@@ -259,19 +261,8 @@ function restoreMyPageDefaults(group: "common" | "other") {
             <span class=":uno: nav-drag-handle cursor-move shrink-0 text-gray-400 hover:text-gray-600">
               <RiDragMove2Line class=":uno: h-4 w-4" />
             </span>
-            <!-- 标识 key（禁用；FormKit label 置空，label 用 CSS 自定义左侧布局） -->
-            <div class=":uno: flex w-32 shrink-0 items-center gap-2">
-              <span class=":uno: w-10 shrink-0 text-xs text-gray-700">标识</span>
-              <FormKit
-                v-model="item.key"
-                :name="`nav_key_${index}`"
-                type="text"
-                disabled
-                outer-class=":uno: min-w-0 flex-1 !pt-0"
-              />
-            </div>
             <!-- 名称 -->
-            <div class=":uno: flex min-w-0 flex-1 items-center gap-2 px-12">
+            <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
               <span class=":uno: w-10 shrink-0 text-xs text-gray-700">名称</span>
               <FormKit
                 v-model="item.title"
@@ -281,7 +272,7 @@ function restoreMyPageDefaults(group: "common" | "other") {
                 outer-class=":uno: min-w-0 flex-1 !pt-0"
               />
             </div>
-            <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
+            <div class=":uno: flex min-w-0 flex-1 items-center gap-2 pl-12">
               <span class=":uno: w-10 shrink-0 text-xs text-gray-700">背景色</span>
               <FormKit
                 type="color"
@@ -323,10 +314,19 @@ function restoreMyPageDefaults(group: "common" | "other") {
       v-if="formState.spec.pages.homeConfig.useCategory"
       class=":uno: mt-4 rounded-lg bg-gray-50 p-4"
     >
-      <div class=":uno: mb-2 text-sm font-medium text-gray-700">分类栏展示（固定 3 个）</div>
-      <p class=":uno: mb-3 text-xs text-gray-400">
-        首页分类栏仅展示选中的分类（最多 3 个），保存后以快照（封面/名称）下发，app 端直接渲染、不再请求分类接口；数据在 Halo「分类」管理维护。
-      </p>
+      <div class="flex items-center justify-between">
+        <div class="flex-1">
+          <div class=":uno: mb-2 text-sm font-medium text-gray-700">分类栏展示（固定 3 个）</div>
+           <p class=":uno: mb-3 text-xs text-gray-400">
+             首页显示的分类，设置3个分类最佳。
+           </p>
+        </div>
+        <div class="shrink-0">
+          <VButton size="sm" type="secondary" @click="categoryModalVisible = true">
+            选择分类
+          </VButton>
+        </div>
+      </div>
       <div v-if="homeCategoriesSortable.length" class=":uno: mb-3">
         <VueDraggable
           v-model="homeCategoriesSortable"
@@ -364,9 +364,7 @@ function restoreMyPageDefaults(group: "common" | "other") {
           </div>
         </VueDraggable>
       </div>
-      <VButton size="sm" type="secondary" @click="categoryModalVisible = true">
-        选择分类
-      </VButton>
+
     </div>
   </template>
 
@@ -380,7 +378,7 @@ function restoreMyPageDefaults(group: "common" | "other") {
     <FormKit v-model="formState.spec.pages.categoryConfig!.pageTitle" name="category_page_title" label="页面标题" type="text" help="分类页展示标题，留空使用默认" />
   </template>
 
-  <!-- 页面与排版 → 瞬间页（2026-09-08 新增） -->
+  <!-- 页面与排版 → 瞬间页 -->
   <template v-if="subTab === 'momentPage'">
     <FormKit v-model="formState.spec.pages.momentConfig!.pageTitle" name="moment_page_title" label="页面标题" type="text" help="瞬间页展示标题，留空使用默认" />
   </template>
@@ -388,19 +386,16 @@ function restoreMyPageDefaults(group: "common" | "other") {
   <!-- 页面与排版 → 关于页 -->
   <template v-if="subTab === 'aboutPage'">
     <FormKit v-model="formState.spec.pages.aboutConfig.pageTitle" name="about_page_title" label="页面标题" type="text" />
-    <!-- 资料卡图片与背景图同行（2026-09-11 布局调整） -->
-    <div class=":uno: flex flex-col gap-4 md:flex-row">
-      <div class=":uno: min-w-0 flex-1">
+    <div class=":uno: flex flex-col gap-y-4 gap-x-12 md:flex-row">
+      <div class=":uno: min-w-0 shrink-0">
         <FormKit v-model="formState.spec.pages.aboutConfig.bgImageUrl" name="about_bg_image" label="资料卡背景图" type="attachment" :accepts="['image/*']" />
       </div>
-      <div class=":uno: min-w-0 flex-1">
+      <div class=":uno: min-w-0 shrink-0">
         <FormKit v-model="formState.spec.pages.aboutConfig.waveImageUrl" name="about_wave_image" label="资料卡波浪图" type="attachment" :accepts="['image/*']" />
       </div>
     </div>
 
-    <!-- 功能入口（2026-09-10 新增：常用功能/其他功能两组，候选弹窗添加 + 拖拽排序 +
-         名称/背景色/显示编辑 + 删除 + 恢复默认；编辑布局对齐首页快捷导航项；
-         页脚版权 2026-09-11 迁回应用设置「页脚版权」tab） -->
+    <!-- 功能入口 -->
     <div class=":uno: mt-6 rounded-lg bg-gray-50 p-4">
       <div class=":uno: mb-2 text-sm font-medium text-gray-700">功能入口</div>
       <p class=":uno: mb-3 text-xs text-gray-400">
@@ -426,23 +421,25 @@ function restoreMyPageDefaults(group: "common" | "other") {
               <span class=":uno: nav-drag-handle cursor-move shrink-0 text-gray-400 hover:text-gray-600">
                 <RiDragMove2Line class=":uno: h-4 w-4" />
               </span>
-              <div class=":uno: flex w-32 shrink-0 items-center gap-2">
-                <span class=":uno: w-10 shrink-0 text-xs text-gray-700">标识</span>
-                <FormKit
-                  v-model="item.key"
-                  :name="`mypage_common_key_${index}`"
-                  type="text"
-                  disabled
-                  outer-class=":uno: min-w-0 flex-1 !pt-0"
-                />
-              </div>
-              <div class=":uno: flex min-w-0 flex-1 items-center gap-2 px-12">
+              <!-- 名称（2026-09-11 起去掉标识 key 列） -->
+              <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
                 <span class=":uno: w-10 shrink-0 text-xs text-gray-700">名称</span>
                 <FormKit
                   v-model="item.title"
                   :name="`mypage_common_title_${index}`"
                   type="text"
                   placeholder="导航名称"
+                  outer-class=":uno: min-w-0 flex-1 !pt-0"
+                />
+              </div>
+              <!-- 提示（subTitle，app 端展示为功能入口副标题） -->
+              <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
+                <span class=":uno: w-10 shrink-0 text-xs text-gray-700">提示</span>
+                <FormKit
+                  v-model="item.subTitle"
+                  :name="`mypage_common_subtitle_${index}`"
+                  type="text"
+                  placeholder="如 博主常用联系方式"
                   outer-class=":uno: min-w-0 flex-1 !pt-0"
                 />
               </div>
@@ -498,23 +495,25 @@ function restoreMyPageDefaults(group: "common" | "other") {
               <span class=":uno: nav-drag-handle cursor-move shrink-0 text-gray-400 hover:text-gray-600">
                 <RiDragMove2Line class=":uno: h-4 w-4" />
               </span>
-              <div class=":uno: flex w-32 shrink-0 items-center gap-2">
-                <span class=":uno: w-10 shrink-0 text-xs text-gray-700">标识</span>
-                <FormKit
-                  v-model="item.key"
-                  :name="`mypage_other_key_${index}`"
-                  type="text"
-                  disabled
-                  outer-class=":uno: min-w-0 flex-1 !pt-0"
-                />
-              </div>
-              <div class=":uno: flex min-w-0 flex-1 items-center gap-2 px-12">
+              <!-- 名称（2026-09-11 起去掉标识 key 列） -->
+              <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
                 <span class=":uno: w-10 shrink-0 text-xs text-gray-700">名称</span>
                 <FormKit
                   v-model="item.title"
                   :name="`mypage_other_title_${index}`"
                   type="text"
                   placeholder="导航名称"
+                  outer-class=":uno: min-w-0 flex-1 !pt-0"
+                />
+              </div>
+              <!-- 提示（subTitle，app 端展示为功能入口副标题） -->
+              <div class=":uno: flex min-w-0 flex-1 items-center gap-2">
+                <span class=":uno: w-10 shrink-0 text-xs text-gray-700">提示</span>
+                <FormKit
+                  v-model="item.subTitle"
+                  :name="`mypage_other_subtitle_${index}`"
+                  type="text"
+                  placeholder="如 首页布局、卡片样式等本地偏好"
                   outer-class=":uno: min-w-0 flex-1 !pt-0"
                 />
               </div>
@@ -553,11 +552,11 @@ function restoreMyPageDefaults(group: "common" | "other") {
     </div>
   </template>
 
-  <!-- 页面与排版 → 文章详情页（2026-09-10 由应用设置「关于与详情」迁入） -->
+  <!-- 页面与排版 -->
   <template v-if="subTab === 'postDetail'">
     <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
       <div>
-        <div class=":uno: text-sm text-gray-700">显示评论相关</div>
+        <div class=":uno: text-sm text-gray-700">显示评论</div>
         <div class=":uno: mt-0.5 text-xs text-gray-400">文章详情页是否展示评论相关功能</div>
       </div>
       <VSwitch v-model="formState.spec.pages.postDetailConfig!.showComment" />

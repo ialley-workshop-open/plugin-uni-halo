@@ -33,7 +33,6 @@ function addSocialItem() {
   socialItems.value = [
     ...socialItems.value,
     {
-      key: "",
       name: "",
       content: "",
       color: "#8a8a8a",
@@ -108,17 +107,6 @@ function onSocialBgColor(item: GeneralConfigSocialItem, value: unknown) {
           <span class=":uno: social-drag-handle cursor-move shrink-0 text-gray-400 hover:text-gray-600">
             <RiDragMove2Line class=":uno: h-4 w-4" />
           </span>
-          <!-- 平台标识 key -->
-          <div class=":uno: flex w-32 shrink-0 items-center gap-2">
-            <span class=":uno: w-10 shrink-0 text-xs text-gray-700">标识</span>
-            <FormKit
-              v-model="item.key"
-              :name="`social_key_${index}`"
-              type="text"
-              placeholder="如 qq"
-              outer-class=":uno: min-w-0 flex-1 !pt-0"
-            />
-          </div>
           <!-- 名称 -->
           <div class=":uno: flex w-32 shrink-0 items-center gap-2">
             <span class=":uno: w-10 shrink-0 text-xs text-gray-700">名称</span>
@@ -142,7 +130,7 @@ function onSocialBgColor(item: GeneralConfigSocialItem, value: unknown) {
             />
           </div>
           <!-- 图标颜色 -->
-          <div class=":uno: flex shrink-0 items-center gap-2">
+          <div class=":uno: flex shrink-0 items-center gap-2 pr-22">
             <span class=":uno: text-xs text-gray-700">颜色</span>
             <FormKit
               type="color"
@@ -153,7 +141,7 @@ function onSocialBgColor(item: GeneralConfigSocialItem, value: unknown) {
             />
           </div>
           <!-- 背景色 -->
-          <div class=":uno: flex shrink-0 items-center gap-2">
+          <div class=":uno: flex shrink-0 items-center gap-2 pr-22">
             <span class=":uno: text-xs text-gray-700">背景</span>
             <FormKit
               type="color"
@@ -186,6 +174,17 @@ function onSocialBgColor(item: GeneralConfigSocialItem, value: unknown) {
       message="点击「添加」增加一条社交方式"
       :class="':uno: py-6'"
     />
+  </template>
+
+  <!-- 应用资料 → 审核模式（2026-09-11 由设置页 safetyConfig.auditConfig 迁入） -->
+  <template v-if="subTab === 'auditMode'">
+    <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
+      <div>
+        <div class=":uno: text-sm text-gray-700">审核模式</div>
+        <div class=":uno: mt-0.5 text-xs text-gray-400">开启审核模式，关闭小程序部分数据展示；小程序提交审核时建议开启，审核通过后关闭</div>
+      </div>
+      <VSwitch v-model="formState.spec.auditMode!.enabled" />
+    </div>
   </template>
 
   <!-- 应用资料 → 页脚版权（2026-09-10 由页面设置-关于页迁回；显示于【关于】页面页脚） -->

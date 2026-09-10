@@ -553,6 +553,10 @@ export interface GeneralConfigSpec {
   linkInfo: GeneralConfigLinkInfo;
   /** 维护模式（2026-09-04 新增，见 .docs/maintenance-config-design.md） */
   maintenance: GeneralConfigMaintenance;
+  /** 审核模式（2026-09-11 由 setting safetyConfig.auditConfig 迁入：开启后关闭
+   * 小程序部分数据展示，小程序提交审核时建议开启；经 getConfigs 重建回旧
+   * auditConfig.auditModeEnabled 形态下发，客户端无感） */
+  auditMode: { enabled?: boolean };
 }
 
 /**
@@ -629,10 +633,9 @@ export interface GeneralConfigProfile {
   };
 }
 
-/** 社交项（app 端联系博主页展示/复制；字段：key 平台标识 + 名称/内容/颜色/背景色/排序/显隐） */
+/** 社交项（app 端联系博主页展示/复制；2026-09-11 起去掉 key 平台标识，
+ * 图标由 app 端按 color/bgColor 色块渲染；仅名称/内容/颜色/背景色/排序/显隐） */
 export interface GeneralConfigSocialItem {
-  /** 平台标识（如 qq/wechat/github/email） */
-  key?: string;
   /** 名称（如「企鹅号」「微信号」） */
   name?: string;
   /** 内容（账号/地址/链接，点击复制） */

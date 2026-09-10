@@ -134,7 +134,7 @@ class PublicConfigAssemblerTest {
                 {"spec":{
                   "profile":{
                     "blogger":{"nickname":"新博主","avatar":"https://a/1.png","email":"a@b.com","description":"简介","website":"https://site.com"},
-                    "social":{"items":[{"key":"qq","name":"企鹅号","content":"123","color":"#12b7f5","bgColor":"#12b7f51A","priority":1,"visible":true}]},
+                    "social":{"items":[{"name":"企鹅号","content":"123","color":"#12b7f5","bgColor":"#12b7f51A","priority":1,"visible":true}]},
                     "copyrightConfig":{"enabled":true,"content":"© 版权"}
                   },
                   "pages":{
@@ -158,6 +158,9 @@ class PublicConfigAssemblerTest {
         assertEquals("https://site.com",
                 root.get("authorConfig").get("blogger").get("website").asText());
         assertEquals("123", root.get("authorConfig").get("social").get("items").get(0).get("content").asText());
+        // 2026-09-11 起社交项去掉 key 平台标识（app 端按 color/bgColor 色块渲染）
+        assertFalse(root.get("authorConfig").get("social").get("items").get(0).has("key"),
+                "社交项已去掉 key 平台标识不应输出");
         // basicConfig 不再输出（版权/免责/文章详情已迁入页面设置）
         assertFalse(root.has("basicConfig"), "basicConfig 内容迁出后不应输出");
         // pageConfig：版权随 aboutConfig 输出、免责声明/文章详情随行输出
@@ -187,6 +190,35 @@ class PublicConfigAssemblerTest {
         assertFalse(root.get("imagesConfig").has("loadingEmptyUrl"),
                 "loadingEmptyUrl 配置已下线不应输出");
         assertNotNull(root.get("appConfig").get("appInfo"));
+    }
+
+    @Test
+    void shouldRebuildAuditConfigFromSpecAuditMode() throws Exception {
+        // 审核模式开关（2026-09-11 由 setting safetyConfig.auditConfig 迁入 spec.auditMode）：
+        // 输出端重建回旧 auditConfig.auditModeEnabled 形态，覆盖旧 ConfigMap 残留透传值
+        // （legacySettings 中 auditModeEnabled=true），客户端 shape 不变。
+        GeneralConfig config = config("""
+                {"spec":{"auditMode":{"enabled":false}}}
+                """);
+
+        ObjectNode root = assembler.assemble(legacySettings(), config);
+
+        assertFalse(root.get("auditConfig").get("auditModeEnabled").asBoolean(),
+                "spec.auditMode.enabled=false 应覆盖 legacy 透传的 true");
+        assertFalse(root.get("auditConfig").has("auditModeData"),
+                "auditModeData 死字段不应随重建输出");
+    }
+
+    @Test
+    void shouldOutputAuditConfigEnabledFromSpecAuditMode() throws Exception {
+        // 开启审核模式：输出 auditConfig.auditModeEnabled=true（app 端据此过滤数据展示）
+        GeneralConfig config = config("""
+                {"spec":{"auditMode":{"enabled":true}}}
+                """);
+
+        ObjectNode root = assembler.assemble(null, config);
+
+        assertTrue(root.get("auditConfig").get("auditModeEnabled").asBoolean());
     }
 
     @Test

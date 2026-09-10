@@ -12,6 +12,7 @@ import cn.ialley.unihalo.constants.Constants;
 import cn.ialley.unihalo.scheme.GeneralConfig;
 import cn.ialley.unihalo.scheme.GeneralConfig.About;
 import cn.ialley.unihalo.scheme.GeneralConfig.Assets;
+import cn.ialley.unihalo.scheme.GeneralConfig.AuditMode;
 import cn.ialley.unihalo.scheme.GeneralConfig.Blogger;
 import cn.ialley.unihalo.scheme.GeneralConfig.CategoryPage;
 import cn.ialley.unihalo.scheme.GeneralConfig.Copyright;
@@ -309,6 +310,24 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                             overlay.set("linkInfo", linkInfoOut);
                         }
                     }
+                    // 审核模式开关（2026-09-11 由 setting safetyConfig.auditConfig 迁入）：
+                    // 旧 auditConfig.auditModeEnabled 导入 spec.auditMode.enabled，避免老用户
+                    // 升级后曾开启的审核模式回退默认关闭。
+                    JsonNode auditConfig = values.get("auditConfig");
+                    if (auditConfig == null || !auditConfig.isObject()) {
+                        JsonNode safety = values.get("safetyConfig");
+                        if (safety != null && safety.isObject()) {
+                            auditConfig = safety.get("auditConfig");
+                        }
+                    }
+                    if (auditConfig != null && auditConfig.isObject()) {
+                        JsonNode auditModeEnabled = auditConfig.get("auditModeEnabled");
+                        if (auditModeEnabled != null && auditModeEnabled.isBoolean()) {
+                            ObjectNode auditModeOut = JsonNodeFactory.instance.objectNode();
+                            auditModeOut.set("enabled", auditModeEnabled);
+                            overlay.set("auditMode", auditModeOut);
+                        }
+                    }
                     return overlay;
                 });
     }
@@ -368,6 +387,10 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         spec.setLove(buildDefaultLove());
         spec.setLinkInfo(buildDefaultLinkInfo());
         spec.setMaintenance(buildDefaultMaintenance());
+        // 审核模式（2026-09-11 由 setting safetyConfig.auditConfig 迁入；默认关闭）
+        AuditMode auditMode = new AuditMode();
+        auditMode.setEnabled(false);
+        spec.setAuditMode(auditMode);
         return spec;
     }
 
@@ -433,20 +456,20 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
     /**
      * 默认社交项（2026-09-10 起社交信息改为动态列表：qq/wechat/email/github 四项，
-     * 颜色/背景色 16 进制、priority 排序、visible 展示；app 端联系博主页按序渲染）。
+     * 颜色/背景色 16 进制、priority 排序、visible 展示；app 端联系博主页按序渲染；
+     * 2026-09-11 起去掉 key 平台标识）。
      */
     private static List<SocialItem> defaultSocialItems() {
         return List.of(
-                socialItem("qq", "企鹅号", "", "#12b7f5", "#12b7f51A", 1),
-                socialItem("wechat", "微信号", "", "#07c160", "#07c1601A", 2),
-                socialItem("email", "邮箱地址", "", "#f57c00", "#f57c001A", 3),
-                socialItem("github", "Github", "", "#24292f", "#24292f1A", 4));
+                socialItem("企鹅号", "", "#12b7f5", "#12b7f51A", 1),
+                socialItem("微信号", "", "#07c160", "#07c1601A", 2),
+                socialItem("邮箱地址", "", "#f57c00", "#f57c001A", 3),
+                socialItem("Github", "", "#24292f", "#24292f1A", 4));
     }
 
-    private static SocialItem socialItem(String key, String name, String content,
+    private static SocialItem socialItem(String name, String content,
             String color, String bgColor, int priority) {
         SocialItem item = new SocialItem();
-        item.setKey(key);
         item.setName(name);
         item.setContent(content);
         item.setColor(color);
@@ -458,8 +481,9 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
     /**
      * 旧社交固定字段（authorConfig.social：enabled/qq/wechat/weibo/email/blog/bilibili/
-     * juejin/csdn/gitee/github）迁移为 items 列表：仅取非空值的字段，key=字段名、
-     * name=平台中文名、content=原值，颜色沿用默认社交项同款色板；enabled 忽略。
+     * juejin/csdn/gitee/github）迁移为 items 列表：仅取非空值的字段，name=平台中文名、
+     * content=原值，颜色沿用默认社交项同款色板；enabled 忽略。
+     * 2026-09-11 起去掉 key 平台标识（迁移后不再携带）。
      */
     private static JsonNode migrateLegacySocialItems(JsonNode oldSocial) {
         Map<String, String> names = Map.of(
@@ -473,7 +497,7 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
             if (value == null || value.isNull() || value.asText().isBlank()) {
                 continue;
             }
-            SocialItem item = socialItem(entry.getKey(), entry.getValue(),
+            SocialItem item = socialItem(entry.getValue(),
                     value.asText(), "#8a8a8a", "#8a8a8a1A", priority++);
             items.set(entry.getKey(),
                     JsonNodeFactory.instance.pojoNode(item));
@@ -543,11 +567,70 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         // 我的页面功能入口（2026-09-10 新增）：默认填充注册表条目——
         // 常用功能=home 组 5 项（与快捷导航默认一致）、其他功能=other 组 2 项，
         // 与前端 ui/src/constant/feature-entries.ts 注册表对齐（设计见 .docs/feature-entry-unified-design.md）
+        // 2026-09-11 起对齐 app 端 about.vue navList：常用 7 项 / 其他 3 项
         MyPage myPage = new MyPage();
-        myPage.setCommonFeatures(defaultQuickNavigation());
+        myPage.setCommonFeatures(defaultMyPageCommonFeatures());
         myPage.setOtherFeatures(defaultMyPageOtherFeatures());
         pages.setMyPageConfig(myPage);
         return pages;
+    }
+
+    /**
+     * 我的页面-常用功能默认 7 项（2026-09-11 对齐 app 端 about.vue navList：
+     * 联系博主/我的收藏/恋爱日记/友情链接/文章归档/投票中心/数据看板，顺序即展示顺序；
+     * bgColor 用品牌深色 hex8（app 端 about.vue 经 toLightBg 渲染为浅底）；
+     * subTitle 对齐 app 端本地默认 rightText（favorites 无副标题）。
+     */
+    private static List<QuickNavigationItem> defaultMyPageCommonFeatures() {
+        List<QuickNavigationItem> items = new ArrayList<>();
+        QuickNavigationItem contactBlogger = navItem("contact-blogger", "联系博主", "#FF9800", "#FF9800F2",
+                "uhemoji2-icon", "-wink", "/pages-blog/contact/contact");
+        contactBlogger.setSubTitle("博主常用联系方式");
+        items.add(contactBlogger);
+        items.add(navItem("favorites", "我的收藏", "#FFB300", "#FFB300F2",
+                "uhemoji2-icon", "-smiling", "/pages-blog/favorites/favorites"));
+        QuickNavigationItem love = navItem("love", "恋爱日记", "#FF4C67", "#FF4C67F2",
+                "uhemoji2-icon", "-in-love", "/pages-blog/love/love");
+        love.setSubTitle("博主的恋爱日记");
+        items.add(love);
+        QuickNavigationItem friendLinks = navItem("friend-links", "友情链接", "#009688", "#009688F2",
+                "uhemoji2-icon", "-cool", "/pages-blog/friend-links/friend-links");
+        friendLinks.setSubTitle("看看博主朋友们吧");
+        items.add(friendLinks);
+        QuickNavigationItem archives = navItem("archives", "文章归档", "#03A9F4", "#03A9F4F2",
+                "uhemoji2-icon", "-mask", "/pages-blog/archives/archives");
+        archives.setSubTitle("全部文章");
+        items.add(archives);
+        QuickNavigationItem vote = navItem("vote", "投票中心", "#00BCD4", "#00BCD4F2",
+                "uhemoji2-icon", "-confused", "/pages-blog/votes/votes");
+        vote.setSubTitle("查看和进行投票");
+        items.add(vote);
+        QuickNavigationItem dataVisual = navItem("data-visual", "数据看板", "#663CC9", "#663CC9F2",
+                "uhemoji2-icon", "-surprised", "/pages-blog/data-visual/data-visual");
+        dataVisual.setSubTitle("站点数据可视化");
+        items.add(dataVisual);
+        return items;
+    }
+
+    /**
+     * 我的页面-其他功能默认 3 项（2026-09-11 对齐 app 端 about.vue navList：
+     * 偏好设置/免责声明/关于项目，顺序即展示顺序；subTitle 对齐 app 端本地默认 rightText）。
+     */
+    private static List<QuickNavigationItem> defaultMyPageOtherFeatures() {
+        List<QuickNavigationItem> items = new ArrayList<>();
+        QuickNavigationItem setting = navItem("setting", "偏好设置", "#7986CB", "#7986CBF2",
+                "uhemoji2-icon", "-tired", "/pages-blog/setting/setting");
+        setting.setSubTitle("首页布局、卡片样式等本地偏好");
+        items.add(setting);
+        QuickNavigationItem disclaimers = navItem("disclaimers", "免责声明", "#795548", "#795548F2",
+                "uhemoji2-icon", "-smirking", "/pages-blog/disclaimers/disclaimers");
+        disclaimers.setSubTitle("博客内容免责声明");
+        items.add(disclaimers);
+        QuickNavigationItem about = navItem("about", "关于项目", "#607D8B", "#607D8BF2",
+                "uhemoji2-icon", "-happy-", "/pages-blog/about/about");
+        about.setSubTitle("小莫唐尼开源项目");
+        items.add(about);
+        return items;
     }
 
     /**
@@ -558,17 +641,17 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         List<QuickNavigationItem> items = new ArrayList<>();
         // 文章归档带副标题「全部文章」（对标 app 端 rightText，2026-09-10 新增）
         QuickNavigationItem archives = navItem("archives", "文章归档", "#03A9F4",
-                "rgba(3, 169, 244, 0.14)", "uhemoji2-icon", "-mask",
+                "#03A9F424", "uhemoji2-icon", "-mask",
                 "/pages-blog/archives/archives");
         archives.setSubTitle("全部文章");
         items.add(archives);
-        items.add(navItem("vote", "投票中心", "#00BCD4", "rgba(0, 188, 212, 0.14)",
+        items.add(navItem("vote", "投票中心", "#00BCD4", "#00BCD424",
                 "uhemoji2-icon", "-confused", "/pages-blog/votes/votes"));
-        items.add(navItem("disclaimers", "友情链接", "#009688", "rgba(0, 150, 136, 0.14)",
+        items.add(navItem("disclaimers", "友情链接", "#009688", "#00968824",
                 "uhemoji2-icon", "-wink", "/pages-blog/friend-links/friend-links"));
-        items.add(navItem("love", "恋爱日记", "#FF4C67", "rgba(255, 76, 103, 0.14)",
+        items.add(navItem("love", "恋爱日记", "#FF4C67", "#FF4C6724",
                 "uhemoji2-icon", "-in-love", "/pages-blog/love/love"));
-        items.add(navItem("contact-blogger", "联系博主", "#FF9800", "rgba(255, 152, 0, 0.14)",
+        items.add(navItem("contact-blogger", "联系博主", "#FF9800", "#FF980024",
                 "uhemoji2-icon", "-cool", "/pages-blog/contact/contact"));
         return items;
     }
@@ -585,18 +668,6 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         item.setPath(path);
         item.setVisible(true);
         return item;
-    }
-
-    /**
-     * 我的页面-其他功能默认 2 项（对齐前端 FEATURE_ENTRY_REGISTRY 的 other 组：
-     * about-system 关于项目（about 页内入口，path 留空）、articles 文章列表）。
-     */
-    private static List<QuickNavigationItem> defaultMyPageOtherFeatures() {
-        return List.of(
-                navItem("about-system", "关于项目", "#FF9800", "rgba(255, 152, 0, 0.14)",
-                        "uhemoji2-icon", "-information", ""),
-                navItem("articles", "文章列表", "#03A9F4", "rgba(3, 169, 244, 0.14)",
-                        "uhemoji2-icon", "-book", "/pagesA/articles"));
     }
 
     /**

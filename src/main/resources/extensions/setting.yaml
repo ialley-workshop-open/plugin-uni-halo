@@ -33,22 +33,6 @@ spec:
       label: 安全控制
       formSchema:
         - $formkit: group
-          name: auditConfig
-          label: 审核模式
-          children:
-            - $formkit: radio
-              name: auditModeEnabled
-              id: auditModeEnabled
-              label: 审核模式
-              help: 开启审核模式，关闭小程序部分数据展示，小程序提交审核使建议开启，审核后关闭。
-              value: false
-              options:
-                - label: 开启
-                  value: true
-                - label: 关闭
-                  value: false
-              validation: required
-        - $formkit: group
           name: captchaConfig
           label: 防刷验证码
           children:
@@ -218,7 +202,7 @@ spec:
               id: floatingWindowEnabled
               label: 在主题显示悬浮窗
               value: false
-              help: 开启后向主题页面注入悬浮球；关闭后页面零残留。
+              help: 开启后向主题页面注入悬浮卡片；关闭后页面零残留。
             - $formkit: select
               name: pageScope
               id: floatingWindowPageScope
@@ -232,7 +216,7 @@ spec:
                 - label: 以下路径不显示
                   value: "except"
               validation: required
-              help: 控制悬浮球在哪些主题页面出现。「仅/排除」模式配合下方「路径模式」使用。
+              help: 控制悬浮卡片在哪些主题页面出现。「仅/排除」模式配合下方「路径模式」使用。
             - $formkit: textarea
               name: pagePatterns
               id: floatingWindowPagePatterns
@@ -264,7 +248,7 @@ spec:
                 - label: 屏幕居中
                   value: "center"
               validation: required
-              help: 悬浮球的初始锚点位置；开启拖拽后可自由移动。
+              help: 悬浮卡片的初始锚点位置；开启拖拽后可自由移动。
             - $formkit: number
               name: offsetX
               id: floatingWindowOffsetX
@@ -354,3 +338,9 @@ spec:
               label: 记住关闭状态
               value: true
               help: 开启后访客点击关闭后，同一浏览器下次访问不再显示；关闭则每次刷新都重新显示。
+            - $formkit: switch
+              name: miniProgramApply
+              id: floatingWindowMiniProgramApply
+              label: 小程序申请
+              value: false
+              help: 开启后悬浮卡片底部显示「申请」「友链信息」两个按钮，点击分别弹出小程序申请表单与友链信息展示。

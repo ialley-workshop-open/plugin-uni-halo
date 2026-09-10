@@ -63,15 +63,20 @@ class GeneralConfigServiceImplTest {
         assertThat(config.getSpec().getMaintenance().getTitle()).isEqualTo("站点维护中");
         assertThat(config.getSpec().getMaintenance().getNotice()).isEmpty();
         assertThat(config.getSpec().getMaintenance().getDescription()).isEmpty();
+        // 审核模式（2026-09-11 由 setting safetyConfig.auditConfig 迁入）：默认关闭
+        assertThat(config.getSpec().getAuditMode()).isNotNull();
+        assertThat(config.getSpec().getAuditMode().getEnabled()).isFalse();
         // 我的页面功能入口（2026-09-10 新增）：默认填充注册表条目——
-        // 常用功能=home 组 5 项（与快捷导航默认一致）、其他功能=other 组 2 项
+        // 常用功能=common 组 7 项（2026-09-11 对齐 app 端 about.vue navList，与快捷导航默认解耦）、
+        // 其他功能=other 组 3 项
         assertThat(config.getSpec().getPages().getMyPageConfig()).isNotNull();
         assertThat(config.getSpec().getPages().getMyPageConfig().getCommonFeatures())
                 .extracting("key")
-                .containsExactly("archives", "vote", "disclaimers", "love", "contact-blogger");
+                .containsExactly("contact-blogger", "favorites", "love", "friend-links",
+                        "archives", "vote", "data-visual");
         assertThat(config.getSpec().getPages().getMyPageConfig().getOtherFeatures())
                 .extracting("key")
-                .containsExactly("about-system", "articles");
+                .containsExactly("setting", "disclaimers", "about");
         // 快捷导航默认：文章归档带副标题（对标 app 端 rightText）
         assertThat(config.getSpec().getPages().getHomeConfig().getQuickNavigation())
                 .extracting("key", "subTitle")
@@ -154,6 +159,31 @@ class GeneralConfigServiceImplTest {
 
         assertThat(saved).isNotNull();
         assertThat(saved.getSpec().getLinkInfo().getSubmissionEnabled()).isFalse();
+    }
+
+    @Test
+    void saveImportsLegacyAuditModeEnabled() {
+        // 历史 setting safetyConfig.auditConfig.auditModeEnabled（2026-09-11 迁入通用配置
+        // 应用设置-审核模式）：首次保存时应导入 spec.auditMode.enabled（曾开启审核模式的
+        // 老配置保持开启，不因迁出而回退默认关闭）
+        GeneralConfig config = new GeneralConfig();
+        Spec spec = new Spec();
+        config.setSpec(spec);
+
+        when(client.fetch(eq(GeneralConfig.class), eq(SINGLETON))).thenReturn(Mono.empty());
+        when(settingFetcher.getSettingValues()).thenReturn(Mono.just(Map.of(
+            "safetyConfig", tools.jackson.databind.node.JsonNodeFactory.instance.objectNode()
+                .set("auditConfig", tools.jackson.databind.node.JsonNodeFactory.instance.objectNode()
+                    .put("auditModeEnabled", true))
+        )));
+        when(client.create(any(GeneralConfig.class)))
+            .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        var saved = service.save(config).block();
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getSpec().getAuditMode()).isNotNull();
+        assertThat(saved.getSpec().getAuditMode().getEnabled()).isTrue();
     }
 
     // ===== 恋爱模块入口密码（2026-09-08，BCrypt 语义与恋爱相册一致）=====

@@ -164,6 +164,18 @@ public class PublicConfigAssembler {
                 root.set("maintenance", maintenanceOut);
             }
         }
+        // 审核模式开关（2026-09-11 由 setting safetyConfig.auditConfig 迁入 spec.auditMode；
+        // 输出端重建回旧 auditConfig.auditModeEnabled 形态，覆盖旧 ConfigMap 残留透传，
+        // 客户端 shape 不变；auditModeData 死字段不随输出）
+        JsonNode auditMode = spec.get("auditMode");
+        if (auditMode != null && auditMode.isObject()) {
+            JsonNode enabled = auditMode.get("enabled");
+            if (enabled != null && enabled.isBoolean()) {
+                ObjectNode auditOut = JsonNodeFactory.instance.objectNode();
+                auditOut.put("auditModeEnabled", enabled.asBoolean());
+                root.set("auditConfig", auditOut);
+            }
+        }
         // 友链信息（2026-09-08 起去映射 + 拆分子结构；2026-09-10 起去作者信息；
         // 2026-09-11 起新增基本配置 submissionEnabled，承接原 setting linkConfig 公开提交开关）：
         // spec.linkInfo 直接下发到 pluginConfig.linkInfo，结构 = {submissionEnabled, miniInfo, siteInfo}：

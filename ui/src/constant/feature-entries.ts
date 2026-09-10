@@ -1,40 +1,54 @@
 import type { GeneralConfigQuickNavigationItem } from "@/types";
 
 /**
- * 功能入口注册表（2026-09-10 新增，设计见 .docs/feature-entry-unified-design.md）。
- *
- * <p>统一功能入口候选数据源：首页快捷导航与我的页面（about）功能入口共用，
- * 前端静态定义、不做后端表/接口维护（与审核配置候选的后端跨插件查询范式不同）。</p>
- *
- * <p>候选清单 = 快捷导航默认数据去重即全部（不含 tabbar 页面，避免入口重复）；
- * 字段对齐快捷导航项（key/title/subTitle/color/bgColor/iconPrefix/icon/path/visible），
- * 仅多一个可空 subTitle（对标 app 端 rightText）。group 标注默认归属：</p>
- * <ul>
- *   <li>home：首页快捷导航可选项（默认 5 项即此组）；</li>
- *   <li>common：我的页面-常用功能（原「博客功能」改名）可选项；</li>
- *   <li>other：我的页面-其他功能可选项。</li>
- * </ul>
- * 同一入口可同时出现在首页快捷导航与我的页面（互不排斥）。
+ * 功能入口注册表
  */
 export interface FeatureEntry extends GeneralConfigQuickNavigationItem {
-  /** 归属：首页候选 / 我的页-常用 / 我的页-其他 */
-  group: "home" | "common" | "other";
+  /** 归属：我的页-常用 / 我的页-其他 */
+  group: "common" | "other";
 }
 
-/** 统一功能入口注册表（不含 tabbar 页面；path 以 app 端实际页面清单为准，实施时核对） */
+/**
+ * 统一功能入口注册表
+ */
 export const FEATURE_ENTRY_REGISTRY: FeatureEntry[] = [
-  {key: "archives", title: "文章归档", subTitle: "全部文章", color: "#03A9F4", bgColor: "rgba(3, 169, 244, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-mask", path: "/pages-blog/archives/archives", visible: true, group: "home"},
-  {key: "vote", title: "投票中心", color: "#00BCD4", bgColor: "rgba(0, 188, 212, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-confused", path: "/pages-blog/votes/votes", visible: true, group: "home"},
-  {key: "disclaimers", title: "友情链接", color: "#009688", bgColor: "rgba(0, 150, 136, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-wink", path: "/pages-blog/friend-links/friend-links", visible: true, group: "home"},
-  {key: "love", title: "恋爱日记", color: "#FF4C67", bgColor: "rgba(255, 76, 103, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-in-love", path: "/pages-blog/love/love", visible: true, group: "home"},
-  {key: "contact-blogger", title: "联系博主", color: "#FF9800", bgColor: "rgba(255, 152, 0, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-cool", path: "/pages-blog/contact/contact", visible: true, group: "home"},
-  {key: "about-system", title: "关于项目", color: "#FF9800", bgColor: "rgba(255, 152, 0, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-information", path: "", visible: true, group: "other"},
-  {key: "articles", title: "文章列表", color: "#03A9F4", bgColor: "rgba(3, 169, 244, 0.14)", iconPrefix: "uhemoji2-icon", icon: "-book", path: "/pagesA/articles", visible: true, group: "other"},
+  // ===== 我的页面-常用功能（默认 7 项，顺序即展示顺序）=====
+  {key: "contact-blogger", title: "联系博主", subTitle: "博主常用联系方式", color: "#FF9800", bgColor: "#FF980024", iconPrefix: "uhemoji2-icon", icon: "-wink", path: "/pages-blog/contact/contact", visible: true, group: "common"},
+  {key: "favorites", title: "我的收藏", color: "#FFB300", bgColor: "#FFB30024", iconPrefix: "uhemoji2-icon", icon: "-smiling", path: "/pages-blog/favorites/favorites", visible: true, group: "common"},
+  {key: "love", title: "恋爱日记", subTitle: "博主的恋爱日记", color: "#FF4C67", bgColor: "#FF4C6724", iconPrefix: "uhemoji2-icon", icon: "-in-love", path: "/pages-blog/love/love", visible: true, group: "common"},
+  {key: "friend-links", title: "友情链接", subTitle: "看看博主朋友们吧", color: "#009688", bgColor: "#00968824", iconPrefix: "uhemoji2-icon", icon: "-cool", path: "/pages-blog/friend-links/friend-links", visible: true, group: "common"},
+  {key: "archives", title: "文章归档", subTitle: "全部文章", color: "#03A9F4", bgColor: "#03A9F424", iconPrefix: "uhemoji2-icon", icon: "-mask", path: "/pages-blog/archives/archives", visible: true, group: "common"},
+  {key: "vote", title: "投票中心", subTitle: "查看和进行投票", color: "#00BCD4", bgColor: "#00BCD424", iconPrefix: "uhemoji2-icon", icon: "-confused", path: "/pages-blog/votes/votes", visible: true, group: "common"},
+  {key: "data-visual", title: "数据看板", subTitle: "站点数据可视化", color: "#663CC9", bgColor: "#663CC924", iconPrefix: "uhemoji2-icon", icon: "-surprised", path: "/pages-blog/data-visual/data-visual", visible: true, group: "common"},
+  // ===== 我的页面-其他功能（默认 3 项，顺序即展示顺序）=====
+  {key: "setting", title: "偏好设置", subTitle: "首页布局、卡片样式等本地偏好", color: "#7986CB", bgColor: "#7986CB24", iconPrefix: "uhemoji2-icon", icon: "-tired", path: "/pages-blog/setting/setting", visible: true, group: "other"},
+  {key: "disclaimers", title: "免责声明", subTitle: "博客内容免责声明", color: "#795548", bgColor: "#79554824", iconPrefix: "uhemoji2-icon", icon: "-smirking", path: "/pages-blog/disclaimers/disclaimers", visible: true, group: "other"},
+  {key: "about", title: "关于项目", subTitle: "小莫唐尼开源项目", color: "#607D8B", bgColor: "#607D8B24", iconPrefix: "uhemoji2-icon", icon: "-happy-", path: "/pages-blog/about/about", visible: true, group: "other"},
 ];
 
-/** 按归属组过滤注册表 */
+/**
+ * 首页快捷导航默认 5 项
+ */
+export const DEFAULT_QUICK_NAV_KEYS = ["archives", "vote", "disclaimers", "love", "contact-blogger"];
+
+/** 我的页面-常用功能默认 7 项 */
+export const DEFAULT_MY_PAGE_COMMON_KEYS = [
+  "contact-blogger", "favorites", "love", "friend-links", "archives", "vote", "data-visual",
+];
+
+/** 我的页面-其他功能默认 3 项 key */
+export const DEFAULT_MY_PAGE_OTHER_KEYS = ["setting", "disclaimers", "about"];
+
+/** 按归属组过滤注册表（候选弹窗统一清单不用；默认配置一律走显式 key 列表） */
 export function featureEntriesByGroup(group: FeatureEntry["group"]): FeatureEntry[] {
   return FEATURE_ENTRY_REGISTRY.filter((entry) => entry.group === group);
+}
+
+/** 按 key 列表从注册表取条目（保持 key 列表顺序；未知 key 跳过） */
+export function featureEntriesByKeys(keys: string[]): FeatureEntry[] {
+  return keys
+    .map((key) => FEATURE_ENTRY_REGISTRY.find((entry) => entry.key === key))
+    .filter((entry): entry is FeatureEntry => !!entry);
 }
 
 /** 注册表条目 → 快捷导航项快照（去掉 group，写入配置） */

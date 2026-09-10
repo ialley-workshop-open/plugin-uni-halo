@@ -85,8 +85,7 @@ const handleClose = () => {
           v-model="keyword"
           type="text"
           placeholder="输入关键字搜索功能入口…"
-          outer-class=":uno: !pt-0"
-          class=":uno: w-full flex-1"
+          outer-class=":uno: !pt-0 !pb-0"
         />
         <span class=":uno: shrink-0 text-sm text-gray-500">
           已选 <b class=":uno: text-primary">{{ localSelected.length }}</b> 条
@@ -120,7 +119,7 @@ const handleClose = () => {
             class=":uno: flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-sm font-medium text-white"
             :style="{ backgroundColor: candidate.bgColor, color: candidate.color }"
           >
-            {{ candidate.icon || "•" }}
+            {{ (candidate.title || "")[0] || "•" }}
           </span>
           <div class=":uno: min-w-0 flex-1">
             <div class=":uno: flex items-baseline gap-2">
@@ -132,6 +131,7 @@ const handleClose = () => {
               </span>
             </div>
             <div class=":uno: mt-0.5 truncate text-xs text-gray-400">
+              <span class=":uno: mr-1 font-mono text-gray-500">{{ candidate.key }}</span>
               {{ candidate.path || "about 页内入口" }}
             </div>
           </div>

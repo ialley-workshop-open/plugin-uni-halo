@@ -6,7 +6,10 @@ import {computed, nextTick, provide, ref, watch} from "vue";
 import SubmitButton from "@/components/button/SubmitButton.vue";
 import {generalConfigApi} from "@/api";
 import {
-  featureEntriesByGroup,
+  DEFAULT_MY_PAGE_COMMON_KEYS,
+  DEFAULT_MY_PAGE_OTHER_KEYS,
+  DEFAULT_QUICK_NAV_KEYS,
+  featureEntriesByKeys,
   toQuickNavigationItem,
 } from "@/constant/feature-entries";
 import type {GeneralConfig, GeneralConfigSpec} from "@/types";
@@ -38,6 +41,7 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
     {id: "appInfo", label: "应用信息"},
     {id: "blogger", label: "博主资料"},
     {id: "social", label: "社交信息"},
+    {id: "auditMode", label: "审核模式"},
     {id: "copyright", label: "页脚版权"},
   ],
   preferences: [
@@ -103,13 +107,14 @@ function defaultSpec(): GeneralConfigSpec {
     profile: {
       appInfo: {name: "uni-halo", logo: "/plugins/plugin-uni-halo/assets/static/logo.png"},
       blogger: {nickname: "uni-halo", avatar: "", email: "", description: "", website: "", intro: ""},
-      // 社交信息（2026-09-10 起动态列表：qq/wechat/email/github 四项默认，去 enabled 开关）
+      // 社交信息（2026-09-10 起动态列表：qq/wechat/email/github 四项默认，去 enabled 开关；
+      // 2026-09-11 起去掉 key 平台标识，图标由 app 端按颜色/背景色色块渲染）
       social: {
         items: [
-          {key: "qq", name: "企鹅号", content: "", color: "#12b7f5", bgColor: "#12b7f51A", priority: 1, visible: true},
-          {key: "wechat", name: "微信号", content: "", color: "#07c160", bgColor: "#07c1601A", priority: 2, visible: true},
-          {key: "email", name: "邮箱地址", content: "", color: "#f57c00", bgColor: "#f57c001A", priority: 3, visible: true},
-          {key: "github", name: "Github", content: "", color: "#24292f", bgColor: "#24292f1A", priority: 4, visible: true},
+          {name: "企鹅号", content: "", color: "#12b7f5", bgColor: "#12b7f51A", priority: 1, visible: true},
+          {name: "微信号", content: "", color: "#07c160", bgColor: "#07c1601A", priority: 2, visible: true},
+          {name: "邮箱地址", content: "", color: "#f57c00", bgColor: "#f57c001A", priority: 3, visible: true},
+          {name: "Github", content: "", color: "#24292f", bgColor: "#24292f1A", priority: 4, visible: true},
         ],
       },
     },
@@ -117,8 +122,8 @@ function defaultSpec(): GeneralConfigSpec {
       homeConfig: {
         pageTitle: "首页",
         useQuickNavigation: true,
-        // 快捷导航默认 5 项（对齐客户端 uh-home-quick-nav 默认 navList；由注册表派生）
-        quickNavigation: featureEntriesByGroup("home").map(toQuickNavigationItem),
+        // 快捷导航默认 5 项（对齐客户端 uh-home-quick-nav 默认 navList；由注册表显式 key 列表派生）
+        quickNavigation: featureEntriesByKeys(DEFAULT_QUICK_NAV_KEYS).map(toQuickNavigationItem),
         useCategory: true,
         categories: [],
       },
@@ -131,11 +136,12 @@ function defaultSpec(): GeneralConfigSpec {
         waveImageUrl: "/plugins/plugin-uni-halo/assets/static/uni_halo_about_wave.gif",
         copyrightConfig: {enabled: true, content: "「 2022 uni-halo 丨 开源项目@小莫唐尼 」"},
       },
-      // 我的页面功能入口（2026-09-10 新增：默认填充注册表条目——
-      // 常用功能=home 组 5 项、其他功能=other 组 2 项，与后端默认一致）
+      // 我的页面功能入口（2026-09-10 新增：默认填充注册表条目；
+      // 2026-09-11 起对齐 app 端 about.vue navList：常用 7 项 / 其他 3 项，
+      // 与后端 GeneralConfigServiceImpl 默认一致）
       myPageConfig: {
-        commonFeatures: featureEntriesByGroup("home").map(toQuickNavigationItem),
-        otherFeatures: featureEntriesByGroup("other").map(toQuickNavigationItem),
+        commonFeatures: featureEntriesByKeys(DEFAULT_MY_PAGE_COMMON_KEYS).map(toQuickNavigationItem),
+        otherFeatures: featureEntriesByKeys(DEFAULT_MY_PAGE_OTHER_KEYS).map(toQuickNavigationItem),
       },
       disclaimers: {content: ""},
       postDetailConfig: {
@@ -198,6 +204,11 @@ function defaultSpec(): GeneralConfigSpec {
       title: "站点维护中",
       notice: "",
       description: "",
+    },
+    // 审核模式（2026-09-11 由设置页 safetyConfig.auditConfig 迁入：默认关闭，
+    // 开启后关闭小程序部分数据展示，小程序提交审核时建议开启）
+    auditMode: {
+      enabled: false,
     },
   };
 }

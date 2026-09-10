@@ -54,6 +54,18 @@ public class GeneralConfig extends AbstractExtension {
         private LinkInfo linkInfo;
         /** 维护模式（2026-09-04 新增，见 {@code .docs/maintenance-config-design.md}） */
         private Maintenance maintenance;
+        /** 审核模式（2026-09-11 由 setting safetyConfig.auditConfig 迁入：开启后关闭
+         * 小程序部分数据展示，小程序提交审核时建议开启；公开 getConfigs 由装配器重建回
+         * 旧 {@code auditConfig.auditModeEnabled} 形态下发，客户端无感） */
+        private AuditMode auditMode;
+    }
+
+    /** 审核模式开关（原 setting safetyConfig.auditConfig.auditModeEnabled，
+     * 2026-09-11 迁入通用配置「应用设置」；默认关闭） */
+    @Data
+    public static class AuditMode {
+        /** 是否开启审核模式 */
+        private Boolean enabled;
     }
 
     /** 应用资料：应用信息（名称/图标，原基本配置 appInfo）+ 博主/社交
@@ -96,11 +108,10 @@ public class GeneralConfig extends AbstractExtension {
         private List<SocialItem> items;
     }
 
-    /** 社交项（app 端联系博主页展示/复制；字段：key 平台标识 + 名称/内容/颜色/背景色/排序/显隐） */
+    /** 社交项（app 端联系博主页展示/复制；2026-09-11 起去掉 key 平台标识，
+     * 仅名称/内容/颜色/背景色/排序/显隐，图标由 app 端按 color/bgColor 色块渲染） */
     @Data
     public static class SocialItem {
-        /** 平台标识（如 qq/wechat/github/email，app 端映射品牌字母兜底） */
-        private String key;
         /** 名称（如「企鹅号」「微信号」） */
         private String name;
         /** 内容（账号/地址/链接，点击复制） */

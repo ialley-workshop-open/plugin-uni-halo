@@ -103,6 +103,7 @@ public class FloatingWindowHeadProcessor implements TemplateHeadProcessor {
         config.put("edgeHideEnabled", node.path("edgeHideEnabled").asBoolean(true));
         config.put("edgeHideDistance", node.path("edgeHideDistance").asInt(24));
         config.put("rememberClosed", node.path("rememberClosed").asBoolean(true));
+        config.put("miniProgramApply", node.path("miniProgramApply").asBoolean(false));
         return config;
     }
 
