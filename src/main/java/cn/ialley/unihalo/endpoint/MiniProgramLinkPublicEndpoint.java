@@ -12,44 +12,40 @@ import cn.ialley.unihalo.captcha.CaptchaScope;
 import cn.ialley.unihalo.captcha.CaptchaService;
 import cn.ialley.unihalo.captcha.CaptchaValidationException;
 import cn.ialley.unihalo.constants.Constants;
+import cn.ialley.unihalo.scheme.GeneralConfig;
 import cn.ialley.unihalo.scheme.MiniProgramLink;
 import cn.ialley.unihalo.scheme.MiniProgramLinkSubmission;
+import cn.ialley.unihalo.services.GeneralConfigService;
 import cn.ialley.unihalo.services.MiniProgramLinkService;
 import cn.ialley.unihalo.services.MiniProgramLinkSubmissionService;
 import reactor.core.publisher.Mono;
 import run.halo.app.core.extension.endpoint.CustomEndpoint;
 import run.halo.app.extension.GroupVersion;
-import cn.ialley.unihalo.utils.SettingGroupResolver;
-import run.halo.app.plugin.ReactiveSettingFetcher;
-import tools.jackson.databind.node.JsonNodeFactory;
 
 /**
  * 友情链接-小程序链接公开接口（app 端，匿名可访问）。
  *
  * <p>仅返回可见（visible=true）的链接（D8）；支持 grouped=true 按类型分组返回
- * （D3）；公开提交申请（D6），提交接口校验必填项并落库为待审核；设置
- * linkConfig.submissionEnabled 关闭时提交申请返回提示。</p>
+ * （D3）；公开提交申请（D6），提交接口校验必填项并落库为待审核；通用配置
+ * 友链信息-基本配置 submissionEnabled 关闭时提交申请返回提示。</p>
  *
  * @author 小莫唐尼
  */
 @Component
 public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
 
-    private static final String SETTING_GROUP_LINK_CONFIG = "linkConfig";
-    private static final String SETTING_KEY_SUBMISSION_ENABLED = "submissionEnabled";
-
     private final MiniProgramLinkService miniProgramLinkService;
     private final MiniProgramLinkSubmissionService miniProgramLinkSubmissionService;
-    private final ReactiveSettingFetcher settingFetcher;
+    private final GeneralConfigService generalConfigService;
     private final CaptchaService captchaService;
 
     public MiniProgramLinkPublicEndpoint(MiniProgramLinkService miniProgramLinkService,
             MiniProgramLinkSubmissionService miniProgramLinkSubmissionService,
-            ReactiveSettingFetcher settingFetcher,
+            GeneralConfigService generalConfigService,
             CaptchaService captchaService) {
         this.miniProgramLinkService = miniProgramLinkService;
         this.miniProgramLinkSubmissionService = miniProgramLinkSubmissionService;
-        this.settingFetcher = settingFetcher;
+        this.generalConfigService = generalConfigService;
         this.captchaService = captchaService;
     }
 
@@ -76,21 +72,35 @@ public class MiniProgramLinkPublicEndpoint implements CustomEndpoint {
 
     private Mono<ServerResponse> submitApplication(ServerRequest request) {
         return captchaService.requireValid(request, CaptchaScope.LINK_SUBMISSION)
-                .then(SettingGroupResolver.group(settingFetcher, "featureConfig",
-                                SETTING_GROUP_LINK_CONFIG)
-                        .defaultIfEmpty(JsonNodeFactory.instance.objectNode())
-                        .flatMap(config -> {
-                            if (!config.path(SETTING_KEY_SUBMISSION_ENABLED).asBoolean(true)) {
-                                return Mono.error(new IllegalArgumentException("暂未开放提交申请"));
-                            }
-                            return request.bodyToMono(MiniProgramLinkSubmission.class)
-                                    .flatMap(miniProgramLinkSubmissionService::submit)
-                                    .flatMap(created -> ServerResponse.ok().bodyValue(created));
-                        })
-                        .onErrorResume(IllegalArgumentException.class,
-                                e -> ServerResponse.badRequest()
-                                        .bodyValue(Map.of("message", e.getMessage()))))
+                .then(isSubmissionEnabled())
+                .flatMap(enabled -> {
+                    if (!enabled) {
+                        return Mono.error(new IllegalArgumentException("暂未开放提交申请"));
+                    }
+                    return request.bodyToMono(MiniProgramLinkSubmission.class)
+                            .flatMap(miniProgramLinkSubmissionService::submit)
+                            .flatMap(created -> ServerResponse.ok().bodyValue(created));
+                })
+                .onErrorResume(IllegalArgumentException.class,
+                        e -> ServerResponse.badRequest()
+                                .bodyValue(Map.of("message", e.getMessage())))
                 .onErrorResume(CaptchaValidationException.class, this::captchaForbidden);
+    }
+
+    /**
+     * 是否开放公开提交申请：通用配置-友链信息-基本配置 submissionEnabled
+     * （2026-09-11 起由 setting linkConfig 迁入；默认 true）。
+     */
+    private Mono<Boolean> isSubmissionEnabled() {
+        return generalConfigService.get()
+                .map(config -> {
+                    GeneralConfig.LinkInfo linkInfo = config.getSpec() != null
+                            ? config.getSpec().getLinkInfo() : null;
+                    return linkInfo == null
+                            || linkInfo.getSubmissionEnabled() == null
+                            || Boolean.TRUE.equals(linkInfo.getSubmissionEnabled());
+                })
+                .defaultIfEmpty(true);
     }
 
     /**

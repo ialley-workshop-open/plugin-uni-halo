@@ -25,9 +25,17 @@ import RiGlobalLine from '~icons/ri/global-line'
 import RiMapPinLine from '~icons/ri/map-pin-line'
 import RiLightbulbLine from '~icons/ri/lightbulb-line'
 import RiHomeLine from '~icons/ri/home-line'
+import RiMegaphoneLine from '~icons/ri/megaphone-line'
+import RiShieldCheckLine from '~icons/ri/shield-check-line'
+import RiSlideshowLine from '~icons/ri/slideshow-line'
+import RiSearchLine from '~icons/ri/search-line'
+import RiArchiveLine from '~icons/ri/archive-line'
+import RiThumbUpLine from '~icons/ri/thumb-up-line'
+import RiNotificationLine from '~icons/ri/notification-line'
+import RiBookmarkLine from '~icons/ri/bookmark-line'
+import RiArticleLine from '~icons/ri/article-line'
 
 import mpPng from '@/assets/mp.png'
-import wxqunPng from '@/assets/wxqun.png'
 import qqqunPng from '@/assets/qqqun.png'
 import wxPng from '@/assets/wx.png'
 import zfbPng from '@/assets/zfb.png'
@@ -35,6 +43,7 @@ import qqPng from '@/assets/qq.png'
 import logoPng from '@/assets/logo.png'
 
 const isLoaded = ref(false)
+const activeFeatureTab = ref<'console' | 'mobile'>('console')
 
 onMounted(() => {
   setTimeout(() => {
@@ -49,41 +58,127 @@ onMounted(() => {
   })
 })
 
-const features = [
+const consoleFeatures = [
   {
     icon: RiSettingsLine,
-    title: '基本配置',
-    description: '文章版权、评论开关、页面显示、免责声明等基础设置',
+    title: '通用配置',
+    description: '应用资料、偏好设置、页面排版、恋爱友链等全局配置',
     color: '#368FEF',
   },
   {
     icon: RiSmartphoneLine,
-    title: '应用配置',
-    description: '应用信息、启动页面、小程序专属配置',
+    title: '应用管理',
+    description: '应用信息维护、版本管理、小程序发布上线',
     color: '#8B5CF6',
   },
   {
-    icon: RiLayoutLine,
-    title: '页面配置',
-    description: '特定页面信息和展示内容的个性化配置',
-    color: '#06B6D4',
+    icon: RiHeartLine,
+    title: '恋爱管理',
+    description: '恋爱配置、恋爱相册、恋爱清单、恋爱故事管理',
+    color: '#EC4899',
   },
   {
-    icon: RiUserLine,
-    title: '我的配置',
-    description: '博主信息、社交链接、个人主页定制',
+    icon: RiMegaphoneLine,
+    title: '公告管理',
+    description: '公告发布、公告类型管理、公告内容编辑',
+    color: '#F59E0B',
+  },
+  {
+    icon: RiLinksLine,
+    title: '链接管理',
+    description: '友情链接维护、申请审核、链接分组管理',
     color: '#10B981',
   },
   {
+    icon: RiShieldCheckLine,
+    title: '审核配置',
+    description: '内容审核模式、数据引用管理、审核规则配置',
+    color: '#06B6D4',
+  },
+  {
+    icon: RiSlideshowLine,
+    title: '轮播管理',
+    description: '首页轮播配置、文章同步、自定义轮播内容',
+    color: '#8B5CF6',
+  },
+]
+
+const mobileFeatures = [
+  {
+    icon: RiHomeLine,
+    title: '首页',
+    description: '轮播展示、文章列表、快捷导航、分类推荐',
+    color: '#368FEF',
+    tab: true,
+  },
+  {
+    icon: RiLayoutLine,
+    title: '分类',
+    description: '文章分类浏览、分类详情、标签筛选',
+    color: '#10B981',
+    tab: true,
+  },
+  {
     icon: RiImageLine,
-    title: '图片配置',
-    description: '默认图片地址、封面图、Logo 设置',
+    title: '图库',
+    description: '图片瀑布流展示、相册浏览、图片预览',
+    color: '#8B5CF6',
+    tab: true,
+  },
+  {
+    icon: RiMessage2Line,
+    title: '瞬间',
+    description: '动态发布、生活记录、互动交流',
+    color: '#EC4899',
+    tab: true,
+  },
+  {
+    icon: RiUserLine,
+    title: '关于',
+    description: '博主信息、社交链接、个人主页、偏好设置',
+    color: '#06B6D4',
+    tab: true,
+  },
+  {
+    icon: RiArticleLine,
+    title: '文章',
+    description: '文章详情阅读、评论互动、收藏分享',
+    color: '#F59E0B',
+  },
+  {
+    icon: RiArchiveLine,
+    title: '归档',
+    description: '文章按时间归档、历史文章检索',
+    color: '#368FEF',
+  },
+  {
+    icon: RiBookmarkLine,
+    title: '收藏',
+    description: '文章收藏管理、阅读历史记录',
+    color: '#10B981',
+  },
+  {
+    icon: RiThumbUpLine,
+    title: '投票',
+    description: '投票参与、投票结果查看',
+    color: '#8B5CF6',
+  },
+  {
+    icon: RiSearchLine,
+    title: '搜索',
+    description: '全文内容搜索、关键词快速定位',
+    color: '#06B6D4',
+  },
+  {
+    icon: RiNotificationLine,
+    title: '公告',
+    description: '公告中心浏览、公告详情查看',
     color: '#F59E0B',
   },
   {
     icon: RiHeartLine,
-    title: '恋爱配置',
-    description: '恋人信息、恋爱清单、恋爱相册、恋爱故事',
+    title: '恋爱',
+    description: '恋爱故事、恋爱相册、恋爱清单',
     color: '#EC4899',
   },
 ]
@@ -150,13 +245,13 @@ const contacts = [
         <img :src="logoPng" alt="UniHalo Logo" class="w-20 h-20 mx-auto mb-6 drop-shadow-lg" />
 
         <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm border rounded-full px-4 py-2 mb-8 shadow-sm" style="border-color: rgb(185 228 36 / 0.47)">
-          <RiSparklingLine class="w-4 h-4" style="color: #B9E424" />
-          <span class="text-sm font-medium" style="color: #B9E424">v3.x AGPL3.0</span>
+          <RiSparklingLine class="w-4 h-4 text-[#B9E424]" />
+          <span class="text-sm font-medium text-[#B9E424]" >v3.x AGPL3.0</span>
         </div>
 
         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6">
           <span style="color: #B9E424">UniHalo</span>
-          <span class="block text-3xl sm:text-4xl lg:text-5xl mt-3 font-bold text-slate-700">配置插件</span>
+          <span class="block text-2xl sm:text-3xl lg:text-4xl mt-3 font-bold text-slate-700">配置插件</span>
         </h1>
 
         <p class="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -202,12 +297,12 @@ const contacts = [
         <!-- 统计数据 -->
         <div class="flex justify-center gap-10 sm:gap-16 mb-10">
           <div class="text-center">
-            <div class="text-3xl sm:text-4xl font-bold" style="color: #B9E424">6+</div>
-            <div class="text-sm text-slate-500 mt-1">配置模块</div>
+            <div class="text-3xl sm:text-4xl font-bold" style="color: #B9E424">7+</div>
+            <div class="text-sm text-slate-500 mt-1">管理模块</div>
           </div>
           <div class="text-center">
-            <div class="text-3xl sm:text-4xl font-bold" style="color: #B9E424">100%</div>
-            <div class="text-sm text-slate-500 mt-1">开源免费</div>
+            <div class="text-3xl sm:text-4xl font-bold" style="color: #B9E424">12+</div>
+            <div class="text-sm text-slate-500 mt-1">移动端页面</div>
           </div>
           <div class="text-center">
             <div class="text-3xl sm:text-4xl font-bold" style="color: #B9E424">v3.x</div>
@@ -216,15 +311,12 @@ const contacts = [
         </div>
 
         <!-- 三个横向截图占位 -->
-        <div class="grid grid-cols-3 gap-4 max-w-4xl mx-auto">
-          <div class="rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
-            <img :src="mpPng" alt="小程序二维码" class="w-full h-full object-contain p-3" />
+        <div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto">
+          <div class="box-border p-2 rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+            <img :src="mpPng" alt="小程序二维码" class="w-full h-full object-contain rounded-lg" />
           </div>
-          <div class="rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
-            <img :src="wxqunPng" alt="微信交流群" class="w-full h-full object-contain p-3" />
-          </div>
-          <div class="rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
-            <img :src="qqqunPng" alt="QQ 交流群" class="w-full h-full object-contain p-3" />
+          <div class="box-border p-2 rounded-2xl overflow-hidden bg-white shadow-sm border border-slate-100 flex items-center justify-center">
+            <img :src="qqqunPng" alt="QQ 交流群" class="w-full h-full object-contain rounded-lg" />
           </div>
         </div>
       </div>
@@ -297,14 +389,41 @@ const contacts = [
     <!-- Features Section -->
     <section class="py-16 sm:py-20">
       <div class="max-w-5xl mx-auto px-4">
-        <div class="text-center mb-12">
+        <div class="text-center mb-8">
           <h2 class="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">功能模块</h2>
           <p class="text-lg text-slate-500">全方位满足你的小程序配置需求</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- 分段器 -->
+        <div class="flex justify-center mb-10">
+          <div class="inline-flex bg-slate-100 rounded-xl p-1">
+            <button
+              class="px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+              :class="activeFeatureTab === 'console' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+              @click="activeFeatureTab = 'console'"
+            >
+              <div class="flex items-center gap-2">
+                <RiSettingsLine class="w-4 h-4" />
+                <span>管理模块</span>
+              </div>
+            </button>
+            <button
+              class="px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200"
+              :class="activeFeatureTab === 'mobile' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'"
+              @click="activeFeatureTab = 'mobile'"
+            >
+              <div class="flex items-center gap-2">
+                <RiSmartphoneLine class="w-4 h-4" />
+                <span>移动端模块</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- 管理模块 -->
+        <div v-if="activeFeatureTab === 'console'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           <div
-            v-for="feature in features"
+            v-for="feature in consoleFeatures"
             :key="feature.title"
             class="group bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 cursor-pointer"
           >
@@ -316,6 +435,31 @@ const contacts = [
             </div>
             <h3 class="text-lg font-semibold text-slate-800 mb-2">{{ feature.title }}</h3>
             <p class="text-slate-500 text-sm leading-relaxed">{{ feature.description }}</p>
+          </div>
+        </div>
+
+        <!-- 移动端模块 -->
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div
+            v-for="feature in mobileFeatures"
+            :key="feature.title"
+            class="group bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-all duration-300 cursor-pointer relative"
+          >
+            <div
+              v-if="feature.tab"
+              class="absolute top-3 right-3 px-2 py-0.5 text-xs font-medium rounded-full"
+              :style="{ background: `${feature.color}20`, color: feature.color }"
+            >
+              Tab
+            </div>
+            <div
+              class="w-10 h-10 rounded-xl flex items-center justify-center text-white mb-3 group-hover:scale-110 transition-transform duration-300"
+              :style="{ background: `linear-gradient(135deg, ${feature.color} 0%, ${feature.color}cc 100%)` }"
+            >
+              <component :is="feature.icon" class="w-5 h-5" />
+            </div>
+            <h3 class="text-base font-semibold text-slate-800 mb-1.5">{{ feature.title }}</h3>
+            <p class="text-slate-500 text-xs leading-relaxed">{{ feature.description }}</p>
           </div>
         </div>
       </div>
@@ -584,10 +728,10 @@ const contacts = [
 @keyframes bounce-slow {
   0%,
   100% {
-    transform: translateY(0);
+    transform: translate(-50%,0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translate(-50%,-10px);
   }
 }
 

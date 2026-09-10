@@ -89,7 +89,7 @@ class PublicConfigAssemblerTest {
         GeneralConfig config = config("""
                 {"spec":{"profile":{"blogger":{"nickname":"测试博主"}},
                   "love":{"pageImages":{"bgImageUrl":"https://img/bg.png",
-                      "waveImageUrl":"/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif"},
+                      "waveImageUrl":"/plugins/plugin-uni-halo/assets/static/uni_halo_about_wave.gif"},
                     "ourStory":{"enabled":true,"iconUrl":"","passwordHash":"$2a$10$fakehash"},
                     "lovePhoto":{"enabled":false,"iconUrl":""},
                     "loveDaily":{"enabled":false,"iconUrl":""}}}}
@@ -134,15 +134,15 @@ class PublicConfigAssemblerTest {
                 {"spec":{
                   "profile":{
                     "blogger":{"nickname":"新博主","avatar":"https://a/1.png","email":"a@b.com","description":"简介","website":"https://site.com"},
-                    "social":{"enabled":true,"qq":"123"}
+                    "social":{"items":[{"key":"qq","name":"企鹅号","content":"123","color":"#12b7f5","bgColor":"#12b7f51A","priority":1,"visible":true}]},
+                    "copyrightConfig":{"enabled":true,"content":"© 版权"}
                   },
                   "pages":{
                     "homeConfig":{"pageTitle":"首页","useQuickNavigation":true,"useCategory":false},
                     "galleryConfig":{"pageTitle":"图库"},
                     "categoryConfig":{"pageTitle":"分类"},
                     "momentConfig":{"pageTitle":"瞬间"},
-                    "aboutConfig":{"pageTitle":"关于博主","bgImageUrl":"https://bg/1.jpg","waveImageUrl":"",
-                      "copyrightConfig":{"enabled":true,"content":"© 版权"}},
+                    "aboutConfig":{"pageTitle":"关于博主","bgImageUrl":"https://bg/1.jpg","waveImageUrl":""},
                     "disclaimers":{"content":"<p>免责声明</p>"},
                     "postDetailConfig":{"showComment":true,"copyrightEnabled":false,
                        "copyrightAuthor":"uni-halo","copyrightDesc":"desc","copyrightViolation":"vio"}
@@ -157,7 +157,7 @@ class PublicConfigAssemblerTest {
         assertEquals("新博主", root.get("authorConfig").get("blogger").get("nickname").asText());
         assertEquals("https://site.com",
                 root.get("authorConfig").get("blogger").get("website").asText());
-        assertEquals("123", root.get("authorConfig").get("social").get("qq").asText());
+        assertEquals("123", root.get("authorConfig").get("social").get("items").get(0).get("content").asText());
         // basicConfig 不再输出（版权/免责/文章详情已迁入页面设置）
         assertFalse(root.has("basicConfig"), "basicConfig 内容迁出后不应输出");
         // pageConfig：版权随 aboutConfig 输出、免责声明/文章详情随行输出
@@ -280,8 +280,8 @@ class PublicConfigAssemblerTest {
     void shouldRebuildLoveConfigFromSpecLove() throws Exception {
         GeneralConfig config = config("""
                 {"spec":{"love":{
-                  "pageImages":{"bgImageUrl":"/plugins/plugin-uni-halo/assets/res/logo.png",
-                    "waveImageUrl":"/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif",
+                  "pageImages":{"bgImageUrl":"/plugins/plugin-uni-halo/assets/static/logo.png",
+                    "waveImageUrl":"/plugins/plugin-uni-halo/assets/static/uni_halo_about_wave.gif",
                     "heartImageUrl":""},
                   "ourStory":{"enabled":true,"iconUrl":"https://img/our-story.png",
                     "passwordHash":"$2a$10$fakehash","passwordEnabled":true},
@@ -298,7 +298,7 @@ class PublicConfigAssemblerTest {
         // 2026-09-10 起总开关 loveEnabled 已下线
         assertFalse(root.get("loveConfig").has("loveEnabled"),
                 "总开关 loveEnabled 已下线不应输出");
-        assertEquals("/plugins/plugin-uni-halo/assets/res/logo.png",
+        assertEquals("/plugins/plugin-uni-halo/assets/static/logo.png",
                 root.get("loveConfig").get("pageImages").get("bgImageUrl").asText());
         assertFalse(root.get("loveConfig").get("pageImages").has("waveImageUrl"));
         assertFalse(root.get("loveConfig").get("pageImages").has("heartImageUrl"));
@@ -385,6 +385,7 @@ class PublicConfigAssemblerTest {
         // 嵌套子结构（对象内对象）：hasNonBlankText 必须递归检查，不能对 ObjectNode 调 asText
         GeneralConfig config = config("""
                 {"spec":{"linkInfo":{
+                  "submissionEnabled":false,
                   "miniInfo":{"displayName":"小程序","miniProgramCode":"gh_xxx","link":"/pages-blog/friend-links/friend-links"},
                   "siteInfo":{"displayName":"","url":"","logo":"","description":""}
                 }}}
@@ -398,6 +399,9 @@ class PublicConfigAssemblerTest {
         assertEquals("小程序", linkInfo.get("miniInfo").get("displayName").asText());
         // 2026-09-10 起作者信息已下线（由应用设置-博主资料承担），不再输出 authorInfo
         assertFalse(linkInfo.has("authorInfo"), "authorInfo 已下线不应输出");
+        // 2026-09-11 起基本配置 submissionEnabled 随行输出（app 端提交入口显隐判断）
+        assertFalse(linkInfo.get("submissionEnabled").asBoolean(),
+                "submissionEnabled 显式配置应原样输出");
     }
 
     @Test
@@ -413,6 +417,40 @@ class PublicConfigAssemblerTest {
         ObjectNode root = assembler.assemble(null, config);
 
         assertFalse(root.has("pluginConfig"), "全部留空不应输出 pluginConfig.linkInfo");
+    }
+
+    @Test
+    void shouldOutputLinkInfoWhenOnlySubmissionEnabledConfigured() throws Exception {
+        // 仅显式配置 submissionEnabled（miniInfo/siteInfo 全空）也应输出
+        // （app 端需据 submissionEnabled 隐藏「提交申请」入口，即使内容未配置）
+        GeneralConfig config = config("""
+                {"spec":{"linkInfo":{
+                  "submissionEnabled":false,
+                  "miniInfo":{"displayName":"","miniProgramCode":"","link":""},
+                  "siteInfo":{"displayName":"","url":"","logo":"","description":""}
+                }}}
+                """);
+
+        ObjectNode root = assembler.assemble(null, config);
+
+        assertTrue(root.has("pluginConfig"), "submissionEnabled 显式配置应输出 pluginConfig.linkInfo");
+        assertFalse(root.get("pluginConfig").get("linkInfo").get("submissionEnabled").asBoolean());
+    }
+
+    @Test
+    void shouldNotOutputLinkInfoWhenSubmissionEnabledMissingAndContentBlank() throws Exception {
+        // submissionEnabled 缺失（未配置，默认 true 不落库）+ 内容全空 → 不输出
+        // （老数据/默认结构下 app 端回退「暂未配置」占位，提交入口默认开放）
+        GeneralConfig config = config("""
+                {"spec":{"linkInfo":{
+                  "miniInfo":{"displayName":"","miniProgramCode":"","link":""},
+                  "siteInfo":{"displayName":"","url":"","logo":"","description":""}
+                }}}
+                """);
+
+        ObjectNode root = assembler.assemble(null, config);
+
+        assertFalse(root.has("pluginConfig"), "无 submissionEnabled 且内容全空不应输出 linkInfo");
     }
 
     // ===== 我的页面功能入口（2026-09-10 新增，pageConfig.myPageConfig）=====

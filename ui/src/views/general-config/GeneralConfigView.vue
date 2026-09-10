@@ -38,6 +38,7 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
     {id: "appInfo", label: "应用信息"},
     {id: "blogger", label: "博主资料"},
     {id: "social", label: "社交信息"},
+    {id: "copyright", label: "页脚版权"},
   ],
   preferences: [
     {id: "home", label: "首页"},
@@ -61,6 +62,7 @@ const SUB_TABS: Record<BigGroup, Array<{id: string; label: string}>> = {
     {id: "modules", label: "模块入口"},
   ],
   linkInfo: [
+    {id: "basic", label: "基本配置"},
     {id: "site", label: "站点信息"},
     {id: "info", label: "小程序信息"},
   ],
@@ -99,20 +101,16 @@ function defaultConfig(): GeneralConfig {
 function defaultSpec(): GeneralConfigSpec {
   return {
     profile: {
-      appInfo: {name: "uni-halo", logo: "/plugins/plugin-uni-halo/assets/res/logo.png"},
-      blogger: {nickname: "uni-halo", avatar: "", email: "", description: "", website: ""},
+      appInfo: {name: "uni-halo", logo: "/plugins/plugin-uni-halo/assets/static/logo.png"},
+      blogger: {nickname: "uni-halo", avatar: "", email: "", description: "", website: "", intro: ""},
+      // 社交信息（2026-09-10 起动态列表：qq/wechat/email/github 四项默认，去 enabled 开关）
       social: {
-        enabled: true,
-        qq: "",
-        wechat: "",
-        weibo: "",
-        email: "",
-        blog: "",
-        bilibili: "",
-        juejin: "",
-        csdn: "",
-        gitee: "",
-        github: "",
+        items: [
+          {key: "qq", name: "企鹅号", content: "", color: "#12b7f5", bgColor: "#12b7f51A", priority: 1, visible: true},
+          {key: "wechat", name: "微信号", content: "", color: "#07c160", bgColor: "#07c1601A", priority: 2, visible: true},
+          {key: "email", name: "邮箱地址", content: "", color: "#f57c00", bgColor: "#f57c001A", priority: 3, visible: true},
+          {key: "github", name: "Github", content: "", color: "#24292f", bgColor: "#24292f1A", priority: 4, visible: true},
+        ],
       },
     },
     pages: {
@@ -129,8 +127,8 @@ function defaultSpec(): GeneralConfigSpec {
       momentConfig: {pageTitle: ""},
       aboutConfig: {
         pageTitle: "关于博主",
-        bgImageUrl: "/plugins/plugin-uni-halo/assets/res/uni_halo_profile_bg.jpg",
-        waveImageUrl: "/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif",
+        bgImageUrl: "/plugins/plugin-uni-halo/assets/static/uni_halo_profile_bg.jpg",
+        waveImageUrl: "/plugins/plugin-uni-halo/assets/static/uni_halo_about_wave.gif",
         copyrightConfig: {enabled: true, content: "「 2022 uni-halo 丨 开源项目@小莫唐尼 」"},
       },
       // 我的页面功能入口（2026-09-10 新增：默认填充注册表条目——
@@ -151,7 +149,7 @@ function defaultSpec(): GeneralConfigSpec {
       },
     },
     assets: {
-      loadingGifUrl: "/plugins/plugin-uni-halo/assets/res/uni_halo_img_lazyload.gif",
+      loadingGifUrl: "/plugins/plugin-uni-halo/assets/static/uni_halo_img_lazyload.gif",
       loadingErrUrl: "",
     },
     preferences: {
@@ -175,6 +173,10 @@ function defaultSpec(): GeneralConfigSpec {
       loveDaily: {enabled: false, passwordEnabled: false, password: "", passwordRemoved: false},
     },
     linkInfo: {
+      // 友链信息默认：基本配置开放公开提交申请（原 setting linkConfig.submissionEnabled，
+      // 2026-09-11 迁入）；miniInfo/siteInfo 留空（站长配置后经 getConfigs 直接下发
+      // pluginConfig.linkInfo；2026-09-10 起去掉作者信息与站点联系邮箱）
+      submissionEnabled: true,
       miniInfo: {
         displayName: "",
         miniProgramCode: "",

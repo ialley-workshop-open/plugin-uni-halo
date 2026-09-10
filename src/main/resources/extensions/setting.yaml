@@ -5,24 +5,12 @@ metadata:
 spec:
   forms:
     - group: featureConfig
-      label: 功能模块
+      label: 基本设置
       formSchema:
         - $formkit: group
           name: linkConfig
           label: 友情链接
           children:
-            - $formkit: radio
-              name: submissionEnabled
-              id: submissionEnabled
-              label: 是否开放公开提交申请
-              value: true
-              options:
-                - label: 开启
-                  value: true
-                - label: 关闭
-                  value: false
-              validation: required
-              help: 开启后 app 端可提交小程序链接申请，后台「链接管理-申请审核」进行审核。
             - $formkit: radio
               name: sendEmail
               id: sendEmail
@@ -42,7 +30,7 @@ spec:
               value: "uni-halo"
               help: 审核邮件标题与正文中的站点名称。
     - group: safetyConfig
-      label: 安全与风控
+      label: 安全控制
       formSchema:
         - $formkit: group
           name: auditConfig
@@ -218,3 +206,151 @@ spec:
                   value: ""
                   help: 广告ID，请在 微信小程序广告管理中获取。
                   validation: required
+    - group: themeConfig
+      label: 主题展示
+      formSchema:
+        - $formkit: group
+          name: floatingWindow
+          label: 主题悬浮窗
+          children:
+            - $formkit: switch
+              name: enabled
+              id: floatingWindowEnabled
+              label: 在主题显示悬浮窗
+              value: false
+              help: 开启后向主题页面注入悬浮球；关闭后页面零残留。
+            - $formkit: select
+              name: pageScope
+              id: floatingWindowPageScope
+              label: 显示范围
+              value: "all"
+              options:
+                - label: 全部页面
+                  value: "all"
+                - label: 仅以下路径显示
+                  value: "only"
+                - label: 以下路径不显示
+                  value: "except"
+              validation: required
+              help: 控制悬浮球在哪些主题页面出现。「仅/排除」模式配合下方「路径模式」使用。
+            - $formkit: textarea
+              name: pagePatterns
+              id: floatingWindowPagePatterns
+              label: 路径模式
+              value: ""
+              help: 每行一个路径模式，匹配当前页面 pathname。* 匹配任意非 / 字符，** 匹配任意字符（含 /）；留空或只写 / 表示仅首页。例如 /archives/** 匹配文章详情页。
+            - $formkit: select
+              name: position
+              id: floatingWindowPosition
+              label: 显示位置
+              value: "bottom-right"
+              options:
+                - label: 左上角
+                  value: "top-left"
+                - label: 顶部居中
+                  value: "top-center"
+                - label: 右上角
+                  value: "top-right"
+                - label: 右侧居中
+                  value: "right-center"
+                - label: 右下角
+                  value: "bottom-right"
+                - label: 底部居中
+                  value: "bottom-center"
+                - label: 左下角
+                  value: "bottom-left"
+                - label: 左侧居中
+                  value: "left-center"
+                - label: 屏幕居中
+                  value: "center"
+              validation: required
+              help: 悬浮球的初始锚点位置；开启拖拽后可自由移动。
+            - $formkit: number
+              name: offsetX
+              id: floatingWindowOffsetX
+              label: 水平偏移(px)
+              value: 0
+              help: 相对锚点的水平微调，可填负数。
+            - $formkit: number
+              name: offsetY
+              id: floatingWindowOffsetY
+              label: 垂直偏移(px)
+              value: 0
+              help: 相对锚点的垂直微调，可填负数。
+            - $formkit: attachment
+              name: imageUrl
+              id: floatingWindowImageUrl
+              label: 太阳码图片
+              value: ""
+              help: 选择一张小程序太阳码图片（Halo 附件）；未选择时悬浮窗不显示。
+              validation: required
+            - $formkit: number
+              name: imageSize
+              id: floatingWindowImageSize
+              label: 图片尺寸(px)
+              value: 100
+              help: 太阳码图片的宽高，默认 100px。
+              validation: required
+            - $formkit: text
+              name: name
+              id: floatingWindowName
+              label: 小程序名称
+              value: "小程序"
+              help: 太阳码下方显示的名称，留空则不显示名称。
+            - $formkit: number
+              name: nameSize
+              id: floatingWindowNameSize
+              label: 名称字号(px)
+              value: 14
+            - $formkit: color
+              name: nameColor
+              id: floatingWindowNameColor
+              label: 名称颜色
+              value: "#333333"
+              format: hex8
+            - $formkit: text
+              name: description
+              id: floatingWindowDescription
+              label: 描述
+              value: ""
+              help: 名称下方显示的描述，留空则不显示。
+            - $formkit: number
+              name: descSize
+              id: floatingWindowDescSize
+              label: 描述字号(px)
+              value: 12
+            - $formkit: color
+              name: descColor
+              id: floatingWindowDescColor
+              label: 描述颜色
+              value: "#999999"
+              format: hex8
+            - $formkit: switch
+              name: dragEnabled
+              id: floatingWindowDragEnabled
+              label: 允许拖拽
+              value: true
+            - $formkit: switch
+              name: closeEnabled
+              id: floatingWindowCloseEnabled
+              label: 显示关闭按钮
+              value: true
+            - $formkit: switch
+              name: edgeHideEnabled
+              id: floatingWindowEdgeHideEnabled
+              label: 贴边隐藏
+              value: true
+              help: 拖拽到屏幕边缘时自动隐藏大部分，仅露出触发条，鼠标悬停滑出。
+            - $formkit: number
+              name: edgeHideDistance
+              id: floatingWindowEdgeHideDistance
+              label: 贴边触发距离(px)
+              value: 24
+              help: 贴边隐藏时露出的宽度，默认 24px。
+              validation: required
+            - $formkit: switch
+              name: rememberClosed
+              id: floatingWindowRememberClosed
+              label: 记住关闭状态
+              value: true
+              help: 开启后访客点击关闭后，同一浏览器下次访问不再显示；关闭则每次刷新都重新显示。

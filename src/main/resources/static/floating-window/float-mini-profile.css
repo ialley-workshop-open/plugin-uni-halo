@@ -1,0 +1,95 @@
+/*
+ * UniHalo 主题悬浮窗样式（小程序太阳码悬浮球）
+ * 设计见 .docs/floating-window-design.md
+ * 所有选择器带 .float-mini-profile 作用域前缀，避免污染主题样式。
+ */
+.float-mini-profile {
+  position: fixed;
+  z-index: 9999;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  max-width: 40vw;
+  line-height: 1.4;
+  transition: transform 0.3s ease;
+}
+
+/* ===== 9 向锚点（配合 JS inline transform 偏移） ===== */
+.float-mini-profile.float-mini-profile-pos-top-left { top: 8px; left: 8px; }
+.float-mini-profile.float-mini-profile-pos-top-center { top: 8px; left: 50%; }
+.float-mini-profile.float-mini-profile-pos-top-right { top: 8px; right: 8px; }
+.float-mini-profile.float-mini-profile-pos-right-center { top: 50%; right: 8px; }
+.float-mini-profile.float-mini-profile-pos-bottom-right { bottom: 8px; right: 8px; }
+.float-mini-profile.float-mini-profile-pos-bottom-center { bottom: 8px; left: 50%; }
+.float-mini-profile.float-mini-profile-pos-bottom-left { bottom: 8px; left: 8px; }
+.float-mini-profile.float-mini-profile-pos-left-center { top: 50%; left: 8px; }
+.float-mini-profile.float-mini-profile-pos-center { top: 50%; left: 50%; }
+
+/* ===== 内容 ===== */
+.float-mini-profile img.float-mini-profile-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+.float-mini-profile .float-mini-profile-name {
+  font-weight: 600;
+  text-align: center;
+}
+.float-mini-profile .float-mini-profile-desc {
+  text-align: center;
+  word-break: break-all;
+}
+
+/* ===== 关闭按钮（右上角） ===== */
+.float-mini-profile .float-mini-profile-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+}
+.float-mini-profile .float-mini-profile-close:hover {
+  background: rgba(0, 0, 0, 0.65);
+}
+
+/* ===== 拖拽 ===== */
+.float-mini-profile.float-mini-profile-dragging {
+  transition: none !important;
+  cursor: grabbing;
+}
+
+/* ===== 贴边隐藏（JS 按最近边缘加 float-mini-profile-edge-*，露出 var(--float-mini-profile-edge) 宽把手） ===== */
+.float-mini-profile.float-mini-profile-edge-left { transform: translateX(calc(-100% + var(--float-mini-profile-edge, 24px))); }
+.float-mini-profile.float-mini-profile-edge-right { transform: translateX(calc(100% - var(--float-mini-profile-edge, 24px))); }
+.float-mini-profile.float-mini-profile-edge-top { transform: translateY(calc(-100% + var(--float-mini-profile-edge, 24px))); }
+.float-mini-profile.float-mini-profile-edge-bottom { transform: translateY(calc(100% - var(--float-mini-profile-edge, 24px))); }
+.float-mini-profile.float-mini-profile-edge:hover,
+.float-mini-profile.float-mini-profile-edge:focus-within {
+  transform: translate(0, 0);
+}
+
+/* ===== 关闭动画 ===== */
+.float-mini-profile.float-mini-profile-closing {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}

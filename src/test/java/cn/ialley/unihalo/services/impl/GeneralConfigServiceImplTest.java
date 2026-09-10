@@ -132,6 +132,30 @@ class GeneralConfigServiceImplTest {
         assertThat(saved.getSpec().getMaintenance().getEndTime()).isNull();
     }
 
+    @Test
+    void saveImportsLegacyLinkConfigSubmissionEnabled() {
+        // 历史 setting featureConfig.linkConfig.submissionEnabled（2026-09-11 迁入友链信息
+        // 基本配置）：首次保存时应导入 spec.linkInfo.submissionEnabled（曾关闭提交的
+        // 老配置保持关闭，不因迁出而回默认 true）
+        GeneralConfig config = new GeneralConfig();
+        Spec spec = new Spec();
+        config.setSpec(spec);
+
+        when(client.fetch(eq(GeneralConfig.class), eq(SINGLETON))).thenReturn(Mono.empty());
+        when(settingFetcher.getSettingValues()).thenReturn(Mono.just(Map.of(
+            "featureConfig", tools.jackson.databind.node.JsonNodeFactory.instance.objectNode()
+                .set("linkConfig", tools.jackson.databind.node.JsonNodeFactory.instance.objectNode()
+                    .put("submissionEnabled", false))
+        )));
+        when(client.create(any(GeneralConfig.class)))
+            .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        var saved = service.save(config).block();
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getSpec().getLinkInfo().getSubmissionEnabled()).isFalse();
+    }
+
     // ===== 恋爱模块入口密码（2026-09-08，BCrypt 语义与恋爱相册一致）=====
 
     private static final String EXISTING_HASH =

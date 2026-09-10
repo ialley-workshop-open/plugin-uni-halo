@@ -31,6 +31,7 @@ import cn.ialley.unihalo.scheme.GeneralConfig.PostDetail;
 import cn.ialley.unihalo.scheme.GeneralConfig.Profile;
 import cn.ialley.unihalo.scheme.GeneralConfig.QuickNavigationItem;
 import cn.ialley.unihalo.scheme.GeneralConfig.Social;
+import cn.ialley.unihalo.scheme.GeneralConfig.SocialItem;
 import cn.ialley.unihalo.scheme.GeneralConfig.Spec;
 import cn.ialley.unihalo.services.GeneralConfigService;
 import cn.ialley.unihalo.utils.MaintenanceResolver;
@@ -190,9 +191,26 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                     JsonNode author = values.get("authorConfig");
                     JsonNode basic = values.get("basicConfig");
                     ObjectNode profile = JsonNodeFactory.instance.objectNode();
-                    pick(author, profile, "blogger", "social");
-                    // 2026-09-10 起 copyrightConfig/showAboutSystem/disclaimers/postDetailConfig
-                    // 不再属于 profile：版权迁入页面设置-关于页、免责/文章详情迁入页面设置，
+                    pick(author, profile, "blogger");
+                    // 社交信息（2026-09-10 起动态列表）：旧 authorConfig.social 固定字段
+                    // （enabled/qq/wechat/...）迁移为 items 列表（key=字段名、content=值）
+                    JsonNode oldSocial = author != null ? author.get("social") : null;
+                    if (oldSocial != null && oldSocial.isObject()) {
+                        JsonNode items = migrateLegacySocialItems(oldSocial);
+                        if (items != null && items.size() > 0) {
+                            ObjectNode socialOut = JsonNodeFactory.instance.objectNode();
+                            socialOut.set("items", items);
+                            profile.set("social", socialOut);
+                        }
+                    }
+                    // 页脚版权（旧 basicConfig.copyrightConfig；2026-09-10 由页面设置-关于页
+                    // 迁回应用资料 profile.copyrightConfig）
+                    JsonNode basicCopyright = basic != null ? basic.get("copyrightConfig") : null;
+                    if (basicCopyright != null && !basicCopyright.isNull()) {
+                        profile.set("copyrightConfig", basicCopyright);
+                    }
+                    // 2026-09-10 起 showAboutSystem/disclaimers/postDetailConfig
+                    // 不再属于 profile：免责/文章详情迁入页面设置，
                     // showAboutSystem 下线（开关入口统一管理），此处仅保留博主/社交历史值
                     // 应用信息（名称/图标）：优先取「基本配置」baseConfig.appInfo，
                     // 回退旧 appConfig.appInfo（历史组已从 setting.yaml 移除）
@@ -215,15 +233,12 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                     JsonNode page = values.get("pageConfig");
                     ObjectNode pages = JsonNodeFactory.instance.objectNode();
                     pick(page, pages, "homeConfig", "galleryConfig");
-                    // 关于页：旧 pageConfig.aboutConfig（标题/背景/波浪）+ 旧
-                    // basicConfig.copyrightConfig（页脚版权 2026-09-10 迁入关于页）
+                    // 关于页：旧 pageConfig.aboutConfig（标题/背景/波浪）；
+                    // 页脚版权 2026-09-10 迁回应用资料 profile.copyrightConfig（见上），
+                    // 此处不再合并旧 basicConfig.copyrightConfig
                     ObjectNode aboutOut = JsonNodeFactory.instance.objectNode();
                     JsonNode aboutOld = page != null ? page.get("aboutConfig") : null;
                     pick(aboutOld, aboutOut, "pageTitle", "bgImageUrl", "waveImageUrl");
-                    JsonNode copyright = basic != null ? basic.get("copyrightConfig") : null;
-                    if (copyright != null && !copyright.isNull()) {
-                        aboutOut.set("copyrightConfig", copyright);
-                    }
                     if (aboutOut.size() > 0) {
                         pages.set("aboutConfig", aboutOut);
                     }
@@ -274,6 +289,24 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                         }
                         if (loveOut.size() > 0) {
                             overlay.set("love", loveOut);
+                        }
+                    }
+                    // 友链信息基本配置（2026-09-11 迁入）：旧 featureConfig.linkConfig.submissionEnabled
+                    // （是否开放公开提交申请）导入 spec.linkInfo.submissionEnabled，避免老用户
+                    // 升级后该开关丢失回默认（曾关闭提交的老配置应保持关闭）。
+                    JsonNode linkConfig = values.get("linkConfig");
+                    if (linkConfig == null || !linkConfig.isObject()) {
+                        JsonNode feature = values.get("featureConfig");
+                        if (feature != null && feature.isObject()) {
+                            linkConfig = feature.get("linkConfig");
+                        }
+                    }
+                    if (linkConfig != null && linkConfig.isObject()) {
+                        JsonNode submission = linkConfig.get("submissionEnabled");
+                        if (submission != null && submission.isBoolean()) {
+                            ObjectNode linkInfoOut = JsonNodeFactory.instance.objectNode();
+                            linkInfoOut.set("submissionEnabled", submission);
+                            overlay.set("linkInfo", linkInfoOut);
                         }
                     }
                     return overlay;
@@ -339,12 +372,15 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
     }
 
     /**
-     * 默认友链信息：两个子配置（miniInfo/siteInfo）全部留空（2026-09-08 拆分子结构；
-     * 2026-09-10 起去掉 authorInfo 作者信息，由应用设置-博主资料承担；
-     * 站长配置后经 getConfigs 直接下发 {@code pluginConfig.linkInfo}，不再使用 linksSubmitPlugin）。
+     * 默认友链信息：基本配置（submissionEnabled 默认 true，原 setting linkConfig
+     * submissionEnabled 2026-09-11 迁入）+ 两个子配置（miniInfo/siteInfo）全部留空
+     * （2026-09-08 拆分子结构；2026-09-10 起去掉 authorInfo 作者信息，由应用设置-博主资料
+     * 承担；站长配置后经 getConfigs 直接下发 {@code pluginConfig.linkInfo}，不再使用
+     * linksSubmitPlugin）。
      */
     private static LinkInfo buildDefaultLinkInfo() {
         LinkInfo linkInfo = new LinkInfo();
+        linkInfo.setSubmissionEnabled(true);
         linkInfo.setMiniInfo(new GeneralConfig.MiniInfo());
         linkInfo.setSiteInfo(new GeneralConfig.SiteInfo());
         return linkInfo;
@@ -370,8 +406,8 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
         GeneralConfig.AppInfo appInfo = new GeneralConfig.AppInfo();
         appInfo.setName("uni-halo");
-        // 应用图标默认引用插件内置静态资源（ReverseProxy：/plugins/plugin-uni-halo/assets/res/**）
-        appInfo.setLogo("/plugins/plugin-uni-halo/assets/res/logo.png");
+        // 应用图标默认引用插件内置静态资源（ReverseProxy：/plugins/plugin-uni-halo/assets/static/**）
+        appInfo.setLogo("/plugins/plugin-uni-halo/assets/static/logo.png");
         profile.setAppInfo(appInfo);
 
         Blogger blogger = new Blogger();
@@ -379,14 +415,79 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         blogger.setAvatar("");
         blogger.setEmail("");
         blogger.setDescription("");
-        // 官网地址（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担）
+        // 主页（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担，原「官网地址」改名）
         blogger.setWebsite("");
         profile.setBlogger(blogger);
 
         Social social = new Social();
-        social.setEnabled(true);
+        social.setItems(defaultSocialItems());
         profile.setSocial(social);
+
+        // 页脚版权（显示于【关于】页面页脚；2026-09-10 由页面设置-关于页迁回应用资料）
+        Copyright copyright = new Copyright();
+        copyright.setEnabled(true);
+        copyright.setContent("「 2022 uni-halo 丨 开源项目@小莫唐尼 」");
+        profile.setCopyrightConfig(copyright);
         return profile;
+    }
+
+    /**
+     * 默认社交项（2026-09-10 起社交信息改为动态列表：qq/wechat/email/github 四项，
+     * 颜色/背景色 16 进制、priority 排序、visible 展示；app 端联系博主页按序渲染）。
+     */
+    private static List<SocialItem> defaultSocialItems() {
+        return List.of(
+                socialItem("qq", "企鹅号", "", "#12b7f5", "#12b7f51A", 1),
+                socialItem("wechat", "微信号", "", "#07c160", "#07c1601A", 2),
+                socialItem("email", "邮箱地址", "", "#f57c00", "#f57c001A", 3),
+                socialItem("github", "Github", "", "#24292f", "#24292f1A", 4));
+    }
+
+    private static SocialItem socialItem(String key, String name, String content,
+            String color, String bgColor, int priority) {
+        SocialItem item = new SocialItem();
+        item.setKey(key);
+        item.setName(name);
+        item.setContent(content);
+        item.setColor(color);
+        item.setBgColor(bgColor);
+        item.setPriority(priority);
+        item.setVisible(true);
+        return item;
+    }
+
+    /**
+     * 旧社交固定字段（authorConfig.social：enabled/qq/wechat/weibo/email/blog/bilibili/
+     * juejin/csdn/gitee/github）迁移为 items 列表：仅取非空值的字段，key=字段名、
+     * name=平台中文名、content=原值，颜色沿用默认社交项同款色板；enabled 忽略。
+     */
+    private static JsonNode migrateLegacySocialItems(JsonNode oldSocial) {
+        Map<String, String> names = Map.of(
+                "qq", "企鹅号", "wechat", "微信号", "weibo", "微博地址", "email", "邮箱地址",
+                "blog", "博客地址", "bilibili", "B站", "juejin", "掘金地址", "csdn", "CSDN",
+                "gitee", "Gitee", "github", "Github");
+        ObjectNode items = JsonNodeFactory.instance.objectNode();
+        int priority = 1;
+        for (Map.Entry<String, String> entry : names.entrySet()) {
+            JsonNode value = oldSocial.get(entry.getKey());
+            if (value == null || value.isNull() || value.asText().isBlank()) {
+                continue;
+            }
+            SocialItem item = socialItem(entry.getKey(), entry.getValue(),
+                    value.asText(), "#8a8a8a", "#8a8a8a1A", priority++);
+            items.set(entry.getKey(),
+                    JsonNodeFactory.instance.pojoNode(item));
+        }
+        if (items.size() == 0) {
+            return null;
+        }
+        // 转数组
+        tools.jackson.databind.node.ArrayNode array =
+                JsonNodeFactory.instance.arrayNode();
+        for (JsonNode node : items) {
+            array.add(node);
+        }
+        return array;
     }
 
     private static Pages buildDefaultPages() {
@@ -418,13 +519,9 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
         About about = new About();
         about.setPageTitle("关于博主");
-        about.setBgImageUrl("/plugins/plugin-uni-halo/assets/res/uni_halo_profile_bg.jpg");
-        about.setWaveImageUrl("/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif");
-        // 页脚版权（2026-09-10 由应用资料迁入，显示于【关于】页面页脚）
-        Copyright copyright = new Copyright();
-        copyright.setEnabled(true);
-        copyright.setContent("「 2022 uni-halo 丨 开源项目@小莫唐尼 」");
-        about.setCopyrightConfig(copyright);
+        about.setBgImageUrl("/plugins/plugin-uni-halo/assets/static/uni_halo_profile_bg.jpg");
+        about.setWaveImageUrl("/plugins/plugin-uni-halo/assets/static/uni_halo_about_wave.gif");
+        // 页脚版权 2026-09-10 迁回应用资料 profile.copyrightConfig（见 buildDefaultProfile）
         pages.setAboutConfig(about);
 
         // 免责声明页（2026-09-10 由应用资料迁入：不再需要启用开关，仅内容，默认留空）
@@ -505,11 +602,11 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
     /**
      * 默认 assets：加载占位图（2026-09-08 起默认图片/空图片配置已下线，客户端内置
      * 回退兜底）；唯一内置默认 = 加载动图（插件静态资源
-     * /plugins/plugin-uni-halo/assets/res/…），error 图留空走客户端回退。
+     * /plugins/plugin-uni-halo/assets/static/…），error 图留空走客户端回退。
      */
     private static Assets buildDefaultAssets() {
         Assets assets = new Assets();
-        assets.setLoadingGifUrl("/plugins/plugin-uni-halo/assets/res/uni_halo_img_lazyload.gif");
+        assets.setLoadingGifUrl("/plugins/plugin-uni-halo/assets/static/uni_halo_img_lazyload.gif");
         assets.setLoadingErrUrl("");
         return assets;
     }

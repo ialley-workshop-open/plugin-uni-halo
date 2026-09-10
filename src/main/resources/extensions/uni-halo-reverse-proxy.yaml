@@ -3,6 +3,6 @@ kind: ReverseProxy
 metadata:
   name: plugin-uni-halo-reverse-proxy
 rules:
-  - path: /res/**
+  - path: /static/**
     file:
       directory: static

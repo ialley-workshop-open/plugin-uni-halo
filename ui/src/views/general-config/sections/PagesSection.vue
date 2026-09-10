@@ -388,26 +388,19 @@ function restoreMyPageDefaults(group: "common" | "other") {
   <!-- 页面与排版 → 关于页 -->
   <template v-if="subTab === 'aboutPage'">
     <FormKit v-model="formState.spec.pages.aboutConfig.pageTitle" name="about_page_title" label="页面标题" type="text" />
-    <FormKit v-model="formState.spec.pages.aboutConfig.bgImageUrl" name="about_bg_image" label="资料卡背景图" type="attachment" :accepts="['image/*']" />
-    <FormKit v-model="formState.spec.pages.aboutConfig.waveImageUrl" name="about_wave_image" label="资料卡波浪图" type="attachment" :accepts="['image/*']" />
-
-    <!-- 页脚版权（2026-09-10 由应用设置迁入，显示于【关于】页面页脚） -->
-    <div class=":uno: mt-6 rounded-lg bg-gray-50 p-4">
-      <div class=":uno: mb-2 text-sm font-medium text-gray-700">页脚版权</div>
-      <div class=":uno: flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
-        <div>
-          <div class=":uno: text-sm text-gray-700">显示版权信息</div>
-          <div class=":uno: mt-0.5 text-xs text-gray-400">小程序关于页页脚展示的版权文案</div>
-        </div>
-        <VSwitch v-model="formState.spec.pages.aboutConfig.copyrightConfig!.enabled" />
+    <!-- 资料卡图片与背景图同行（2026-09-11 布局调整） -->
+    <div class=":uno: flex flex-col gap-4 md:flex-row">
+      <div class=":uno: min-w-0 flex-1">
+        <FormKit v-model="formState.spec.pages.aboutConfig.bgImageUrl" name="about_bg_image" label="资料卡背景图" type="attachment" :accepts="['image/*']" />
       </div>
-      <div class=":uno: mt-3">
-        <FormKit v-model="formState.spec.pages.aboutConfig.copyrightConfig!.content" name="copyright_content" label="版权内容" type="textarea" />
+      <div class=":uno: min-w-0 flex-1">
+        <FormKit v-model="formState.spec.pages.aboutConfig.waveImageUrl" name="about_wave_image" label="资料卡波浪图" type="attachment" :accepts="['image/*']" />
       </div>
     </div>
 
     <!-- 功能入口（2026-09-10 新增：常用功能/其他功能两组，候选弹窗添加 + 拖拽排序 +
-         名称/背景色/显示编辑 + 删除 + 恢复默认；编辑布局对齐首页快捷导航项） -->
+         名称/背景色/显示编辑 + 删除 + 恢复默认；编辑布局对齐首页快捷导航项；
+         页脚版权 2026-09-11 迁回应用设置「页脚版权」tab） -->
     <div class=":uno: mt-6 rounded-lg bg-gray-50 p-4">
       <div class=":uno: mb-2 text-sm font-medium text-gray-700">功能入口</div>
       <p class=":uno: mb-3 text-xs text-gray-400">
@@ -590,4 +583,35 @@ function restoreMyPageDefaults(group: "common" | "other") {
     </p>
     <RichTextEditorField v-model="formState.spec.pages.disclaimers!.content" placeholder="输入免责声明内容，支持图文混排……留空则不展示免责声明页" />
   </template>
+
+  <!-- 首页分类栏选择（固定 3 个，复用审核配置候选弹窗） -->
+  <AuditCandidatesModal
+    v-if="categoryModalVisible"
+    type="category"
+    :selected="categoryModalSelected"
+    :max="3"
+    @update:visible="categoryModalVisible = false"
+    @confirm="handleCategoryConfirm"
+  />
+
+  <!-- 首页快捷导航「添加」候选弹窗（统一清单：展示全部注册表条目，已配置置灰禁选，确认后追加） -->
+  <FeatureEntryCandidatesModal
+    v-if="quickNavModalVisible"
+    :selected-keys="(formState.spec.pages.homeConfig.quickNavigation || []).map((i) => i.key || '')"
+    @update:visible="quickNavModalVisible = false"
+    @confirm="(selected) => handleQuickNavConfirm(selected)"
+  />
+
+  <!-- 关于页功能入口候选弹窗（common/other 两组共用；统一清单展示全部注册表条目，按组追加） -->
+  <FeatureEntryCandidatesModal
+    v-if="myPageModalGroup"
+    :selected-keys="
+      (myPageModalGroup === 'common'
+        ? myPageCommonFeatures
+        : myPageOtherFeatures
+      ).map((i) => i.key || '')
+    "
+    @update:visible="myPageModalGroup = null"
+    @confirm="(selected) => handleMyPageConfirm(selected, myPageModalGroup!)"
+  />
 </template>

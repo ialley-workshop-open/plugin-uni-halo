@@ -57,13 +57,16 @@ public class GeneralConfig extends AbstractExtension {
     }
 
     /** 应用资料：应用信息（名称/图标，原基本配置 appInfo）+ 博主/社交
-     * （原 authorConfig 内容部分；版权/免责/文章详情 2026-09-10 起迁移至页面设置） */
+     * （原 authorConfig 内容部分；版权/免责/文章详情 2026-09-10 起迁移至页面设置；
+     * 页脚版权 2026-09-10 由页面设置-关于页迁回此处，显示于【关于】页面页脚） */
     @Data
     public static class Profile {
         /** 应用信息（原 setting「基本配置」baseConfig.appInfo，2026-09-02 并入） */
         private AppInfo appInfo;
         private Blogger blogger;
         private Social social;
+        /** 页脚版权（显示于【关于】页面页脚；2026-09-10 由页面设置-关于页迁回） */
+        private Copyright copyrightConfig;
     }
 
     /** 应用信息（应用名称/图标；原 setting「基本配置」应用信息，2026-09-02 并入） */
@@ -80,24 +83,36 @@ public class GeneralConfig extends AbstractExtension {
         private String avatar;
         private String email;
         private String description;
-        /** 官网地址（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担） */
+        /** 主页（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担，原「官网地址」改名） */
         private String website;
+        /** 介绍（2026-09-10 新增；富文本 HTML，app 端联系博主页 mp-html 渲染） */
+        private String intro;
     }
 
-    /** 社交信息（原 authorConfig.social） */
+    /** 社交信息（原 authorConfig.social；2026-09-10 起改为动态列表，去 enabled 开关） */
     @Data
     public static class Social {
-        private Boolean enabled;
-        private String qq;
-        private String wechat;
-        private String weibo;
-        private String email;
-        private String blog;
-        private String bilibili;
-        private String juejin;
-        private String csdn;
-        private String gitee;
-        private String github;
+        /** 社交项列表（app 端联系博主页按序渲染；数组顺序 = 展示顺序） */
+        private List<SocialItem> items;
+    }
+
+    /** 社交项（app 端联系博主页展示/复制；字段：key 平台标识 + 名称/内容/颜色/背景色/排序/显隐） */
+    @Data
+    public static class SocialItem {
+        /** 平台标识（如 qq/wechat/github/email，app 端映射品牌字母兜底） */
+        private String key;
+        /** 名称（如「企鹅号」「微信号」） */
+        private String name;
+        /** 内容（账号/地址/链接，点击复制） */
+        private String content;
+        /** 图标颜色（16 进制，支持透明） */
+        private String color;
+        /** 背景色（16 进制，支持透明） */
+        private String bgColor;
+        /** 排序（越大越靠前，与 Banner.priority 同语义） */
+        private Integer priority;
+        /** 是否展示 */
+        private Boolean visible;
     }
 
     /** 页脚版权（原 basicConfig.copyrightConfig，显示于【关于】页面） */
@@ -231,7 +246,7 @@ public class GeneralConfig extends AbstractExtension {
         private String pageTitle;
     }
 
-    /** 关于页（原 pageConfig.aboutConfig；页脚版权 2026-09-10 起由应用资料迁入） */
+    /** 关于页（原 pageConfig.aboutConfig；页脚版权 2026-09-10 迁回应用资料 profile.copyrightConfig） */
     @Data
     public static class About {
         private String pageTitle;
@@ -239,8 +254,6 @@ public class GeneralConfig extends AbstractExtension {
         private String bgImageUrl;
         /** 资料卡波浪图 */
         private String waveImageUrl;
-        /** 页脚版权（原 basicConfig.copyrightConfig，显示于【关于】页面页脚） */
-        private Copyright copyrightConfig;
     }
 
     /** 资源与兜底：加载占位图片（原 imagesConfig；2026-09-08 起默认图片/空图片配置已下线，
@@ -343,7 +356,8 @@ public class GeneralConfig extends AbstractExtension {
 
     /**
      * 友链信息（2026-09-08 拆分子结构；2026-09-10 起去作者信息：
-     * 作者信息下线，由应用设置-博主资料承担；站点信息不再维护联系邮箱）：
+     * 作者信息下线，由应用设置-博主资料承担；站点信息不再维护联系邮箱；
+     * 2026-09-11 起新增基本配置，承接原 setting linkConfig 的公开提交申请开关）：
      * <ul>
      *   <li>{@link MiniInfo} 小程序信息：小程序端「申请信息」弹窗（uh-links-mini-info）展示；</li>
      *   <li>{@link SiteInfo} 站点信息：本站站点名片，字段对齐 Halo 官方友链提交 API
@@ -353,6 +367,9 @@ public class GeneralConfig extends AbstractExtension {
      */
     @Data
     public static class LinkInfo {
+        /** 是否开放公开提交申请（原 setting featureConfig.linkConfig.submissionEnabled，
+         * 2026-09-11 迁入；默认 true，关闭后公开提交接口返回「暂未开放提交申请」） */
+        private Boolean submissionEnabled;
         /** 小程序信息（原 linkInfo 主体：小程序名称/太阳码/跳转地址/描述/申请说明） */
         private MiniInfo miniInfo;
         /** 站点信息（本站站点名片，字段对齐 Halo 官方友链提交 API） */

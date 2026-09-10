@@ -1,0 +1,9 @@
+apiVersion: plugin.halo.run/v1alpha1
+kind: ExtensionDefinition
+metadata:
+  name: floating-window-head-extension
+spec:
+  extensionPointName: template-head-processor
+  className: cn.ialley.unihalo.theme.FloatingWindowHeadProcessor
+  displayName: 主题悬浮窗
+  description: 向主题页面注入小程序太阳码悬浮球（支持位置/偏移/拖拽/关闭/贴边隐藏/页面显示范围）。

@@ -105,10 +105,20 @@ public class PublicConfigAssembler {
         JsonNode pages = spec.get("pages");
         if (pages != null && pages.isObject()) {
             ObjectNode pageConfig = JsonNodeFactory.instance.objectNode();
-            // 2026-09-10 起 aboutConfig 内嵌页脚版权、postDetailConfig 文章详情页、
-            // disclaimers 免责声明页随行输出（app 端按新位置消费）
+            // 2026-09-10 起 postDetailConfig 文章详情页、disclaimers 免责声明页随行输出；
+            // 页脚版权 2026-09-10 迁回 profile.copyrightConfig，输出端映射回
+            // pageConfig.aboutConfig.copyrightConfig（app 端消费位置不变，客户端无感）
             pick(pages, pageConfig, "homeConfig", "galleryConfig", "aboutConfig",
                     "categoryConfig", "momentConfig", "postDetailConfig", "disclaimers");
+            // 页脚版权（来自 profile.copyrightConfig；app 端 about.vue 读
+            // pageConfig.aboutConfig.copyrightConfig 保持不变）
+            JsonNode copyright = profile != null ? profile.get("copyrightConfig") : null;
+            if (copyright != null && !copyright.isNull()) {
+                JsonNode about = pageConfig.get("aboutConfig");
+                if (about != null && about.isObject()) {
+                    ((ObjectNode) about).set("copyrightConfig", copyright);
+                }
+            }
             // 我的页面功能入口（2026-09-10 新增，additive 键）：两组均为空时不输出，
             // app 端展示内置默认（语义同 linkInfo「全部留空不输出」）
             JsonNode myPage = pages.get("myPageConfig");
@@ -154,23 +164,36 @@ public class PublicConfigAssembler {
                 root.set("maintenance", maintenanceOut);
             }
         }
-        // 友链信息（2026-09-08 起去映射 + 拆分子结构；2026-09-10 起去作者信息）：
-        // spec.linkInfo 直接下发到 pluginConfig.linkInfo，结构 = {miniInfo, siteInfo}：
+        // 友链信息（2026-09-08 起去映射 + 拆分子结构；2026-09-10 起去作者信息；
+        // 2026-09-11 起新增基本配置 submissionEnabled，承接原 setting linkConfig 公开提交开关）：
+        // spec.linkInfo 直接下发到 pluginConfig.linkInfo，结构 = {submissionEnabled, miniInfo, siteInfo}：
+        // - submissionEnabled（基本配置）供小程序端「提交申请」入口显隐判断（默认 true）；
         // - miniInfo（小程序信息）供小程序端「申请信息」弹窗（uh-links-mini-info）读取；
         // - siteInfo（站点信息）字段对齐 Halo 官方 plugin-links 友链提交 API
         //   （link-applications 请求体：displayName/url/logo/description/backlink/feedUrls，
         //   2026-09-10 起不再维护联系邮箱 email）。
         // 作者信息已下线：app 端作者区改用应用设置-博主资料（authorConfig.blogger）。
-        // linkInfo 全部留空时不输出（app 端展示「暂未配置」占位）。
+        // 输出判定：仅 submissionEnabled 显式配置 或 miniInfo/siteInfo 有非空内容时输出
+        // （全部留空不输出，app 端展示「暂未配置」占位）。
         // 旧 linksSubmitPlugin（blogName/blogLogo/blogUrl/blogDesc 等键）映射已移除，不再下发。
         JsonNode linkInfo = spec.get("linkInfo");
-        if (linkInfo != null && linkInfo.isObject() && hasNonBlankText(linkInfo)) {
-            JsonNode pluginConfigNode = root.get("pluginConfig");
-            ObjectNode pluginConfig = pluginConfigNode != null && pluginConfigNode.isObject()
-                    ? (ObjectNode) pluginConfigNode.deepCopy()
-                    : JsonNodeFactory.instance.objectNode();
-            pluginConfig.set("linkInfo", linkInfo);
-            root.set("pluginConfig", pluginConfig);
+        if (linkInfo != null && linkInfo.isObject()) {
+            ObjectNode linkInfoOut = (ObjectNode) linkInfo.deepCopy();
+            // submissionEnabled 不参与内容空判断（默认 true 不应使空配置变为「已配置」）
+            JsonNode submission = linkInfoOut.remove("submissionEnabled");
+            boolean hasContent = hasNonBlankText(linkInfoOut);
+            boolean hasSubmission = submission != null && submission.isBoolean();
+            if (hasContent || hasSubmission) {
+                if (hasSubmission) {
+                    linkInfoOut.set("submissionEnabled", submission);
+                }
+                JsonNode pluginConfigNode = root.get("pluginConfig");
+                ObjectNode pluginConfig = pluginConfigNode != null && pluginConfigNode.isObject()
+                        ? (ObjectNode) pluginConfigNode.deepCopy()
+                        : JsonNodeFactory.instance.objectNode();
+                pluginConfig.set("linkInfo", linkInfoOut);
+                root.set("pluginConfig", pluginConfig);
+            }
         }
         return root;
     }

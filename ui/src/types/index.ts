@@ -557,10 +557,15 @@ export interface GeneralConfigSpec {
 
 /**
  * 友链信息（2026-09-08 拆分子结构；2026-09-10 起去作者信息，作者区改用
- * 应用设置-博主资料）：miniInfo 小程序信息 / siteInfo 站点信息（字段对齐 Halo 官方
- * plugin-links 友链提交 API）；经 getConfigs 直接下发 pluginConfig.linkInfo（字段名无映射）
+ * 应用设置-博主资料；2026-09-11 起新增基本配置 submissionEnabled）：
+ * 基本配置（公开提交申请开关）/ miniInfo 小程序信息 / siteInfo 站点信息
+ * （字段对齐 Halo 官方 plugin-links 友链提交 API）；
+ * 经 getConfigs 直接下发 pluginConfig.linkInfo（字段名无映射）
  */
 export interface GeneralConfigLinkInfo {
+  /** 是否开放公开提交申请（原 setting featureConfig.linkConfig.submissionEnabled，
+   * 2026-09-11 迁入；默认 true，关闭后公开提交接口返回「暂未开放提交申请」） */
+  submissionEnabled?: boolean;
   /** 小程序信息（原 linkInfo 主体：小程序名称/太阳码/跳转地址/描述/申请说明） */
   miniInfo?: GeneralConfigMiniInfo;
   /** 站点信息（本站站点名片，对齐 Halo 官方友链提交 API 字段） */
@@ -608,22 +613,38 @@ export interface GeneralConfigProfile {
     avatar?: string;
     email?: string;
     description?: string;
-    /** 官网地址（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担） */
+    /** 主页（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担，原「官网地址」改名） */
     website?: string;
+    /** 介绍（2026-09-10 新增；富文本 HTML，app 端联系博主页 mp-html 渲染） */
+    intro?: string;
   };
   social: {
-    enabled?: boolean;
-    qq?: string;
-    wechat?: string;
-    weibo?: string;
-    email?: string;
-    blog?: string;
-    bilibili?: string;
-    juejin?: string;
-    csdn?: string;
-    gitee?: string;
-    github?: string;
+    /** 社交项列表（2026-09-10 起动态列表，app 端联系博主页按序渲染；去 enabled 开关） */
+    items?: GeneralConfigSocialItem[];
   };
+  /** 页脚版权（2026-09-10 由页面设置-关于页迁回应用资料，显示于关于页页脚） */
+  copyrightConfig?: {
+    enabled?: boolean;
+    content?: string;
+  };
+}
+
+/** 社交项（app 端联系博主页展示/复制；字段：key 平台标识 + 名称/内容/颜色/背景色/排序/显隐） */
+export interface GeneralConfigSocialItem {
+  /** 平台标识（如 qq/wechat/github/email） */
+  key?: string;
+  /** 名称（如「企鹅号」「微信号」） */
+  name?: string;
+  /** 内容（账号/地址/链接，点击复制） */
+  content?: string;
+  /** 图标颜色（16 进制，支持透明） */
+  color?: string;
+  /** 背景色（16 进制，支持透明） */
+  bgColor?: string;
+  /** 排序（越大越靠前） */
+  priority?: number;
+  /** 是否展示 */
+  visible?: boolean;
 }
 
 export interface GeneralConfigPages {
