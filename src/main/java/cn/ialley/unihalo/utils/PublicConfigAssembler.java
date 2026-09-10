@@ -70,6 +70,10 @@ public class PublicConfigAssembler {
                     root.set(group, withoutKeys(node, "startConfig"));
                 } else if ("auditConfig".equals(group)) {
                     root.set(group, withoutKeys(node, "auditModeData"));
+                } else if ("pluginConfig".equals(group)) {
+                    // 2026-09-10 起 votePlugin/linksPlugin 开关已下线（app 端改用插件启用
+                    // 检测判定），剔除旧 ConfigMap 残留避免继续透传；toolsPlugin 保留
+                    root.set(group, withoutKeys(node, "votePlugin", "linksPlugin"));
                 } else {
                     root.set(group, node);
                 }
@@ -87,12 +91,9 @@ public class PublicConfigAssembler {
             if (authorConfig.size() > 0) {
                 root.set("authorConfig", authorConfig);
             }
-            ObjectNode basicConfig = JsonNodeFactory.instance.objectNode();
-            pick(profile, basicConfig, "copyrightConfig", "showAboutSystem", "disclaimers",
-                    "postDetailConfig");
-            if (basicConfig.size() > 0) {
-                root.set("basicConfig", basicConfig);
-            }
+            // 2026-09-10 起版权/免责/文章详情迁移至页面设置（pageConfig.aboutConfig 版权 /
+            // pageConfig.disclaimers / pageConfig.postDetailConfig），basicConfig 组不再输出；
+            // 旧 ConfigMap 残留 basicConfig 由 isContentGroup 跳过透传
             JsonNode appInfo = profile.get("appInfo");
             if (appInfo != null && !appInfo.isNull()) {
                 // 应用信息（名称/图标）→ 旧 appConfig.appInfo 形态（覆盖历史遗留设置值，
@@ -104,8 +105,16 @@ public class PublicConfigAssembler {
         JsonNode pages = spec.get("pages");
         if (pages != null && pages.isObject()) {
             ObjectNode pageConfig = JsonNodeFactory.instance.objectNode();
+            // 2026-09-10 起 aboutConfig 内嵌页脚版权、postDetailConfig 文章详情页、
+            // disclaimers 免责声明页随行输出（app 端按新位置消费）
             pick(pages, pageConfig, "homeConfig", "galleryConfig", "aboutConfig",
-                    "categoryConfig", "momentConfig");
+                    "categoryConfig", "momentConfig", "postDetailConfig", "disclaimers");
+            // 我的页面功能入口（2026-09-10 新增，additive 键）：两组均为空时不输出，
+            // app 端展示内置默认（语义同 linkInfo「全部留空不输出」）
+            JsonNode myPage = pages.get("myPageConfig");
+            if (myPage != null && myPage.isObject() && hasNonBlankText(myPage)) {
+                pageConfig.set("myPageConfig", myPage);
+            }
             if (pageConfig.size() > 0) {
                 root.set("pageConfig", pageConfig);
             }
@@ -121,9 +130,10 @@ public class PublicConfigAssembler {
             root.set("preferences", preferences);
         }
         // 恋爱模块（2026-09-03 迁入）：spec.love → 旧顶层 loveConfig shape
-        // （loveEnabled/pageImages/模块开关，客户端无感）。2026-09-08 起模块开关
-        // 脱敏输出：仅 enabled + passwordEnabled（是否已设置密码，客户端据此决定
-        // 是否弹密码验证），密码相关字段一律不下发小程序端。
+        // （pageImages/模块开关，客户端无感）。2026-09-08 起模块开关脱敏输出：
+        // 仅 enabled + passwordEnabled（是否已设置密码，客户端据此决定是否弹密码验证），
+        // 密码相关字段一律不下发小程序端；2026-09-10 起总开关 loveEnabled 已下线
+        // （入口展示由模块入口开关与 navList 统一管理）。
         JsonNode love = spec.get("love");
         if (love != null && love.isObject()) {
             root.set("loveConfig", sanitizeLove(love));
@@ -144,12 +154,13 @@ public class PublicConfigAssembler {
                 root.set("maintenance", maintenanceOut);
             }
         }
-        // 链接配置（2026-09-08 起去映射 + 拆分子结构）：spec.linkInfo 直接下发到
-        // pluginConfig.linkInfo，结构 = {miniInfo, siteInfo, authorInfo}：
+        // 友链信息（2026-09-08 起去映射 + 拆分子结构；2026-09-10 起去作者信息）：
+        // spec.linkInfo 直接下发到 pluginConfig.linkInfo，结构 = {miniInfo, siteInfo}：
         // - miniInfo（小程序信息）供小程序端「申请信息」弹窗（uh-links-mini-info）读取；
         // - siteInfo（站点信息）字段对齐 Halo 官方 plugin-links 友链提交 API
-        //   （link-applications 请求体：displayName/url/logo/description/email/backlink/feedUrls）；
-        // - authorInfo（作者信息）小程序端作者区展示（authorName/avatar/website）。
+        //   （link-applications 请求体：displayName/url/logo/description/backlink/feedUrls，
+        //   2026-09-10 起不再维护联系邮箱 email）。
+        // 作者信息已下线：app 端作者区改用应用设置-博主资料（authorConfig.blogger）。
         // linkInfo 全部留空时不输出（app 端展示「暂未配置」占位）。
         // 旧 linksSubmitPlugin（blogName/blogLogo/blogUrl/blogDesc 等键）映射已移除，不再下发。
         JsonNode linkInfo = spec.get("linkInfo");
@@ -218,13 +229,15 @@ public class PublicConfigAssembler {
 
     /**
      * 恋爱配置公开输出脱敏（getConfigs loveConfig 组）：
-     * loveEnabled / pageImages.bgImageUrl 原样保留；模块开关仅输出
-     * enabled + passwordEnabled（按 passwordHash 非空派生），
-     * password / passwordHash / passwordRemoved 等密码字段一律不下发小程序端。
+     * pageImages.bgImageUrl 原样保留；2026-09-10 起总开关 loveEnabled 已下线
+     * （入口展示由模块入口开关与 navList 统一管理，app 端按模块开关判定）；
+     * 模块开关仅输出 enabled + passwordEnabled（按 passwordHash 非空派生），
+     * password / passwordHash / passwordRemoved 等密码字段一律不下发小程序端；
+     * 2026-09-10 起附 navList（入口列表：key/title/subTitle/priority/visible，
+     * 全部 visible=false 或列表为空时不输出，app 端回退内置默认）。
      */
     private static JsonNode sanitizeLove(JsonNode love) {
         ObjectNode out = JsonNodeFactory.instance.objectNode();
-        pick(love, out, "loveEnabled");
         JsonNode pageImages = love.get("pageImages");
         if (pageImages != null && pageImages.isObject()) {
             ObjectNode pageImagesOut = JsonNodeFactory.instance.objectNode();
@@ -246,7 +259,24 @@ public class PublicConfigAssembler {
                 }
             }
         }
+        // 恋爱页入口列表（additive：全部 visible=false 或列表为空时不输出）
+        JsonNode navList = love.get("navList");
+        if (navList != null && navList.isArray() && navList.size() > 0
+                && hasVisibleTrue(navList)) {
+            out.set("navList", navList);
+        }
         return out;
+    }
+
+    /** 数组中是否存在至少一个 visible=true 的条目（判断 navList 是否值得输出） */
+    private static boolean hasVisibleTrue(JsonNode array) {
+        for (JsonNode item : array) {
+            JsonNode visible = item.get("visible");
+            if (visible != null && visible.isBoolean() && visible.asBoolean()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isContentGroup(String group) {
@@ -255,16 +285,24 @@ public class PublicConfigAssembler {
                 || "loveConfig".equals(group);
     }
 
-    /** 对象中是否存在至少一个非空文本字段（用于判断链接配置是否值得覆盖输出） */
+    /**
+     * 节点（含嵌套对象/数组）中是否存在至少一个非空文本字段（用于判断链接配置
+     * 是否值得覆盖输出）。递归检查：ObjectNode 遍历子值、ArrayNode 遍历元素，
+     * 仅对标量节点取文本，避免对 ObjectNode 调 asText() 抛 JsonNodeException。
+     */
     private static boolean hasNonBlankText(JsonNode node) {
-        if (node == null || !node.isObject()) {
+        if (node == null || node.isNull()) {
             return false;
         }
-        var values = node.properties();
-        return values.stream().anyMatch(entry -> {
-            JsonNode value = entry.getValue();
-            return value != null && !value.isNull() && !value.asText().isBlank();
-        });
+        if (node.isValueNode()) {
+            return !node.asText().isBlank();
+        }
+        for (JsonNode child : node) {
+            if (hasNonBlankText(child)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static ObjectNode withoutKeys(JsonNode node, String... keys) {

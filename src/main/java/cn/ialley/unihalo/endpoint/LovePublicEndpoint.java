@@ -16,6 +16,7 @@ import cn.ialley.unihalo.captcha.CaptchaService;
 import cn.ialley.unihalo.captcha.CaptchaValidationException;
 import cn.ialley.unihalo.constants.Constants;
 import cn.ialley.unihalo.scheme.GeneralConfig;
+import cn.ialley.unihalo.scheme.GeneralConfig.ModuleSwitch;
 import cn.ialley.unihalo.scheme.LoveAlbum;
 import cn.ialley.unihalo.scheme.LoveConfig;
 import cn.ialley.unihalo.services.GeneralConfigService;
@@ -269,14 +270,28 @@ public class LovePublicEndpoint implements CustomEndpoint {
                 .flatMap(body -> ServerResponse.ok().bodyValue(body));
     }
 
+    /**
+     * 恋爱总开关（/love-config enabled）派生：2026-09-10 起总开关 loveEnabled 已下线
+     * （入口展示由模块入口开关与 navList 统一管理），此处按「任一模块入口开启」派生，
+     * 兼容老客户端 /love-config 读取语义。
+     */
     private Mono<Boolean> fetchLoveEnabled() {
         return generalConfigService.get()
                 .map(config -> {
                     GeneralConfig.Love love = config.getSpec() != null
                             ? config.getSpec().getLove() : null;
-                    return love != null && Boolean.TRUE.equals(love.getLoveEnabled());
+                    if (love == null) {
+                        return false;
+                    }
+                    return isModuleEnabled(love.getOurStory())
+                            || isModuleEnabled(love.getLovePhoto())
+                            || isModuleEnabled(love.getLoveDaily());
                 })
                 .defaultIfEmpty(false);
+    }
+
+    private static boolean isModuleEnabled(ModuleSwitch module) {
+        return module != null && Boolean.TRUE.equals(module.getEnabled());
     }
 
     private static boolean isLocked(LoveAlbum album) {

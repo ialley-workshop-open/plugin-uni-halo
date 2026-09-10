@@ -63,6 +63,24 @@ class GeneralConfigServiceImplTest {
         assertThat(config.getSpec().getMaintenance().getTitle()).isEqualTo("站点维护中");
         assertThat(config.getSpec().getMaintenance().getNotice()).isEmpty();
         assertThat(config.getSpec().getMaintenance().getDescription()).isEmpty();
+        // 我的页面功能入口（2026-09-10 新增）：默认填充注册表条目——
+        // 常用功能=home 组 5 项（与快捷导航默认一致）、其他功能=other 组 2 项
+        assertThat(config.getSpec().getPages().getMyPageConfig()).isNotNull();
+        assertThat(config.getSpec().getPages().getMyPageConfig().getCommonFeatures())
+                .extracting("key")
+                .containsExactly("archives", "vote", "disclaimers", "love", "contact-blogger");
+        assertThat(config.getSpec().getPages().getMyPageConfig().getOtherFeatures())
+                .extracting("key")
+                .containsExactly("about-system", "articles");
+        // 快捷导航默认：文章归档带副标题（对标 app 端 rightText）
+        assertThat(config.getSpec().getPages().getHomeConfig().getQuickNavigation())
+                .extracting("key", "subTitle")
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple("archives", "全部文章"),
+                        org.assertj.core.groups.Tuple.tuple("vote", null),
+                        org.assertj.core.groups.Tuple.tuple("disclaimers", null),
+                        org.assertj.core.groups.Tuple.tuple("love", null),
+                        org.assertj.core.groups.Tuple.tuple("contact-blogger", null));
     }
 
     @Test

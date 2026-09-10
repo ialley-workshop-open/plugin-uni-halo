@@ -20,9 +20,11 @@ import cn.ialley.unihalo.scheme.GeneralConfig.Gallery;
 import cn.ialley.unihalo.scheme.GeneralConfig.Home;
 import cn.ialley.unihalo.scheme.GeneralConfig.LinkInfo;
 import cn.ialley.unihalo.scheme.GeneralConfig.Love;
+import cn.ialley.unihalo.scheme.GeneralConfig.LoveNavItem;
 import cn.ialley.unihalo.scheme.GeneralConfig.Maintenance;
 import cn.ialley.unihalo.scheme.GeneralConfig.MomentPage;
 import cn.ialley.unihalo.scheme.GeneralConfig.ModuleSwitch;
+import cn.ialley.unihalo.scheme.GeneralConfig.MyPage;
 import cn.ialley.unihalo.scheme.GeneralConfig.PageImages;
 import cn.ialley.unihalo.scheme.GeneralConfig.Pages;
 import cn.ialley.unihalo.scheme.GeneralConfig.PostDetail;
@@ -189,8 +191,9 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                     JsonNode basic = values.get("basicConfig");
                     ObjectNode profile = JsonNodeFactory.instance.objectNode();
                     pick(author, profile, "blogger", "social");
-                    pick(basic, profile, "copyrightConfig", "showAboutSystem", "disclaimers",
-                            "postDetailConfig");
+                    // 2026-09-10 起 copyrightConfig/showAboutSystem/disclaimers/postDetailConfig
+                    // 不再属于 profile：版权迁入页面设置-关于页、免责/文章详情迁入页面设置，
+                    // showAboutSystem 下线（开关入口统一管理），此处仅保留博主/社交历史值
                     // 应用信息（名称/图标）：优先取「基本配置」baseConfig.appInfo，
                     // 回退旧 appConfig.appInfo（历史组已从 setting.yaml 移除）
                     JsonNode appInfo = null;
@@ -211,7 +214,21 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                     }
                     JsonNode page = values.get("pageConfig");
                     ObjectNode pages = JsonNodeFactory.instance.objectNode();
-                    pick(page, pages, "homeConfig", "galleryConfig", "aboutConfig");
+                    pick(page, pages, "homeConfig", "galleryConfig");
+                    // 关于页：旧 pageConfig.aboutConfig（标题/背景/波浪）+ 旧
+                    // basicConfig.copyrightConfig（页脚版权 2026-09-10 迁入关于页）
+                    ObjectNode aboutOut = JsonNodeFactory.instance.objectNode();
+                    JsonNode aboutOld = page != null ? page.get("aboutConfig") : null;
+                    pick(aboutOld, aboutOut, "pageTitle", "bgImageUrl", "waveImageUrl");
+                    JsonNode copyright = basic != null ? basic.get("copyrightConfig") : null;
+                    if (copyright != null && !copyright.isNull()) {
+                        aboutOut.set("copyrightConfig", copyright);
+                    }
+                    if (aboutOut.size() > 0) {
+                        pages.set("aboutConfig", aboutOut);
+                    }
+                    // 免责声明/文章详情（2026-09-10 由 basicConfig 迁入页面设置）
+                    pick(basic, pages, "disclaimers", "postDetailConfig");
                     if (pages.size() > 0) {
                         overlay.set("pages", pages);
                     }
@@ -235,7 +252,8 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
                     }
                     if (love != null && love.isObject() && love.size() > 0) {
                         ObjectNode loveOut = JsonNodeFactory.instance.objectNode();
-                        pick(love, loveOut, "loveEnabled");
+                        // 2026-09-10 起总开关 loveEnabled 已下线（入口展示由模块入口
+                        // 开关与 navList 统一管理），不再导入该历史键
                         JsonNode pageImages = love.get("pageImages");
                         if (pageImages != null && pageImages.isObject()) {
                             ObjectNode pageImagesOut = JsonNodeFactory.instance.objectNode();
@@ -321,14 +339,14 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
     }
 
     /**
-     * 默认链接配置：三个子配置（miniInfo/siteInfo/authorInfo）全部留空（2026-09-08 拆分子结构；
+     * 默认友链信息：两个子配置（miniInfo/siteInfo）全部留空（2026-09-08 拆分子结构；
+     * 2026-09-10 起去掉 authorInfo 作者信息，由应用设置-博主资料承担；
      * 站长配置后经 getConfigs 直接下发 {@code pluginConfig.linkInfo}，不再使用 linksSubmitPlugin）。
      */
     private static LinkInfo buildDefaultLinkInfo() {
         LinkInfo linkInfo = new LinkInfo();
         linkInfo.setMiniInfo(new GeneralConfig.MiniInfo());
         linkInfo.setSiteInfo(new GeneralConfig.SiteInfo());
-        linkInfo.setAuthorInfo(new GeneralConfig.AuthorInfo());
         return linkInfo;
     }
 
@@ -361,33 +379,13 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         blogger.setAvatar("");
         blogger.setEmail("");
         blogger.setDescription("");
+        // 官网地址（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担）
+        blogger.setWebsite("");
         profile.setBlogger(blogger);
 
         Social social = new Social();
         social.setEnabled(true);
         profile.setSocial(social);
-
-        Copyright copyright = new Copyright();
-        copyright.setEnabled(true);
-        copyright.setContent("「 2022 uni-halo 丨 开源项目@小莫唐尼 」");
-        profile.setCopyrightConfig(copyright);
-
-        Disclaimer disclaimer = new Disclaimer();
-        disclaimer.setEnabled(true);
-        disclaimer.setContent("");
-        profile.setDisclaimers(disclaimer);
-
-        profile.setShowAboutSystem(true);
-
-        PostDetail postDetail = new PostDetail();
-        postDetail.setShowComment(true);
-        postDetail.setCopyrightEnabled(true);
-        postDetail.setCopyrightAuthor("uni-halo");
-        postDetail.setCopyrightDesc("使用《非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)》"
-                + "协议授权，文章来源于网上收集或者原创，若未在文章内说明的均为原创文章");
-        postDetail.setCopyrightViolation("若侵害到您的权利，请您及时联系我，在收到通知后第一时间处理，"
-                + "邮箱：xxxx@xx.com");
-        profile.setPostDetailConfig(postDetail);
         return profile;
     }
 
@@ -422,7 +420,36 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         about.setPageTitle("关于博主");
         about.setBgImageUrl("/plugins/plugin-uni-halo/assets/res/uni_halo_profile_bg.jpg");
         about.setWaveImageUrl("/plugins/plugin-uni-halo/assets/res/uni_halo_about_wave.gif");
+        // 页脚版权（2026-09-10 由应用资料迁入，显示于【关于】页面页脚）
+        Copyright copyright = new Copyright();
+        copyright.setEnabled(true);
+        copyright.setContent("「 2022 uni-halo 丨 开源项目@小莫唐尼 」");
+        about.setCopyrightConfig(copyright);
         pages.setAboutConfig(about);
+
+        // 免责声明页（2026-09-10 由应用资料迁入：不再需要启用开关，仅内容，默认留空）
+        Disclaimer disclaimer = new Disclaimer();
+        disclaimer.setContent("");
+        pages.setDisclaimers(disclaimer);
+
+        // 文章详情页内容与版权文案（2026-09-10 由应用资料迁入，原 profile.postDetailConfig）
+        PostDetail postDetail = new PostDetail();
+        postDetail.setShowComment(true);
+        postDetail.setCopyrightEnabled(true);
+        postDetail.setCopyrightAuthor("uni-halo");
+        postDetail.setCopyrightDesc("使用《非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)》"
+                + "协议授权，文章来源于网上收集或者原创，若未在文章内说明的均为原创文章");
+        postDetail.setCopyrightViolation("若侵害到您的权利，请您及时联系我，在收到通知后第一时间处理，"
+                + "邮箱：xxxx@xx.com");
+        pages.setPostDetailConfig(postDetail);
+
+        // 我的页面功能入口（2026-09-10 新增）：默认填充注册表条目——
+        // 常用功能=home 组 5 项（与快捷导航默认一致）、其他功能=other 组 2 项，
+        // 与前端 ui/src/constant/feature-entries.ts 注册表对齐（设计见 .docs/feature-entry-unified-design.md）
+        MyPage myPage = new MyPage();
+        myPage.setCommonFeatures(defaultQuickNavigation());
+        myPage.setOtherFeatures(defaultMyPageOtherFeatures());
+        pages.setMyPageConfig(myPage);
         return pages;
     }
 
@@ -432,8 +459,12 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
      */
     private static List<QuickNavigationItem> defaultQuickNavigation() {
         List<QuickNavigationItem> items = new ArrayList<>();
-        items.add(navItem("archives", "文章归档", "#03A9F4", "rgba(3, 169, 244, 0.14)",
-                "uhemoji2-icon", "-mask", "/pages-blog/archives/archives"));
+        // 文章归档带副标题「全部文章」（对标 app 端 rightText，2026-09-10 新增）
+        QuickNavigationItem archives = navItem("archives", "文章归档", "#03A9F4",
+                "rgba(3, 169, 244, 0.14)", "uhemoji2-icon", "-mask",
+                "/pages-blog/archives/archives");
+        archives.setSubTitle("全部文章");
+        items.add(archives);
         items.add(navItem("vote", "投票中心", "#00BCD4", "rgba(0, 188, 212, 0.14)",
                 "uhemoji2-icon", "-confused", "/pages-blog/votes/votes"));
         items.add(navItem("disclaimers", "友情链接", "#009688", "rgba(0, 150, 136, 0.14)",
@@ -460,6 +491,18 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
     }
 
     /**
+     * 我的页面-其他功能默认 2 项（对齐前端 FEATURE_ENTRY_REGISTRY 的 other 组：
+     * about-system 关于项目（about 页内入口，path 留空）、articles 文章列表）。
+     */
+    private static List<QuickNavigationItem> defaultMyPageOtherFeatures() {
+        return List.of(
+                navItem("about-system", "关于项目", "#FF9800", "rgba(255, 152, 0, 0.14)",
+                        "uhemoji2-icon", "-information", ""),
+                navItem("articles", "文章列表", "#03A9F4", "rgba(3, 169, 244, 0.14)",
+                        "uhemoji2-icon", "-book", "/pagesA/articles"));
+    }
+
+    /**
      * 默认 assets：加载占位图（2026-09-08 起默认图片/空图片配置已下线，客户端内置
      * 回退兜底）；唯一内置默认 = 加载动图（插件静态资源
      * /plugins/plugin-uni-halo/assets/res/…），error 图留空走客户端回退。
@@ -473,13 +516,13 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
 
     /**
      * 默认 love（对齐旧 setting.yaml 的 value 缺省；2026-09-03 由
-     * featureConfig.loveConfig 迁入）：总开关默认关闭；恋爱页背景图默认留空
+     * featureConfig.loveConfig 迁入）：2026-09-10 起去掉总开关 loveEnabled
+     * （入口展示由模块入口开关与 navList 统一管理）；恋爱页背景图默认留空
      * （原 925i.cn 外链默认图依赖已清除，由站长配置或客户端内置回退）；
      * 2026-09-08 起 pageImages 仅保留背景图、模块入口仅开关+密码（均默认未设置）。
      */
     private static Love buildDefaultLove() {
         Love love = new Love();
-        love.setLoveEnabled(false);
 
         PageImages pageImages = new PageImages();
         pageImages.setBgImageUrl("");
@@ -500,7 +543,33 @@ public class GeneralConfigServiceImpl implements GeneralConfigService {
         loveDaily.setEnabled(false);
         loveDaily.setPasswordEnabled(false);
         love.setLoveDaily(loveDaily);
+
+        // 恋爱页入口列表（2026-09-10 新增：固定 3 项，key 对应模块；文案对齐 app 端
+        // love.vue 现有硬编码，priority 默认 1/2/3、visible 默认 true）
+        love.setNavList(defaultLoveNavList());
         return love;
+    }
+
+    /**
+     * 恋爱页入口默认 3 项（对齐 app 端 love.vue 的硬编码 navList：
+     * stories/album/list，desc 文案改名 subTitle）。
+     */
+    private static List<LoveNavItem> defaultLoveNavList() {
+        return List.of(
+                loveNavItem("stories", "恋爱故事", "我们一起度过的那些经历", 1),
+                loveNavItem("album", "恋爱相册", "定格了我们的那些小美好", 2),
+                loveNavItem("list", "恋爱清单", "你我之间的约定我们都在努力实现", 3));
+    }
+
+    private static LoveNavItem loveNavItem(String key, String title, String subTitle,
+            int priority) {
+        LoveNavItem item = new LoveNavItem();
+        item.setKey(key);
+        item.setTitle(title);
+        item.setSubTitle(subTitle);
+        item.setPriority(priority);
+        item.setVisible(true);
+        return item;
     }
 
     /**

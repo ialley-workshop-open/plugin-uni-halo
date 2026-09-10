@@ -48,26 +48,22 @@ public class GeneralConfig extends AbstractExtension {
         private Assets assets;
         private Preferences preferences;
         private Love love;
-        /** 链接配置（2026-09-08 新增）：站长小程序展示信息，经 getConfigs 覆盖
-         * pluginConfig.linksSubmitPlugin 对应键下发，供小程序端「申请信息」弹窗展示 */
+        /** 友链信息（2026-09-08 新增：站长小程序展示信息，经 getConfigs 覆盖
+         * pluginConfig.linksSubmitPlugin 对应键下发，供小程序端「申请信息」弹窗展示；
+         * 2026-09-10 起去掉作者信息与站点联系邮箱） */
         private LinkInfo linkInfo;
         /** 维护模式（2026-09-04 新增，见 {@code .docs/maintenance-config-design.md}） */
         private Maintenance maintenance;
     }
 
-    /** 应用资料：应用信息（名称/图标，原基本配置 appInfo）+ 博主/社交/版权/免责/文章详情文案
-     * （原 authorConfig + basicConfig 内容部分） */
+    /** 应用资料：应用信息（名称/图标，原基本配置 appInfo）+ 博主/社交
+     * （原 authorConfig 内容部分；版权/免责/文章详情 2026-09-10 起迁移至页面设置） */
     @Data
     public static class Profile {
         /** 应用信息（原 setting「基本配置」baseConfig.appInfo，2026-09-02 并入） */
         private AppInfo appInfo;
         private Blogger blogger;
         private Social social;
-        private Copyright copyrightConfig;
-        private Disclaimer disclaimers;
-        /** 显示关于项目页面入口（【关于】导航页） */
-        private Boolean showAboutSystem;
-        private PostDetail postDetailConfig;
     }
 
     /** 应用信息（应用名称/图标；原 setting「基本配置」应用信息，2026-09-02 并入） */
@@ -84,6 +80,8 @@ public class GeneralConfig extends AbstractExtension {
         private String avatar;
         private String email;
         private String description;
+        /** 官网地址（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担） */
+        private String website;
     }
 
     /** 社交信息（原 authorConfig.social） */
@@ -109,10 +107,10 @@ public class GeneralConfig extends AbstractExtension {
         private String content;
     }
 
-    /** 免责声明（原 basicConfig.disclaimers） */
+    /** 免责声明（原 basicConfig.disclaimers；2026-09-10 起迁移至页面设置，
+     * 不再需要启用开关，仅维护内容） */
     @Data
     public static class Disclaimer {
-        private Boolean enabled;
         private String content;
     }
 
@@ -128,7 +126,9 @@ public class GeneralConfig extends AbstractExtension {
         private String copyrightViolation;
     }
 
-    /** 页面与排版：首页/图库/分类页/瞬间页/关于页视觉（原 pageConfig；startConfig 已下线不在此） */
+    /** 页面与排版：首页/图库/分类页/瞬间页/关于页/文章详情页/免责声明页视觉
+     * （原 pageConfig；startConfig 已下线不在此；版权/免责/文章详情 2026-09-10
+     * 起由应用资料迁入） */
     @Data
     public static class Pages {
         private Home homeConfig;
@@ -138,6 +138,14 @@ public class GeneralConfig extends AbstractExtension {
         private CategoryPage categoryConfig;
         /** 瞬间页（2026-09-08 新增：瞬间页标题，客户端 pageConfig.momentConfig） */
         private MomentPage momentConfig;
+        /** 我的页面功能入口（2026-09-10 新增：常用功能/其他功能两组，配置并入「关于页」tab，
+         * 经 getConfigs 下发 pageConfig.myPageConfig；设计见 .docs/feature-entry-unified-design.md） */
+        private MyPage myPageConfig;
+        /** 免责声明页（2026-09-10 由应用资料迁入：不再需要启用开关，仅内容） */
+        private Disclaimer disclaimers;
+        /** 文章详情页内容与版权文案（2026-09-10 由应用资料迁入，
+         * 原 basicConfig.postDetailConfig） */
+        private PostDetail postDetailConfig;
     }
 
     /** 首页（原 pageConfig.homeConfig；2026-09-08 起轮播渲染参数下线由 app 端默认开启、
@@ -162,6 +170,8 @@ public class GeneralConfig extends AbstractExtension {
     public static class QuickNavigationItem {
         private String key;
         private String title;
+        /** 副标题（对标 app 端 rightText，如「全部文章」，2026-09-10 新增，可空） */
+        private String subTitle;
         /** 图标颜色（十六进制色值，如 #03A9F4） */
         private String color;
         /** 背景色（原 bgGlass，rgba 半透明值） */
@@ -174,6 +184,16 @@ public class GeneralConfig extends AbstractExtension {
         private String path;
         /** 是否显示（原 show） */
         private Boolean visible;
+    }
+
+    /** 我的页面功能入口（2026-09-10 新增：常用功能/其他功能两组，条目复用快捷导航项结构，
+     * app 端 about 页按组渲染；设计见 .docs/feature-entry-unified-design.md） */
+    @Data
+    public static class MyPage {
+        /** 常用功能（原「博客功能」改名） */
+        private List<QuickNavigationItem> commonFeatures;
+        /** 其他功能 */
+        private List<QuickNavigationItem> otherFeatures;
     }
 
     /** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序/文章数，
@@ -211,7 +231,7 @@ public class GeneralConfig extends AbstractExtension {
         private String pageTitle;
     }
 
-    /** 关于页（原 pageConfig.aboutConfig） */
+    /** 关于页（原 pageConfig.aboutConfig；页脚版权 2026-09-10 起由应用资料迁入） */
     @Data
     public static class About {
         private String pageTitle;
@@ -219,6 +239,8 @@ public class GeneralConfig extends AbstractExtension {
         private String bgImageUrl;
         /** 资料卡波浪图 */
         private String waveImageUrl;
+        /** 页脚版权（原 basicConfig.copyrightConfig，显示于【关于】页面页脚） */
+        private Copyright copyrightConfig;
     }
 
     /** 资源与兜底：加载占位图片（原 imagesConfig；2026-09-08 起默认图片/空图片配置已下线，
@@ -257,11 +279,10 @@ public class GeneralConfig extends AbstractExtension {
     }
 
     /** 恋爱模块（原 setting.featureConfig.loveConfig 剩余字段，2026-09-03 迁入；
-     * getConfigs 输出由装配器映射回旧顶层 loveConfig shape，客户端无感） */
+     * getConfigs 输出由装配器映射回旧顶层 loveConfig shape，客户端无感；
+     * 2026-09-10 起去掉总开关 loveEnabled，入口展示由模块入口开关与 navList 统一管理） */
     @Data
     public static class Love {
-        /** 总开关：启用后小程序端「我的页面」导航出现恋爱入口 */
-        private Boolean loveEnabled;
         /** 恋爱页图片配置 */
         private PageImages pageImages;
         /** 恋爱故事模块入口开关（数据在「恋爱管理-恋爱故事」维护） */
@@ -270,6 +291,26 @@ public class GeneralConfig extends AbstractExtension {
         private ModuleSwitch lovePhoto;
         /** 恋爱清单模块入口开关（数据在「恋爱管理-恋爱清单」维护） */
         private ModuleSwitch loveDaily;
+        /** 恋爱页入口列表（2026-09-10 新增：固定 3 项，key 对应模块；
+         * 仅 title/subTitle 可编辑 + priority 排序 + visible 开关，不可增删；
+         * 经 getConfigs 下发 loveConfig.navList；设计见 .docs/feature-entry-unified-design.md D8） */
+        private List<LoveNavItem> navList;
+    }
+
+    /** 恋爱页入口项（2026-09-10 新增：固定 3 项，key 对应 ourStory/lovePhoto/loveDaily 模块，
+     * app 端按 key 映射 uhlove-icon 图标与跳转路径） */
+    @Data
+    public static class LoveNavItem {
+        /** 固定：stories/album/list（对应 ourStory/lovePhoto/loveDaily 模块） */
+        private String key;
+        /** 可编辑名称 */
+        private String title;
+        /** 可编辑副标题（原 app 端 desc 字段改名 subTitle） */
+        private String subTitle;
+        /** 排序字段（越大越靠前，与 CategoryItem/Banner.priority 同语义） */
+        private Integer priority;
+        /** 是否展示（不可删除，仅禁用/启用开关；与模块开关 enabled 均 true 才展示） */
+        private Boolean visible;
     }
 
     /** 恋爱页图片（原 loveConfig.pageImages；2026-09-08 起仅保留背景图，
@@ -301,13 +342,12 @@ public class GeneralConfig extends AbstractExtension {
     }
 
     /**
-     * 链接配置（2026-09-08 拆分为三个子配置；不再使用 linksSubmitPlugin）：
+     * 友链信息（2026-09-08 拆分子结构；2026-09-10 起去作者信息：
+     * 作者信息下线，由应用设置-博主资料承担；站点信息不再维护联系邮箱）：
      * <ul>
      *   <li>{@link MiniInfo} 小程序信息：小程序端「申请信息」弹窗（uh-links-mini-info）展示；</li>
      *   <li>{@link SiteInfo} 站点信息：本站站点名片，字段对齐 Halo 官方友链提交 API
-     *       （plugin-links {@code link-applications} 请求体：displayName/url/logo/description/email/backlink/feedUrls）；</li>
-     *   <li>{@link AuthorInfo} 作者信息：小程序端作者区展示（authorName/avatar/website，
-     *       官方申请接口无作者字段，保持原字段）。</li>
+     *       （plugin-links {@code link-applications} 请求体：displayName/url/logo/description/backlink/feedUrls）。</li>
      * </ul>
      * getConfigs 输出经装配器直接下发 {@code pluginConfig.linkInfo}（字段名无映射）。
      */
@@ -317,8 +357,6 @@ public class GeneralConfig extends AbstractExtension {
         private MiniInfo miniInfo;
         /** 站点信息（本站站点名片，字段对齐 Halo 官方友链提交 API） */
         private SiteInfo siteInfo;
-        /** 作者信息（小程序端作者区：昵称/头像/网站） */
-        private AuthorInfo authorInfo;
     }
 
     /** 小程序信息（app 端「申请信息」弹窗展示项） */
@@ -336,7 +374,8 @@ public class GeneralConfig extends AbstractExtension {
         private String applyRemark;
     }
 
-    /** 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API：link-applications 请求体） */
+    /** 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API：link-applications 请求体；
+     * 2026-09-10 起不再维护联系邮箱 email） */
     @Data
     public static class SiteInfo {
         /** 网站名称（官方 displayName） */
@@ -347,23 +386,10 @@ public class GeneralConfig extends AbstractExtension {
         private String logo;
         /** 网站描述（官方 description） */
         private String description;
-        /** 联系邮箱（官方 email） */
-        private String email;
         /** 反链页面地址（官方 backlink） */
         private String backlink;
         /** RSS/Atom 订阅地址（官方 feedUrls；配置表单换行分隔，存储为数组） */
         private List<String> feedUrls;
-    }
-
-    /** 作者信息（小程序端作者区展示；官方申请接口无作者字段，保持原字段） */
-    @Data
-    public static class AuthorInfo {
-        /** 作者昵称 */
-        private String authorName;
-        /** 作者头像 */
-        private String avatar;
-        /** 作者网站 */
-        private String website;
     }
 
     /** 维护模式（2026-09-04 新增）。维护页展示内容与排期窗口；实际状态（未维护/预告/维护中）

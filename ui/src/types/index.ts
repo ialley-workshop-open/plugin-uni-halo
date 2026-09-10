@@ -544,27 +544,27 @@ export interface GeneralConfigSpec {
   assets: GeneralConfigAssets;
   preferences: GeneralConfigPreferences;
   /** 恋爱模块（2026-09-03 由 setting.featureConfig.loveConfig 迁入；经 getConfigs
-   * loveConfig 组下发，结构与旧 loveConfig 一致） */
+   * loveConfig 组下发，结构与旧 loveConfig 一致；2026-09-10 起总开关 loveEnabled 已下线，
+   * 入口展示由模块入口开关与 navList 统一管理） */
   love: GeneralConfigLove;
-  /** 链接配置（2026-09-08 新增）：站长小程序展示信息，经 getConfigs 覆盖
-   * pluginConfig.linksSubmitPlugin 对应键下发，供小程序端「申请信息」弹窗展示 */
+  /** 友链信息（2026-09-08 新增）：站长小程序展示信息，经 getConfigs 覆盖
+   * pluginConfig.linksSubmitPlugin 对应键下发，供小程序端「申请信息」弹窗展示；
+   * 2026-09-10 起去掉作者信息与站点联系邮箱 */
   linkInfo: GeneralConfigLinkInfo;
   /** 维护模式（2026-09-04 新增，见 .docs/maintenance-config-design.md） */
   maintenance: GeneralConfigMaintenance;
 }
 
 /**
- * 链接配置（2026-09-08 拆分为三个子配置，不再使用 linksSubmitPlugin）：
- * miniInfo 小程序信息 / siteInfo 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API）/
- * authorInfo 作者信息；经 getConfigs 直接下发 pluginConfig.linkInfo（字段名无映射）
+ * 友链信息（2026-09-08 拆分子结构；2026-09-10 起去作者信息，作者区改用
+ * 应用设置-博主资料）：miniInfo 小程序信息 / siteInfo 站点信息（字段对齐 Halo 官方
+ * plugin-links 友链提交 API）；经 getConfigs 直接下发 pluginConfig.linkInfo（字段名无映射）
  */
 export interface GeneralConfigLinkInfo {
   /** 小程序信息（原 linkInfo 主体：小程序名称/太阳码/跳转地址/描述/申请说明） */
   miniInfo?: GeneralConfigMiniInfo;
   /** 站点信息（本站站点名片，对齐 Halo 官方友链提交 API 字段） */
   siteInfo?: GeneralConfigSiteInfo;
-  /** 作者信息（小程序端作者区：昵称/头像/网站） */
-  authorInfo?: GeneralConfigAuthorInfo;
 }
 
 /** 小程序信息（app 端「申请信息」弹窗展示项） */
@@ -581,7 +581,8 @@ export interface GeneralConfigMiniInfo {
   applyRemark?: string;
 }
 
-/** 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API：link-applications 请求体） */
+/** 站点信息（字段对齐 Halo 官方 plugin-links 友链提交 API：link-applications 请求体；
+ * 2026-09-10 起不再维护联系邮箱 email） */
 export interface GeneralConfigSiteInfo {
   /** 网站名称（官方 displayName） */
   displayName?: string;
@@ -591,22 +592,10 @@ export interface GeneralConfigSiteInfo {
   logo?: string;
   /** 网站描述（官方 description） */
   description?: string;
-  /** 联系邮箱（官方 email） */
-  email?: string;
   /** 反链页面地址（官方 backlink） */
   backlink?: string;
   /** RSS/Atom 订阅地址（官方 feedUrls；表单换行分隔存数组） */
   feedUrls?: string[];
-}
-
-/** 作者信息（小程序端作者区展示；官方申请接口无作者字段，保持原字段） */
-export interface GeneralConfigAuthorInfo {
-  /** 作者昵称 */
-  authorName?: string;
-  /** 作者头像 */
-  avatar?: string;
-  /** 作者网站 */
-  website?: string;
 }
 
 export interface GeneralConfigProfile {
@@ -619,6 +608,8 @@ export interface GeneralConfigProfile {
     avatar?: string;
     email?: string;
     description?: string;
+    /** 官网地址（2026-09-10 新增；友链信息-作者信息下线后由博主资料承担） */
+    website?: string;
   };
   social: {
     enabled?: boolean;
@@ -632,22 +623,6 @@ export interface GeneralConfigProfile {
     csdn?: string;
     gitee?: string;
     github?: string;
-  };
-  copyrightConfig: {
-    enabled?: boolean;
-    content?: string;
-  };
-  disclaimers: {
-    enabled?: boolean;
-    content?: string;
-  };
-  showAboutSystem?: boolean;
-  postDetailConfig: {
-    showComment?: boolean;
-    copyrightEnabled?: boolean;
-    copyrightAuthor?: string;
-    copyrightDesc?: string;
-    copyrightViolation?: string;
   };
 }
 
@@ -670,6 +645,11 @@ export interface GeneralConfigPages {
     pageTitle?: string;
     bgImageUrl?: string;
     waveImageUrl?: string;
+    /** 页脚版权（2026-09-10 由应用设置迁入，显示于关于页页脚） */
+    copyrightConfig?: {
+      enabled?: boolean;
+      content?: string;
+    };
   };
   /** 分类页（2026-09-08 新增：分类页标题，客户端 pageConfig.categoryConfig） */
   categoryConfig?: {
@@ -679,6 +659,21 @@ export interface GeneralConfigPages {
   momentConfig?: {
     pageTitle?: string;
   };
+  /** 我的页面功能入口（2026-09-10 新增：常用功能/其他功能两组，配置并入「关于页」tab，
+   * 经 getConfigs 下发 pageConfig.myPageConfig；设计见 .docs/feature-entry-unified-design.md） */
+  myPageConfig?: GeneralConfigMyPage;
+  /** 免责声明页（2026-09-10 由应用设置迁入：不再需要启用开关，仅内容） */
+  disclaimers?: {
+    content?: string;
+  };
+  /** 文章详情页内容与版权文案（2026-09-10 由应用设置迁入，原 basicConfig.postDetailConfig） */
+  postDetailConfig?: {
+    showComment?: boolean;
+    copyrightEnabled?: boolean;
+    copyrightAuthor?: string;
+    copyrightDesc?: string;
+    copyrightViolation?: string;
+  };
 }
 
 /** 快捷导航项（2026-09-08 新增；字段与客户端 uh-home-quick-nav 对齐，
@@ -686,6 +681,8 @@ export interface GeneralConfigPages {
 export interface GeneralConfigQuickNavigationItem {
   key?: string;
   title?: string;
+  /** 副标题（对标 app 端 rightText，如「全部文章」，2026-09-10 新增，可空） */
+  subTitle?: string;
   /** 图标颜色（十六进制色值，如 #03A9F4） */
   color?: string;
   /** 背景色（原 bgGlass，rgba 半透明值） */
@@ -698,6 +695,15 @@ export interface GeneralConfigQuickNavigationItem {
   path?: string;
   /** 是否显示（原 show） */
   visible?: boolean;
+}
+
+/** 我的页面功能入口（2026-09-10 新增：常用功能/其他功能两组，条目复用快捷导航项结构，
+ * app 端 about 页按组渲染；设计见 .docs/feature-entry-unified-design.md） */
+export interface GeneralConfigMyPage {
+  /** 常用功能（原「博客功能」改名） */
+  commonFeatures?: GeneralConfigQuickNavigationItem[];
+  /** 其他功能 */
+  otherFeatures?: GeneralConfigQuickNavigationItem[];
 }
 
 /** 首页分类栏选中引用（固定 3 个；name = Category.metadata.name，快照含名称/封面/排序/文章数，
@@ -738,10 +744,9 @@ export interface GeneralConfigPreferences {
   avatarRadius?: boolean;
 }
 
-/** 恋爱模块（原 setting.featureConfig.loveConfig 剩余字段，2026-09-03 迁入通用配置） */
+/** 恋爱模块（原 setting.featureConfig.loveConfig 剩余字段，2026-09-03 迁入通用配置；
+ * 2026-09-10 起总开关 loveEnabled 已下线，入口展示由模块入口开关与 navList 统一管理） */
 export interface GeneralConfigLove {
-  /** 总开关：启用后小程序端「我的页面」导航出现恋爱入口 */
-  loveEnabled?: boolean;
   /** 恋爱页图片（2026-09-08 起仅保留背景图，波浪/爱心图配置已下线） */
   pageImages?: {
     /** 背景图片 */
