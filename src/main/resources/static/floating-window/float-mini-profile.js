@@ -19,7 +19,7 @@
     return;
   }
 
-  var STORAGE_KEY = "float-mini-profile-closed";
+  var STORAGE_KEY = "uh-fmp-closed";
   var EDGE_TRIGGER = 80; // 距视口边缘小于该值视为贴边
 
   // ===== 页面显示范围匹配（对齐 plugin-announcement 的 matchUrlPattern 语义） =====
@@ -65,12 +65,12 @@
   // ===== DOM 构建 =====
   function buildElement() {
     var card = document.createElement("div");
-    card.className = "float-mini-profile";
+    card.className = "uh-fmp";
 
     if (CONFIG.closeEnabled !== false) {
       var close = document.createElement("button");
       close.type = "button";
-      close.className = "float-mini-profile-close";
+      close.className = "uh-fmp-close";
       close.setAttribute("aria-label", "关闭悬浮窗");
       close.innerHTML = "&times;"; // 固定符号，非用户输入
       card.appendChild(close);
@@ -78,7 +78,7 @@
 
     if (CONFIG.imageUrl) {
       var img = document.createElement("img");
-      img.className = "float-mini-profile-img";
+      img.className = "uh-fmp-img";
       img.src = CONFIG.imageUrl;
       img.alt = CONFIG.name || "小程序太阳码";
       var size = Number(CONFIG.imageSize) || 100;
@@ -89,7 +89,7 @@
 
     if (CONFIG.name) {
       var nameEl = document.createElement("div");
-      nameEl.className = "float-mini-profile-name";
+      nameEl.className = "uh-fmp-name";
       nameEl.textContent = String(CONFIG.name);
       nameEl.style.fontSize = (Number(CONFIG.nameSize) || 14) + "px";
       nameEl.style.color = CONFIG.nameColor || "#333333";
@@ -98,7 +98,7 @@
 
     if (CONFIG.description) {
       var descEl = document.createElement("div");
-      descEl.className = "float-mini-profile-desc";
+      descEl.className = "uh-fmp-desc";
       descEl.textContent = String(CONFIG.description);
       descEl.style.fontSize = (Number(CONFIG.descSize) || 12) + "px";
       descEl.style.color = CONFIG.descColor || "#999999";
@@ -111,7 +111,7 @@
   // ===== 定位：9 向锚点 + 偏移（inline transform 携带动态偏移） =====
   function applyPosition(el) {
     var pos = CONFIG.position || "bottom-right";
-    el.classList.add("float-mini-profile-pos-" + pos);
+    el.classList.add("uh-fmp-pos-" + pos);
 
     var x = Number(CONFIG.offsetX) || 0;
     var y = Number(CONFIG.offsetY) || 0;
@@ -124,7 +124,7 @@
         ? "calc(-50% + " + y + "px)"
         : y + "px";
     el.style.transform = "translate(" + tx + ", " + ty + ")";
-    el.style.setProperty("--float-mini-profile-edge", (Number(CONFIG.edgeHideDistance) || 24) + "px");
+    el.style.setProperty("--uh-fmp-edge", (Number(CONFIG.edgeHideDistance) || 24) + "px");
   }
 
   // ===== 拖拽：Pointer Events（拖动转 left/top 自由定位，松手检测贴边） =====
@@ -134,7 +134,7 @@
     el.style.right = "auto";
     el.style.bottom = "auto";
     el.style.transform = "translate(0, 0)";
-    el.classList.remove("float-mini-profile-edge");
+    el.classList.remove("uh-fmp-edge");
   }
 
   function maybeEdgeHide(el) {
@@ -157,7 +157,7 @@
       }
     });
     if (side) {
-      el.classList.add("float-mini-profile-edge", "float-mini-profile-edge-" + side);
+      el.classList.add("uh-fmp-edge", "uh-fmp-edge-" + side);
     }
   }
 
@@ -165,7 +165,7 @@
     var dragState = null;
 
     el.addEventListener("pointerdown", function (e) {
-      if (e.target.closest(".float-mini-profile-close")) {
+      if (e.target.closest(".uh-fmp-close")) {
         return; // 关闭按钮不触发拖拽
       }
       var rect = el.getBoundingClientRect();
@@ -175,7 +175,7 @@
         left: rect.left,
         top: rect.top,
       };
-      el.classList.add("float-mini-profile-dragging");
+      el.classList.add("uh-fmp-dragging");
       el.style.touchAction = "none"; // 拖拽期间禁止触摸滚动
       el.setPointerCapture(e.pointerId);
       e.preventDefault();
@@ -198,7 +198,7 @@
         return;
       }
       dragState = null;
-      el.classList.remove("float-mini-profile-dragging");
+      el.classList.remove("uh-fmp-dragging");
       el.style.touchAction = "";
       maybeEdgeHide(el);
     }
@@ -209,7 +209,7 @@
 
   // ===== 关闭：淡出移除 + localStorage 记忆 =====
   function initClose(el) {
-    var close = el.querySelector(".float-mini-profile-close");
+    var close = el.querySelector(".uh-fmp-close");
     if (!close) {
       return;
     }
@@ -221,7 +221,7 @@
           // localStorage 不可用时仅本次会话关闭
         }
       }
-      el.classList.add("float-mini-profile-closing");
+      el.classList.add("uh-fmp-closing");
       setTimeout(function () {
         el.remove();
       }, 200);
@@ -241,7 +241,7 @@
       }
     }
     // 防重复注入
-    if (document.querySelector(".float-mini-profile")) {
+    if (document.querySelector(".uh-fmp")) {
       return;
     }
     var el = buildElement();
