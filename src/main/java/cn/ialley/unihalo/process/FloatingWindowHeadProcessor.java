@@ -38,8 +38,6 @@ public class FloatingWindowHeadProcessor implements TemplateHeadProcessor {
     private static final String DOMAIN = "themeConfig";
     private static final String MODULE = "floatingWindow";
 
-    private static final String CSS_URL_TEMPLATE =
-            "/plugins/plugin-uni-halo/assets/static/floating-window/float-mini-profile.css?version=%s";
     private static final String JS_URL_TEMPLATE =
             "/plugins/plugin-uni-halo/assets/static/floating-window/float-mini-profile.js?version=%s";
 
@@ -114,10 +112,8 @@ public class FloatingWindowHeadProcessor implements TemplateHeadProcessor {
         return """
             <!-- uni-halo v3.x floating window start -->
             <script>window.__UNI_HALO_FLOAT_MINI_PROFILE__ = %s;</script>
-            <link rel="stylesheet" href="%s" />
             <script defer src="%s"></script>
             <!-- uni-halo v3.x floating window end -->
-            """.formatted(configJson, CSS_URL_TEMPLATE.formatted(version),
-                JS_URL_TEMPLATE.formatted(version));
+            """.formatted(configJson, JS_URL_TEMPLATE.formatted(version));
     }
 }

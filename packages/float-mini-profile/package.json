@@ -1,0 +1,20 @@
+{
+  "name": "@unihalo/float-mini-profile",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "主题端悬浮卡片（小程序太阳码）——独立 vite 子工程，构建压缩产物自动拷贝至插件 static/floating-window/",
+  "scripts": {
+    "build": "vite build --config vite.config.lib.ts",
+    "dev": "vite",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.2",
+    "typescript": "^5.8.0",
+    "vite": "^8.2.0"
+  },
+  "dependencies": {
+    "lit": "^3.3.3"
+  }
+}
