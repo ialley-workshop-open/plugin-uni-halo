@@ -2,6 +2,7 @@ package cn.ialley.unihalo.services.impl;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
@@ -47,23 +48,71 @@ public class MiniProgramLinkSubmissionServiceImpl implements MiniProgramLinkSubm
             builder.fieldQuery(equal("spec.status", status));
         }
         ListOptions listOptions = builder.build();
-        return client.listAll(MiniProgramLinkSubmission.class, listOptions,
-                        Sort.by(Sort.Direction.DESC, sortField(sort),
-                                "metadata.creationTimestamp"))
+        return client.listAll(MiniProgramLinkSubmission.class, listOptions, Sort.unsorted())
                 .filter(submission -> matches(submission, keyword))
                 .collectList()
-                .map(list -> new ListResult<>(page, size, list.size(), slice(list, page, size)));
+                .map(list -> {
+                    list.sort(sortComparator(sort));
+                    return new ListResult<>(page, size, list.size(), slice(list, page, size));
+                });
     }
 
     /**
-     * sort 参数白名单映射（防止任意字段排序）：submittedAt（默认）/ reviewedAt / status。
+     * sort 参数解析为内存排序比较器（决策：审核待办优先）：
+     * <ul>
+     *   <li>空/默认：待审核优先（PENDING 在前），其余按申请时间倒序</li>
+     *   <li>submittedAt / reviewedAt / status：字段倒序（白名单，防止任意字段排序）</li>
+     *   <li>statusFirst:{STATUS}：目标状态优先（如 statusFirst:PENDING），其余按申请时间倒序</li>
+     * </ul>
      */
-    private static String sortField(String sort) {
-        return switch (sort == null ? "submittedAt" : sort) {
-            case "reviewedAt" -> "spec.reviewedAt";
-            case "status" -> "spec.status";
-            default -> "spec.submittedAt";
+    private static Comparator<MiniProgramLinkSubmission> sortComparator(String sort) {
+        String statusFirst = statusFirstOf(sort);
+        if (statusFirst != null) {
+            return Comparator
+                    .comparing((MiniProgramLinkSubmission s) ->
+                            statusFirst.equals(s.getSpec().getStatus()) ? 0 : 1)
+                    .thenComparing(submittedAtDesc());
+        }
+        return switch (sort == null ? "" : sort) {
+            case "reviewedAt" -> Comparator.comparing(
+                            (MiniProgramLinkSubmission s) -> s.getSpec().getReviewedAt(),
+                            Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(submittedAtDesc());
+            case "status" -> Comparator.comparing(
+                            (MiniProgramLinkSubmission s) -> s.getSpec().getStatus(),
+                            Comparator.nullsLast(Comparator.reverseOrder()))
+                    .thenComparing(submittedAtDesc());
+            case "submittedAt" -> submittedAtDesc();
+            default -> pendingFirstDesc(); // 空/未知值：默认=待审核优先
         };
+    }
+
+    /** 解析 statusFirst:{STATUS}，非法值返回 null（走默认排序） */
+    private static String statusFirstOf(String sort) {
+        if (sort != null && sort.startsWith("statusFirst:")) {
+            String statusValue = sort.substring("statusFirst:".length());
+            if (List.of(STATUS_PENDING, STATUS_APPROVED, STATUS_REJECTED).contains(statusValue)) {
+                return statusValue;
+            }
+        }
+        return null;
+    }
+
+    /** 待审核优先（PENDING 在前），其余按申请时间倒序 */
+    private static Comparator<MiniProgramLinkSubmission> pendingFirstDesc() {
+        return Comparator
+                .comparing((MiniProgramLinkSubmission s) ->
+                        STATUS_PENDING.equals(s.getSpec().getStatus()) ? 0 : 1)
+                .thenComparing(submittedAtDesc());
+    }
+
+    /** 申请时间倒序，二级创建时间倒序 */
+    private static Comparator<MiniProgramLinkSubmission> submittedAtDesc() {
+        return Comparator
+                .comparing((MiniProgramLinkSubmission s) -> s.getSpec().getSubmittedAt(),
+                        Comparator.nullsLast(Comparator.reverseOrder()))
+                .thenComparing(s -> s.getMetadata().getCreationTimestamp(),
+                        Comparator.nullsLast(Comparator.reverseOrder()));
     }
 
     @Override

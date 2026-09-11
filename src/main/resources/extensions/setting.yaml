@@ -324,13 +324,12 @@ spec:
               id: floatingWindowEdgeHideEnabled
               label: 贴边隐藏
               value: true
-              help: 拖拽到屏幕边缘时自动隐藏大部分，仅露出触发条，鼠标悬停滑出。
+              help: 拖拽到屏幕边缘时卡片完全隐藏，露出边缘抓手，鼠标悬停滑出、点击恢复。
             - $formkit: number
               name: edgeHideDistance
               id: floatingWindowEdgeHideDistance
               label: 贴边触发距离(px)
               value: 24
-              help: 贴边隐藏时露出的宽度，默认 24px。
               validation: required
             - $formkit: switch
               name: rememberClosed

@@ -30,7 +30,7 @@ export const styles = css`
     box-shadow: 0 16px 60px rgba(0, 0, 0, 0.06);
     user-select: none;
     -webkit-user-select: none;
-    cursor: grab;
+    cursor: default;
     max-width: 40vw;
     line-height: 1.4;
     transition: transform 0.3s ease;
@@ -171,7 +171,7 @@ export const styles = css`
   /* ===== 拖拽 ===== */
   .uh-fmp.uh-fmp-dragging {
     transition: none !important;
-    cursor: grabbing;
+    cursor: default;
   }
 
   /* ===== 贴边隐藏（完全隐藏 + 边缘触发把手，JS 控制 hover 类滑出） ===== */
@@ -185,18 +185,18 @@ export const styles = css`
   /* 边缘触发把手（贴边后露出的触发元素，hover 滑出、点击完全恢复） */
   .uh-fmp-edge-trigger {
     position: fixed;
-    width: 8px; /* 厚度 */
-    height: 35px; /* 长度（贴左/右竖把手） */
+    width: 8px;
+    height: 35px;
     border: none;
     border-radius: 4px;
     padding: 0;
     background: rgb(255, 255, 255, 0.85);
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
     cursor: pointer;
-    z-index: 2147482999;
+    z-index: 99999999;
   }
   .uh-fmp-edge-trigger:hover {
-    background: #0E1731; /* hover 深色主色 */
+    background: #0E1731;
   }
   .uh-fmp-edge-trigger-top,
   .uh-fmp-edge-trigger-bottom {
@@ -352,6 +352,7 @@ export const styles = css`
     color: #1a1a1a;
     outline: none;
     font-family: inherit;
+    background: #ffffff;
   }
   .uh-fmp-field input[type="text"]:focus,
   .uh-fmp-field select:focus,
@@ -578,103 +579,5 @@ export const styles = css`
     text-align: center;
     font-size: 13px;
     color: #999999;
-  }
-
-  /* ===== 深色模式 ===== */
-  @media (prefers-color-scheme: dark) {
-    .uh-fmp {
-      background: rgba(28, 28, 32, 0.85);
-      border-color: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
-    }
-    .uh-fmp-close {
-      background: rgba(0, 0, 0, 0.75);
-      border-color: rgba(0, 0, 0, 0.9);
-    }
-    .uh-fmp-close:hover {
-      color: #fff;
-    }
-    .uh-fmp-minimize {
-      background: rgba(0, 0, 0, 0.75);
-      border-color: rgba(0, 0, 0, 0.9);
-    }
-    .uh-fmp-minimize:hover {
-      color: #fff;
-    }
-    .uh-fmp-mini-dot {
-      border-color: rgba(28, 28, 32, 0.9);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-    }
-    .uh-fmp-modal {
-      background: rgba(28, 28, 32, 0.9);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-modal-header {
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-modal-title,
-    .uh-fmp-info-card-title {
-      color: #f5f5f5;
-    }
-    .uh-fmp-field,
-    .uh-fmp-copy-label {
-      color: #999999;
-    }
-    .uh-fmp-field input[type="text"],
-    .uh-fmp-field select,
-    .uh-fmp-field textarea {
-      background: #2a2a30;
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f5;
-    }
-    .uh-fmp-segmented {
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-seg-item {
-      background: transparent;
-      color: #999999;
-    }
-    .uh-fmp-seg-active {
-      background: #0E1731;
-      color: #ffffff;
-    }
-    .uh-fmp-shot-input {
-      background: #2a2a30;
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f5;
-    }
-    .uh-fmp-shot-remove {
-      background: rgba(255, 255, 255, 0.1);
-      color: #999999;
-    }
-    .uh-fmp-apply-footer {
-      border-top-color: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-info-card {
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .uh-fmp-copy-input {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f5;
-    }
-    .uh-fmp-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.12);
-      color: #f5f5f5;
-    }
-    .uh-fmp-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-    }
-    .uh-fmp-btn-primary {
-      background: #0E1731;
-      color: #ffffff;
-    }
-    .uh-fmp-btn-primary:hover {
-      background: #16244a;
-    }
-    .uh-fmp-hint {
-      color: rgba(255, 255, 255, 0.4);
-    }
   }
 `;

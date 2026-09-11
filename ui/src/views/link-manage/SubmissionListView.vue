@@ -24,16 +24,29 @@ import SubmissionDetailModal from "@/components/link-manage/SubmissionDetailModa
 import SubmissionFormModal from "@/components/link-manage/SubmissionFormModal.vue";
 import AuditConfirmModal from "@/components/link-manage/AuditConfirmModal.vue";
 import FilterDropdown from "@/components/common/FilterDropdown.vue";
+import FilterCleanButton from "@/components/common/FilterCleanButton.vue";
+import SortDropdowns from "@/components/common/SortDropdowns.vue";
 import ImagePreviewModal from "@/components/common/ImagePreviewModal.vue";
 import { miniProgramLinkSubmissionsApi } from "@/api";
 import { SUBMISSION_STATUS_LABELS, SUBMISSION_STATUS_OPTIONS } from "@/types";
 import type { MiniProgramLinkSubmission } from "@/types";
+import type { SortField } from "@/components/common/SortDropdowns.vue";
 
-/** 排序选项（后端 sort 参数，均倒序） */
-const SORT_OPTIONS = [
-  { label: "申请时间", value: "submittedAt" },
-  { label: "审核时间", value: "reviewedAt" },
-  { label: "状态", value: "status" },
+/** 排序维度（每个维度独立下拉，互斥单值；选项 value 对应后端 sort 参数）
+ * 审核状态维度为 4 选项：「默认」=待审核优先（后端默认排序） */
+const SORT_FIELDS: SortField[] = [
+  { key: "submittedAt", label: "申请时间" },
+  { key: "reviewedAt", label: "审核时间" },
+  {
+    key: "status",
+    label: "审核状态",
+    options: [
+      { label: "默认" },
+      { label: "待审核", value: "statusFirst:PENDING" },
+      { label: "已通过", value: "statusFirst:APPROVED" },
+      { label: "已拒绝", value: "statusFirst:REJECTED" },
+    ],
+  },
 ];
 
 const { confirmDelete } = useDeletionFlow(["uni-halo:mini-program-link-submissions"]);
@@ -85,6 +98,15 @@ watch(
     page.value = 1;
   }
 );
+
+/** 筛选/排序是否有激活条件（决定是否显示「清除」按钮） */
+const hasFilters = computed(() => !!status.value || !!sortBy.value);
+
+/** 清除操作：重置状态筛选与排序（keyword 搜索框独立保留） */
+const handleClearFilters = () => {
+  status.value = undefined;
+  sortBy.value = undefined;
+};
 
 watch(
   () => selectedNames.value,
@@ -219,6 +241,7 @@ const formatTime = (value?: string | null) => {
     <template #actions>
       <VSpace>
         <VButton
+          v-if="false"
           v-permission="['plugin:uni-halo:link:manage']"
           type="secondary"
           @click="formModal = true"
@@ -267,18 +290,13 @@ const formatTime = (value?: string | null) => {
               </VSpace>
             </div>
             <VSpace spacing="lg" class=":uno: flex-wrap">
+              <FilterCleanButton v-if="hasFilters" @click="handleClearFilters" />
               <FilterDropdown
                 v-model="status"
                 label="状态"
                 :items="SUBMISSION_STATUS_OPTIONS"
-                @update:model-value="() => refetch()"
               />
-              <FilterDropdown
-                v-model="sortBy"
-                label="排序"
-                :items="SORT_OPTIONS"
-                @update:model-value="() => refetch()"
-              />
+              <SortDropdowns v-model="sortBy" :fields="SORT_FIELDS" />
             </VSpace>
           </div>
         </div>
@@ -306,7 +324,7 @@ const formatTime = (value?: string | null) => {
               />
             </template>
             <template #start>
-              <VEntityField v-if="submission.spec.miniProgramCode" width="6rem">
+              <VEntityField v-if="submission.spec.miniProgramCode" width="42px">
                 <template #description>
                   <img
                     :src="submission.spec.miniProgramCode"
@@ -375,9 +393,14 @@ const formatTime = (value?: string | null) => {
               </VEntityField>
               <VEntityField>
                 <template #description>
-                  <span class=":uno: text-xs text-gray-500">
-                    {{ formatTime(submission.spec.submittedAt || submission.metadata.creationTimestamp) }}
-                  </span>
+                  <div class=":uno: flex flex-col gap-0.5 text-xs text-gray-500">
+                    <span>
+                      申请时间：{{ formatTime(submission.spec.submittedAt || submission.metadata.creationTimestamp) }}
+                    </span>
+                    <span v-if="submission.spec.reviewedAt">
+                      审核时间：{{ formatTime(submission.spec.reviewedAt) }}
+                    </span>
+                  </div>
                 </template>
               </VEntityField>
               <!-- 行内审核按钮：仅待审核显示（审核 / 通过 / 拒绝） -->

@@ -22,7 +22,7 @@
     box-shadow: 0 16px 60px rgba(0, 0, 0, 0.06);
     user-select: none;
     -webkit-user-select: none;
-    cursor: grab;
+    cursor: default;
     max-width: 40vw;
     line-height: 1.4;
     transition: transform 0.3s ease;
@@ -163,7 +163,7 @@
   /* ===== 拖拽 ===== */
   .uh-fmp.uh-fmp-dragging {
     transition: none !important;
-    cursor: grabbing;
+    cursor: default;
   }
 
   /* ===== 贴边隐藏（完全隐藏 + 边缘触发把手，JS 控制 hover 类滑出） ===== */
@@ -177,18 +177,18 @@
   /* 边缘触发把手（贴边后露出的触发元素，hover 滑出、点击完全恢复） */
   .uh-fmp-edge-trigger {
     position: fixed;
-    width: 8px; /* 厚度 */
-    height: 35px; /* 长度（贴左/右竖把手） */
+    width: 8px;
+    height: 35px;
     border: none;
     border-radius: 4px;
     padding: 0;
     background: rgb(255, 255, 255, 0.85);
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
     cursor: pointer;
-    z-index: 2147482999;
+    z-index: 99999999;
   }
   .uh-fmp-edge-trigger:hover {
-    background: #0E1731; /* hover 深色主色 */
+    background: #0E1731;
   }
   .uh-fmp-edge-trigger-top,
   .uh-fmp-edge-trigger-bottom {
@@ -344,6 +344,7 @@
     color: #1a1a1a;
     outline: none;
     font-family: inherit;
+    background: #ffffff;
   }
   .uh-fmp-field input[type="text"]:focus,
   .uh-fmp-field select:focus,
@@ -571,105 +572,7 @@
     font-size: 13px;
     color: #999999;
   }
-
-  /* ===== 深色模式 ===== */
-  @media (prefers-color-scheme: dark) {
-    .uh-fmp {
-      background: rgba(28, 28, 32, 0.85);
-      border-color: rgba(255, 255, 255, 0.08);
-      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
-    }
-    .uh-fmp-close {
-      background: rgba(0, 0, 0, 0.75);
-      border-color: rgba(0, 0, 0, 0.9);
-    }
-    .uh-fmp-close:hover {
-      color: #fff;
-    }
-    .uh-fmp-minimize {
-      background: rgba(0, 0, 0, 0.75);
-      border-color: rgba(0, 0, 0, 0.9);
-    }
-    .uh-fmp-minimize:hover {
-      color: #fff;
-    }
-    .uh-fmp-mini-dot {
-      border-color: rgba(28, 28, 32, 0.9);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-    }
-    .uh-fmp-modal {
-      background: rgba(28, 28, 32, 0.9);
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-modal-header {
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-modal-title,
-    .uh-fmp-info-card-title {
-      color: #f5f5f5;
-    }
-    .uh-fmp-field,
-    .uh-fmp-copy-label {
-      color: #999999;
-    }
-    .uh-fmp-field input[type="text"],
-    .uh-fmp-field select,
-    .uh-fmp-field textarea {
-      background: #2a2a30;
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f5;
-    }
-    .uh-fmp-segmented {
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-seg-item {
-      background: transparent;
-      color: #999999;
-    }
-    .uh-fmp-seg-active {
-      background: #0E1731;
-      color: #ffffff;
-    }
-    .uh-fmp-shot-input {
-      background: #2a2a30;
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f5;
-    }
-    .uh-fmp-shot-remove {
-      background: rgba(255, 255, 255, 0.1);
-      color: #999999;
-    }
-    .uh-fmp-apply-footer {
-      border-top-color: rgba(255, 255, 255, 0.08);
-    }
-    .uh-fmp-info-card {
-      background: rgba(255, 255, 255, 0.06);
-    }
-    .uh-fmp-copy-input {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.1);
-      color: #f5f5f5;
-    }
-    .uh-fmp-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border-color: rgba(255, 255, 255, 0.12);
-      color: #f5f5f5;
-    }
-    .uh-fmp-btn:hover {
-      background: rgba(255, 255, 255, 0.14);
-    }
-    .uh-fmp-btn-primary {
-      background: #0E1731;
-      color: #ffffff;
-    }
-    .uh-fmp-btn-primary:hover {
-      background: #16244a;
-    }
-    .uh-fmp-hint {
-      color: rgba(255, 255, 255, 0.4);
-    }
-  }
-`,Y=[{key:`displayName`,label:`应用名称`,required:!0},{key:`miniProgramCode`,label:`太阳码（图片地址）`,required:!0},{key:`link`,label:`应用地址`,required:!1,placeholder:`#小程序://xxx`},{key:`description`,label:`应用描述`,required:!1,type:`textarea`},{key:`applyRemark`,label:`申请说明`,required:!1,type:`textarea`}],X=[{key:`avatar`,label:`作者头像（图片地址）`,required:!1},{key:`authorName`,label:`作者昵称`,required:!1},{key:`website`,label:`作者网站`,required:!1},{key:`email`,label:`邮箱（选填，用于审核结果通知）`,required:!1}],Z=`uh-fmp-apply-draft`;function Q(e){return e?/^(https?:)?\/\//.test(e)||/^data:/i.test(e)?e:window.location.origin+(e.startsWith(`/`)?e:`/`+e):``}var Ee=class extends G{static{this.styles=[Te]}static{this.properties={applyOpen:{state:!0},linksOpen:{state:!0},applySubmitting:{state:!0},captchaId:{state:!0},captchaSrc:{state:!0},linksLoading:{state:!0},linksError:{state:!0},miniInfo:{state:!0},blogger:{state:!0},groupOptions:{state:!0},applyTab:{state:!0},screenshotRows:{state:!0},minimized:{state:!0},edgeTrigger:{state:!0},edgeSide:{state:!0},edgeTriggerStyle:{state:!0},miniDotStyle:{state:!0}}}constructor(){super(),this.dragState=null,this.miniDotDrag=null,this.miniDotDragged=!1,this.config=K,this.applyOpen=!1,this.linksOpen=!1,this.applySubmitting=!1,this.captchaId=``,this.captchaSrc=``,this.linksLoading=!1,this.linksError=!1,this.miniInfo=null,this.blogger=null,this.groupOptions=[],this.applyTab=`basic`,this.screenshotRows=[``],this.minimized=!1,this.edgeTrigger=!1,this.edgeSide=``,this.edgeTriggerStyle=``,this.miniDotStyle=``}connectedCallback(){super.connectedCallback(),(!we()||this.isClosed())&&this.remove()}firstUpdated(){this.applyPosition()}isClosed(){if(this.config.rememberClosed===!1)return!1;try{return localStorage.getItem(q)===`1`}catch{return!1}}get cardEl(){return this.renderRoot.querySelector(`.uh-fmp`)}applyPosition(){let e=this.cardEl;if(!e)return;let t=this.config,n=t.position||`bottom-right`;e.classList.add(`uh-fmp-pos-`+n);let r=Number(t.offsetX)||0,i=Number(t.offsetY)||0,a=n===`center`||n===`top-center`||n===`bottom-center`?`calc(-50% + `+r+`px)`:r+`px`,o=n===`center`||n===`left-center`||n===`right-center`?`calc(-50% + `+i+`px)`:i+`px`;e.style.transform=`translate(`+a+`, `+o+`)`,e.style.setProperty(`--uh-fmp-edge`,(Number(t.edgeHideDistance)||24)+`px`)}onPointerDown(e){let t=e.target;if(t&&(t.closest(`.uh-fmp-close`)||t.closest(`.uh-fmp-minimize`)||t.closest(`.uh-fmp-actions`)||t.closest(`.uh-fmp-overlay`)||t.closest(`.uh-fmp-mini-dot`)||t.closest(`.uh-fmp-edge-trigger`)))return;let n=this.cardEl;if(!n)return;let r=n.getBoundingClientRect();this.dragState={startX:e.clientX,startY:e.clientY,left:r.left,top:r.top},this.restoreFromEdge(),n.classList.add(`uh-fmp-dragging`),n.style.touchAction=`none`,n.setPointerCapture(e.pointerId),e.preventDefault()}onPointerMove(e){let t=this.dragState,n=this.cardEl;if(!t||!n)return;let r=t.left+(e.clientX-t.startX),i=t.top+(e.clientY-t.startY);r=Math.max(0,Math.min(r,window.innerWidth-n.offsetWidth)),i=Math.max(0,Math.min(i,window.innerHeight-n.offsetHeight)),this.setFree(r,i)}onPointerEnd(){let e=this.cardEl;this.dragState&&e&&(this.dragState=null,e.classList.remove(`uh-fmp-dragging`),e.style.touchAction=``,this.maybeEdgeHide())}setFree(e,t){let n=this.cardEl;n&&(n.style.left=e+`px`,n.style.top=t+`px`,n.style.right=`auto`,n.style.bottom=`auto`,n.style.transform=`translate(0, 0)`,n.classList.remove(`uh-fmp-edge`))}maybeEdgeHide(){if(!this.config.edgeHideEnabled)return;let e=this.cardEl;if(!e)return;let t=e.getBoundingClientRect(),n={left:t.left,right:window.innerWidth-t.right,top:t.top,bottom:window.innerHeight-t.bottom},r=null,i=80;[`left`,`right`,`top`,`bottom`].forEach(e=>{n[e]<i&&(i=n[e],r=e)}),r&&(e.style.transform=``,e.classList.add(`uh-fmp-edge`,`uh-fmp-edge-`+r),this.edgeSide=r,this.edgeTriggerStyle=this.buildEdgeTriggerStyle(r,t),this.edgeTrigger=!0)}buildEdgeTriggerStyle(e,t){let n=t.left+t.width/2,r=t.top+t.height/2;return e===`left`?`left:2px;top:${Math.round(r-17.5)}px;`:e===`right`?`right:2px;top:${Math.round(r-17.5)}px;`:e===`top`?`top:2px;left:${Math.round(n-17.5)}px;`:`bottom:2px;left:${Math.round(n-17.5)}px;`}onEdgeTriggerEnter(){let e=this.cardEl;e&&e.classList.add(`uh-fmp-edge-hover`)}onEdgeTriggerLeave(){let e=this.cardEl;e&&e.classList.remove(`uh-fmp-edge-hover`)}restoreFromEdge(){let e=this.cardEl;this.edgeTrigger=!1,this.edgeSide=``,this.edgeTriggerStyle=``,e&&e.classList.remove(`uh-fmp-edge`,`uh-fmp-edge-hover`,`uh-fmp-edge-left`,`uh-fmp-edge-right`,`uh-fmp-edge-top`,`uh-fmp-edge-bottom`)}onMinimizeClick(){let e=this.cardEl;if(!e)return;let t=e.getBoundingClientRect();this.miniDotStyle=`left:${Math.round(t.left)}px;top:${Math.round(t.top)}px;`,this.minimized=!0,this.edgeTrigger=!1,e.classList.remove(`uh-fmp-edge`,`uh-fmp-edge-left`,`uh-fmp-edge-right`,`uh-fmp-edge-top`,`uh-fmp-edge-bottom`)}onRestoreClick(){if(this.miniDotDragged){this.miniDotDragged=!1;return}this.minimized=!1}onMiniDotPointerDown(e){let t=e.currentTarget,n=t.getBoundingClientRect();this.miniDotDrag={startX:e.clientX,startY:e.clientY,left:n.left,top:n.top,moved:!1},t.setPointerCapture(e.pointerId)}onMiniDotPointerMove(e){let t=this.miniDotDrag;if(!t)return;let n=e.clientX-t.startX,r=e.clientY-t.startY;if(!t.moved&&(Math.abs(n)>3||Math.abs(r)>3)&&(t.moved=!0),!t.moved)return;let i=e.currentTarget,a=Math.max(0,Math.min(t.left+n,window.innerWidth-i.offsetWidth)),o=Math.max(0,Math.min(t.top+r,window.innerHeight-i.offsetHeight));i.style.left=a+`px`,i.style.top=o+`px`}onMiniDotPointerEnd(){this.miniDotDrag?.moved&&(this.miniDotDragged=!0),this.miniDotDrag=null}onCloseClick(){if(this.config.rememberClosed!==!1)try{localStorage.setItem(q,`1`)}catch{}let e=this.cardEl;e?(e.classList.add(`uh-fmp-closing`),setTimeout(()=>this.remove(),200)):this.remove()}onOverlayClick(e){e.target.classList.contains(`uh-fmp-overlay`)&&this.closeModals()}closeModals(){this.applyOpen=!1,this.linksOpen=!1}openApply(){this.applyOpen=!0,this.refreshCaptcha(),this.updateComplete.then(()=>this.restoreDraft())}restoreDraft(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);if(!e)return;let t=this.loadDraft();[...Y,...X].forEach(n=>{let r=e.elements.namedItem(n.key);r&&t[n.key]&&(r.value=String(t[n.key]))});let n=t.screenshots;Array.isArray(n)?this.screenshotRows=n.length?n.slice():[``]:typeof n==`string`&&n.trim()&&(this.screenshotRows=n.split(`
+`,Y=[{key:`displayName`,label:`应用名称`,required:!0},{key:`miniProgramCode`,label:`太阳码（图片地址）`,required:!0},{key:`link`,label:`应用地址`,required:!1,placeholder:`#小程序://xxx`},{key:`description`,label:`应用描述`,required:!1,type:`textarea`},{key:`applyRemark`,label:`申请说明`,required:!1,type:`textarea`}],X=[{key:`avatar`,label:`作者头像（图片地址）`,required:!1},{key:`authorName`,label:`作者昵称`,required:!1},{key:`website`,label:`作者网站`,required:!1},{key:`email`,label:`邮箱（选填，用于审核结果通知）`,required:!1}],Z=`uh-fmp-apply-draft`;function Q(e){return e?/^(https?:)?\/\//.test(e)||/^data:/i.test(e)?e:window.location.origin+(e.startsWith(`/`)?e:`/`+e):``}var Ee=class extends G{static{this.styles=[Te]}static{this.properties={applyOpen:{state:!0},linksOpen:{state:!0},applySubmitting:{state:!0},captchaId:{state:!0},captchaSrc:{state:!0},linksLoading:{state:!0},linksError:{state:!0},miniInfo:{state:!0},blogger:{state:!0},groupOptions:{state:!0},applyTab:{state:!0},screenshotRows:{state:!0},minimized:{state:!0},edgeTrigger:{state:!0},edgeSide:{state:!0},edgeTriggerStyle:{state:!0},miniDotStyle:{state:!0}}}constructor(){super(),this.dragState=null,this.miniDotDrag=null,this.miniDotDragged=!1,this.config=K,this.applyOpen=!1,this.linksOpen=!1,this.applySubmitting=!1,this.captchaId=``,this.captchaSrc=``,this.linksLoading=!1,this.linksError=!1,this.miniInfo=null,this.blogger=null,this.groupOptions=[],this.applyTab=`basic`,this.screenshotRows=[``],this.minimized=!1,this.edgeTrigger=!1,this.edgeSide=``,this.edgeTriggerStyle=``,this.miniDotStyle=``}connectedCallback(){super.connectedCallback(),(!we()||this.isClosed())&&this.remove()}firstUpdated(){this.applyPosition()}isClosed(){if(this.config.rememberClosed===!1)return!1;try{return localStorage.getItem(q)===`1`}catch{return!1}}get cardEl(){return this.renderRoot.querySelector(`.uh-fmp`)}applyPosition(){let e=this.cardEl;if(!e)return;let t=this.config,n=t.position||`bottom-right`;e.classList.add(`uh-fmp-pos-`+n);let r=Number(t.offsetX)||0,i=Number(t.offsetY)||0,a=n===`center`||n===`top-center`||n===`bottom-center`?`calc(-50% + `+r+`px)`:r+`px`,o=n===`center`||n===`left-center`||n===`right-center`?`calc(-50% + `+i+`px)`:i+`px`;e.style.transform=`translate(`+a+`, `+o+`)`}onPointerDown(e){let t=e.target;if(t&&(t.closest(`.uh-fmp-close`)||t.closest(`.uh-fmp-minimize`)||t.closest(`.uh-fmp-actions`)||t.closest(`.uh-fmp-overlay`)||t.closest(`.uh-fmp-mini-dot`)||t.closest(`.uh-fmp-edge-trigger`)))return;let n=this.cardEl;if(!n)return;let r=n.getBoundingClientRect();this.dragState={startX:e.clientX,startY:e.clientY,left:r.left,top:r.top},this.restoreFromEdge(),n.classList.add(`uh-fmp-dragging`),n.style.touchAction=`none`,n.setPointerCapture(e.pointerId),e.preventDefault()}onPointerMove(e){let t=this.dragState,n=this.cardEl;if(!t||!n)return;let r=t.left+(e.clientX-t.startX),i=t.top+(e.clientY-t.startY);r=Math.max(0,Math.min(r,window.innerWidth-n.offsetWidth)),i=Math.max(0,Math.min(i,window.innerHeight-n.offsetHeight)),this.setFree(r,i)}onPointerEnd(){let e=this.cardEl;this.dragState&&e&&(this.dragState=null,e.classList.remove(`uh-fmp-dragging`),e.style.touchAction=``,this.maybeEdgeHide())}setFree(e,t){let n=this.cardEl;n&&(n.style.left=e+`px`,n.style.top=t+`px`,n.style.right=`auto`,n.style.bottom=`auto`,n.style.transform=`translate(0, 0)`,n.classList.remove(`uh-fmp-edge`))}maybeEdgeHide(){if(!this.config.edgeHideEnabled)return;let e=this.cardEl;if(!e)return;let t=e.getBoundingClientRect(),n={left:t.left,right:window.innerWidth-t.right,top:t.top,bottom:window.innerHeight-t.bottom},r=null,i=this.config.edgeHideDistance,a=i==null?NaN:i===0?4:Number(i),o=Number.isFinite(a)?a:80;[`left`,`right`,`top`,`bottom`].forEach(e=>{n[e]<o&&(o=n[e],r=e)}),r&&(r===`left`?e.style.transform=`translateX(${-(t.left+t.width)}px)`:r===`right`?e.style.transform=`translateX(${window.innerWidth-t.left}px)`:r===`top`?e.style.transform=`translateY(${-(t.top+t.height)}px)`:e.style.transform=`translateY(${window.innerHeight-t.top}px)`,e.classList.add(`uh-fmp-edge`,`uh-fmp-edge-`+r),this.edgeSide=r,this.edgeTriggerStyle=this.buildEdgeTriggerStyle(r,t),this.edgeTrigger=!0)}buildEdgeTriggerStyle(e,t){let n=t.left+t.width/2,r=t.top+t.height/2;return e===`left`?`left:2px;top:${Math.round(r-17.5)}px;`:e===`right`?`right:2px;top:${Math.round(r-17.5)}px;`:e===`top`?`top:2px;left:${Math.round(n-17.5)}px;`:`bottom:2px;left:${Math.round(n-17.5)}px;`}onEdgeTriggerEnter(){let e=this.cardEl;e&&e.classList.add(`uh-fmp-edge-hover`)}onEdgeTriggerLeave(){let e=this.cardEl;e&&e.classList.remove(`uh-fmp-edge-hover`)}restoreFromEdge(){let e=this.cardEl;this.edgeTrigger=!1,this.edgeSide=``,this.edgeTriggerStyle=``,e&&(e.style.transform=``,e.classList.remove(`uh-fmp-edge`,`uh-fmp-edge-hover`,`uh-fmp-edge-left`,`uh-fmp-edge-right`,`uh-fmp-edge-top`,`uh-fmp-edge-bottom`))}onMinimizeClick(){let e=this.cardEl;if(!e)return;let t=e.getBoundingClientRect();this.miniDotStyle=`left:${Math.round(t.left)}px;top:${Math.round(t.top)}px;`,this.minimized=!0,this.edgeTrigger=!1,e.style.transform=``,e.classList.remove(`uh-fmp-edge`,`uh-fmp-edge-left`,`uh-fmp-edge-right`,`uh-fmp-edge-top`,`uh-fmp-edge-bottom`)}onRestoreClick(){if(this.miniDotDragged){this.miniDotDragged=!1;return}this.minimized=!1}onMiniDotPointerDown(e){let t=e.currentTarget,n=t.getBoundingClientRect();this.miniDotDrag={startX:e.clientX,startY:e.clientY,left:n.left,top:n.top,moved:!1},t.setPointerCapture(e.pointerId)}onMiniDotPointerMove(e){let t=this.miniDotDrag;if(!t)return;let n=e.clientX-t.startX,r=e.clientY-t.startY;if(!t.moved&&(Math.abs(n)>3||Math.abs(r)>3)&&(t.moved=!0),!t.moved)return;let i=e.currentTarget,a=Math.max(0,Math.min(t.left+n,window.innerWidth-i.offsetWidth)),o=Math.max(0,Math.min(t.top+r,window.innerHeight-i.offsetHeight));i.style.left=a+`px`,i.style.top=o+`px`}onMiniDotPointerEnd(){this.miniDotDrag?.moved&&(this.miniDotDragged=!0),this.miniDotDrag=null}onCloseClick(){if(this.config.rememberClosed!==!1)try{localStorage.setItem(q,`1`)}catch{}let e=this.cardEl;e?(e.classList.add(`uh-fmp-closing`),setTimeout(()=>this.remove(),200)):this.remove()}onOverlayClick(e){e.target.classList.contains(`uh-fmp-overlay`)&&this.closeModals()}closeModals(){this.applyOpen=!1,this.linksOpen=!1}openApply(){this.applyOpen=!0,this.refreshCaptcha(),this.updateComplete.then(()=>this.restoreDraft())}restoreDraft(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);if(!e)return;let t=this.loadDraft();[...Y,...X].forEach(n=>{let r=e.elements.namedItem(n.key);r&&t[n.key]&&(r.value=String(t[n.key]))});let n=t.screenshots;Array.isArray(n)?this.screenshotRows=n.length?n.slice():[``]:typeof n==`string`&&n.trim()&&(this.screenshotRows=n.split(`
 `).map(e=>e.trim()).filter(Boolean),this.screenshotRows.length||(this.screenshotRows=[``]))}loadDraft(){try{let e=localStorage.getItem(Z);return e?JSON.parse(e):{}}catch{return{}}}saveDraft(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);if(!e)return;let t={};[...Y,...X].forEach(n=>{let r=e.elements.namedItem(n.key);t[n.key]=r?.value||``}),t.screenshots=this.screenshotRows.filter(e=>e.trim());try{localStorage.setItem(Z,JSON.stringify(t))}catch{}}clearDraft(){try{localStorage.removeItem(Z)}catch{}}resetApply(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);e&&e.reset(),this.screenshotRows=[``],this.applyTab=`basic`,this.clearDraft()}onFormInput(){this.saveDraft()}refreshCaptcha(){fetch(be).then(e=>e.json()).then(e=>{e&&e.imageBase64&&this.setCaptcha(e)}).catch(()=>{})}setCaptcha(e){this.captchaId=e.id,this.captchaSrc=e.imageBase64}async onApplySubmit(e){e.preventDefault();let t=e.target;for(let e of[{key:`displayName`,message:`请填写小程序名称`,panel:`basic`},{key:`miniProgramCode`,message:`请填写太阳码图片地址`,panel:`basic`},{key:`captchaCode`,message:`请输入验证码`}]){let n=t.elements.namedItem(e.key);if(!n||!n.value.trim()){e.panel&&(this.applyTab=e.panel),alert(e.message);return}}let n={};[...Y,...X].forEach(e=>{let r=t.elements.namedItem(e.key);r&&r.value.trim()&&(n[e.key]=r.value.trim())});let r=this.screenshotRows.map(e=>e.trim()).filter(Boolean).map(Q);r.length&&(n.screenshots=r);let i=(t.elements.namedItem(`captchaCode`)?.value||``).trim(),a=`?captchaId=`+encodeURIComponent(this.captchaId||``)+`&captchaCode=`+encodeURIComponent(i);this.applySubmitting=!0;try{let e=await fetch(xe+a,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify({spec:n})}),r=await e.json().catch(()=>({}));if(e.status===200||e.status===201){this.applyOpen=!1,this.clearDraft(),t.reset(),this.screenshotRows=[``],this.applyTab=`basic`,alert(`申请提交成功，请等待审核`);return}e.status===403&&r.captcha&&this.setCaptcha(r.captcha),alert(r.message||`提交失败，请重试`)}catch{alert(`网络异常，请稍后重试`)}finally{this.applySubmitting=!1}}openLinks(){this.linksOpen=!0,this.linksLoading=!0,this.linksError=!1,this.miniInfo=null,this.blogger=null,fetch(Se).then(e=>e.json()).then(e=>{let t=e?.pluginConfig,n=e?.authorConfig;this.miniInfo=t?.linkInfo?.miniInfo||null,this.blogger=n?.blogger||null}).catch(()=>{this.linksError=!0}).finally(()=>{this.linksLoading=!1})}render(){let e=this.config,t=Number(e.imageSize)||100;return P`
       ${this.applyOpen?this.renderApplyModal():``}
       ${this.linksOpen?this.renderLinksModal():``}

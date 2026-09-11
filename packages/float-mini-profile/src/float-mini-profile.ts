@@ -211,7 +211,6 @@ export class FloatMiniProfileElement extends LitElement {
         ? "calc(-50% + " + y + "px)"
         : y + "px";
     card.style.transform = "translate(" + tx + ", " + ty + ")";
-    card.style.setProperty("--uh-fmp-edge", (Number(c.edgeHideDistance) || 24) + "px");
   }
 
   // ===== 拖拽（Pointer Events）+ 贴边隐藏 =====
@@ -301,7 +300,15 @@ export class FloatMiniProfileElement extends LitElement {
       bottom: window.innerHeight - rect.bottom,
     };
     let side: string | null = null;
-    let min = EDGE_TRIGGER;
+    // 触发阈值：配置 edgeHideDistance（0 视为未设置，兜底最小有效值 4px 防贴边失效；未配置回退 80）
+    const rawDistance = this.config.edgeHideDistance;
+    const configured =
+      rawDistance === undefined || rawDistance === null
+        ? NaN
+        : rawDistance === 0
+          ? 4
+          : Number(rawDistance);
+    let min = Number.isFinite(configured) ? configured : EDGE_TRIGGER;
     (["left", "right", "top", "bottom"] as const).forEach((key) => {
       if (distances[key] < min) {
         min = distances[key];
@@ -309,8 +316,16 @@ export class FloatMiniProfileElement extends LitElement {
       }
     });
     if (side) {
-      // 清除内联 transform（拖拽 setFree 写入的 translate(0,0) 会覆盖类的贴边位移）
-      card.style.transform = "";
+      // 完全隐藏：按当前视口位置精确位移（覆盖锚点 top/left/offset 残留，不留任何可见部分）
+      if (side === "left") {
+        card.style.transform = `translateX(${-(rect.left + rect.width)}px)`;
+      } else if (side === "right") {
+        card.style.transform = `translateX(${window.innerWidth - rect.left}px)`;
+      } else if (side === "top") {
+        card.style.transform = `translateY(${-(rect.top + rect.height)}px)`;
+      } else {
+        card.style.transform = `translateY(${window.innerHeight - rect.top}px)`;
+      }
       card.classList.add("uh-fmp-edge", "uh-fmp-edge-" + side);
       // 边缘触发把手：fixed 定位在对应视口边缘中点
       this.edgeSide = side;
@@ -358,6 +373,7 @@ export class FloatMiniProfileElement extends LitElement {
     this.edgeSide = "";
     this.edgeTriggerStyle = "";
     if (card) {
+      card.style.transform = ""; // 清除贴边内联位移，回到锚点/拖拽位置
       card.classList.remove(
         "uh-fmp-edge",
         "uh-fmp-edge-hover",
@@ -381,6 +397,7 @@ export class FloatMiniProfileElement extends LitElement {
     this.minimized = true;
     this.edgeTrigger = false; // 最小化后隐藏贴边触发把手
     // 最小化后不再贴边（小图保持原位）
+    card.style.transform = ""; // 清除贴边内联位移，恢复后卡片正常显示
     card.classList.remove(
       "uh-fmp-edge",
       "uh-fmp-edge-left",
