@@ -3,6 +3,7 @@ import { Toast, VButton, VModal, VSpace } from "@halo-dev/components";
 import { submitForm } from "@formkit/core";
 import { computed, ref } from "vue";
 import SubmitButton from "@/components/button/SubmitButton.vue";
+import LinkGroupSelectField from "@/components/link-manage/LinkGroupSelectField.vue";
 import { miniProgramLinkSubmissionsApi } from "@/api";
 
 const props = defineProps<{
@@ -20,6 +21,8 @@ const emit = defineEmits<{
 const modal = ref<InstanceType<typeof VModal> | null>(null);
 const reason = ref("");
 const saving = ref(false);
+/** 通过时归入的分组（空字符串=未分组） */
+const groupName = ref("");
 
 const isReject = computed(() => props.action === "reject");
 const isBatch = computed(() => props.names.length > 1);
@@ -40,11 +43,17 @@ const handleSubmit = () => {
 const handleConfirm = async () => {
   try {
     saving.value = true;
+    // 通过时归入所选分组（空字符串=未分组）；拒绝不涉及分组
+    const groupArg = isReject.value ? undefined : groupName.value;
     await Promise.all(
       props.names.map((name) =>
         isReject.value
           ? miniProgramLinkSubmissionsApi.reject(name, reason.value.trim())
-          : miniProgramLinkSubmissionsApi.approve(name, reason.value.trim() || undefined)
+          : miniProgramLinkSubmissionsApi.approve(
+              name,
+              reason.value.trim() || undefined,
+              groupArg
+            )
       )
     );
     Toast.success(isReject.value ? "已拒绝" : "已通过");
@@ -75,6 +84,12 @@ const handleConfirm = async () => {
       <div class=":uno: mb-4 text-sm text-gray-600">
         {{ description }}
       </div>
+      <!-- 通过时可选分组（仅未分组+已有分组，默认未分组） -->
+      <LinkGroupSelectField
+        v-if="!isReject"
+        v-model="groupName"
+        help="选择通过后链接归入的分组"
+      />
       <FormKit
         v-model="reason"
         name="reason"

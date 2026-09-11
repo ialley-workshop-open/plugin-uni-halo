@@ -17,7 +17,6 @@ import {
   CONFIGS_URL,
   EDGE_TRIGGER,
   LINK_SUBMIT_URL,
-  LINK_TYPES_URL,
   STORAGE_KEY,
 } from "./config";
 import { matchPage } from "./page-match";
@@ -34,6 +33,7 @@ interface ApplyField {
   label: string;
   required: boolean;
   type?: "text" | "textarea" | "select";
+  placeholder?: string;
 }
 
 /** 友链信息弹窗展示行（长文本用 textarea；copyable=false 不渲染复制按钮） */
@@ -55,11 +55,10 @@ interface MiniDotDrag {
 
 /** 申请表单-基础信息字段（对齐管理端「链接管理-申请审核」新增申请表单） */
 const BASIC_FIELDS: ApplyField[] = [
-  { key: "displayName", label: "小程序名称", required: true },
-  { key: "miniProgramCode", label: "太阳码图片", required: true },
-  { key: "link", label: "小程序地址", required: false },
-  { key: "groupName", label: "申请分组", required: false, type: "select" },
-  { key: "description", label: "申请描述", required: false, type: "textarea" },
+  { key: "displayName", label: "应用名称", required: true },
+  { key: "miniProgramCode", label: "太阳码（图片地址）", required: true },
+  { key: "link", label: "应用地址", required: false, placeholder: "#小程序://xxx" },
+  { key: "description", label: "应用描述", required: false, type: "textarea" },
   { key: "applyRemark", label: "申请说明", required: false, type: "textarea" },
 ];
 
@@ -478,26 +477,8 @@ export class FloatMiniProfileElement extends LitElement {
   private openApply(): void {
     this.applyOpen = true;
     this.refreshCaptcha();
-    this.loadGroupOptions();
     // 弹窗渲染完成后回填本地草稿（验证码不缓存）
     this.updateComplete.then(() => this.restoreDraft());
-  }
-
-  /** 拉取公开分组列表（GET .../mini-program-links/types → GroupOption[{name, displayName}]） */
-  private loadGroupOptions(): void {
-    fetch(LINK_TYPES_URL)
-      .then((res) => res.json())
-      .then((groups: Array<{ name?: string; displayName?: string }>) => {
-        if (Array.isArray(groups)) {
-          this.groupOptions = groups.map((g) => ({
-            value: g.name || "",
-            label: g.displayName || g.name || "未命名",
-          }));
-        }
-      })
-      .catch(() => {
-        // 分组加载失败静默处理（留空归未分组）
-      });
   }
 
   private restoreDraft(): void {
@@ -624,8 +605,11 @@ export class FloatMiniProfileElement extends LitElement {
         spec[field.key] = el.value.trim();
       }
     });
-    // 预览图动态行 → 数组（对齐 MiniProgramLinkSubmissionSpec.screenshots）
-    const shots = this.screenshotRows.map((s) => s.trim()).filter(Boolean);
+    // 预览图动态行 → 数组（对齐 MiniProgramLinkSubmissionSpec.screenshots；URL 规范化防控制台裂图）
+    const shots = this.screenshotRows
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .map(normalizeImageUrl);
     if (shots.length) {
       spec["screenshots"] = shots;
     }
@@ -648,6 +632,9 @@ export class FloatMiniProfileElement extends LitElement {
       if (res.status === 200 || res.status === 201) {
         this.applyOpen = false;
         this.clearDraft(); // 提交成功后清空本地草稿
+        form.reset(); // 清空表单字段（含验证码，下次打开为空）
+        this.screenshotRows = [""]; // 预览图动态行重置
+        this.applyTab = "basic"; // 回到基础信息面板
         alert("申请提交成功，请等待审核");
         return;
       }
@@ -781,13 +768,13 @@ export class FloatMiniProfileElement extends LitElement {
       return html`
         <label class="uh-fmp-field">
           ${labelEl}
-          <textarea name=${field.key} rows="2" class="uh-fmp-textarea"></textarea>
+          <textarea name=${field.key} rows="2" class="uh-fmp-textarea" placeholder=${field.placeholder ?? ""}></textarea>
         </label>`;
     }
     return html`
       <label class="uh-fmp-field">
         ${labelEl}
-        <input type="text" name=${field.key} ?required=${field.required} />
+        <input type="text" name=${field.key} ?required=${field.required} placeholder=${field.placeholder ?? ""} />
       </label>`;
   }
 
@@ -856,7 +843,7 @@ export class FloatMiniProfileElement extends LitElement {
   private renderScreenshotRows() {
     return html`
       <div class="uh-fmp-field">
-        <span>预览图（可选）</span>
+        <span>预览截图(可选)</span>
         ${this.screenshotRows.map(
           (url, index) => html`
             <div class="uh-fmp-shot-row">

@@ -165,10 +165,10 @@ const preview = (url?: string) => {
       v-if="reviewed"
       class=":uno: space-y-1 rounded-md border border-gray-100 bg-gray-50 p-3"
     >
-      <div class=":uno: text-xs text-gray-500">审核信息</div>
-      <div class=":uno: flex items-center gap-2 text-sm">
+      <div class=":uno: text-xs text-gray-500 mb-3">审核结果</div>
+      <div class=":uno: flex items-center text-sm">
         <span class=":uno: text-gray-500">审核状态：</span>
-        <span class=":uno: rounded px-1.5 py-0.5 text-xs" :class="statusBadgeClass">
+        <span class=":uno: rounded box-border px-1.5 py-0.5 text-xs" :class="statusBadgeClass">
           {{ statusLabel }}
         </span>
       </div>
