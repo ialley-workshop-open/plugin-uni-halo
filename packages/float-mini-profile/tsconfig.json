@@ -9,5 +9,5 @@
     "noEmit": true,
     "noUnusedLocals": true
   },
-  "include": ["src", "vite.config.lib.ts"]
+  "include": ["src", "vite.config.ts"]
 }

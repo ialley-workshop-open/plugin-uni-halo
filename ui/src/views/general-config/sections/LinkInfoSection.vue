@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject } from "vue";
+import { VSwitch } from "@halo-dev/components";
 import { GeneralConfigFormKey } from "../form-context";
 
 /**

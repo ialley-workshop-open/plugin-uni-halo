@@ -24,9 +24,7 @@ export const styles = css`
     padding: 10px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
       "Microsoft YaHei", sans-serif;
-    background: rgba(255, 255, 255, 0.92);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 1);
     border: 2px solid rgba(255, 255, 255, 0.65);
     border-radius: 14px;
     box-shadow: 0 16px 60px rgba(0, 0, 0, 0.06);
@@ -68,22 +66,26 @@ export const styles = css`
   /* ===== 关闭按钮（右上角） ===== */
   .uh-fmp-close {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: 8px;
+    right: 8px;
     width: 20px;
     height: 20px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.45);
-    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255, 0.5);
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.075);
+    color: #999999;
     font-size: 14px;
     line-height: 20px;
     text-align: center;
     cursor: pointer;
-    padding: 0;
   }
   .uh-fmp-close:hover {
-    background: rgba(0, 0, 0, 0.65);
+    color: #333;
   }
 
   /* ===== 拖拽 ===== */
@@ -111,7 +113,7 @@ export const styles = css`
   /* ===== 底部操作按钮（小程序申请开关开启后显示） ===== */
   .uh-fmp-actions {
     display: flex;
-    flex-wrap: wrap; /* 两个按钮同一行，提示文字（flex-basis:100%）换行独占一行 */
+    flex-wrap: wrap;
     gap: 8px;
     width: 100%;
     margin-top: 2px;
@@ -119,27 +121,30 @@ export const styles = css`
   .uh-fmp-btn {
     flex: 1;
     box-sizing: border-box;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0,0,0,0.05);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.85);
-    color: #333333;
+    background: #ffffff;
+    color: #0E1731;
     font-size: 12px;
     line-height: 1;
-    padding: 7px 0;
+    padding: 8px 0;
     cursor: pointer;
     text-align: center;
     font-family: inherit;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+    transition: background 0.15s ease;
   }
   .uh-fmp-btn:hover {
-    background: #ffffff;
+    background: #f1f5f9;
   }
   .uh-fmp-btn-primary {
-    background: rgba(22, 119, 255, 0.92);
+    /* 主色 #0E1731 + 白色文字 */
+    background: #0E1731;
     border-color: transparent;
     color: #ffffff;
   }
   .uh-fmp-btn-primary:hover {
-    background: #1677ff;
+    background: #16244a;
   }
   .uh-fmp-hint {
     flex-basis: 100%;
@@ -157,18 +162,24 @@ export const styles = css`
     display: flex;
     align-items: center;
     justify-content: center;
+    /* glass 遮罩：半透明 + 轻微毛玻璃（对齐 app 弹窗遮罩） */
     background: rgba(0, 0, 0, 0.45);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
     padding: 16px;
     box-sizing: border-box;
   }
   .uh-fmp-modal {
     box-sizing: border-box;
     width: 100%;
-    max-width: 360px;
+    max-width: 420px;
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 14px;
     box-shadow: 0 16px 60px rgba(0, 0, 0, 0.18);
     overflow: hidden;
@@ -188,13 +199,19 @@ export const styles = css`
     color: #1a1a1a;
   }
   .uh-fmp-modal-close {
-    border: none;
-    background: transparent;
-    font-size: 18px;
-    line-height: 1;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255, 0.5);
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.075);
+    font-size: 14px;
     color: #999999;
     cursor: pointer;
-    padding: 2px 4px;
   }
   .uh-fmp-modal-close:hover {
     color: #333333;
@@ -217,6 +234,13 @@ export const styles = css`
     font-size: 12px;
     color: #666666;
   }
+  /* 申请弹窗面板内字段上下间距（footer 内验证码区不受影响） */
+  .uh-fmp-apply-panel .uh-fmp-field {
+    margin-bottom: 10px;
+  }
+  .uh-fmp-apply-panel .uh-fmp-field:last-child {
+    margin-bottom: 0;
+  }
   .uh-fmp-field input[type="text"] {
     box-sizing: border-box;
     width: 100%;
@@ -229,8 +253,30 @@ export const styles = css`
     outline: none;
     font-family: inherit;
   }
-  .uh-fmp-field input[type="text"]:focus {
-    border-color: #1677ff;
+  .uh-fmp-field input[type="text"]:focus,
+  .uh-fmp-field select:focus,
+  .uh-fmp-field textarea:focus {
+    border-color: #37c2bc;
+  }
+  .uh-fmp-field select,
+  .uh-fmp-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1a1a1a;
+    outline: none;
+    font-family: inherit;
+    background: #ffffff;
+  }
+  .uh-fmp-field select {
+    height: 32px;
+    padding: 0 8px;
+  }
+  .uh-fmp-field textarea {
+    padding: 6px 10px;
+    resize: vertical;
   }
   .uh-fmp-captcha-input {
     display: flex;
@@ -250,55 +296,181 @@ export const styles = css`
   .uh-fmp-form-actions {
     display: flex;
     gap: 8px;
+    margin-top: 12px;
+  }
+
+  /* ===== 申请弹窗：分段器 + 面板 + 底部固定操作区 ===== */
+  .uh-fmp-modal-apply {
+    max-height: 80vh;
+  }
+  /* shadcn Tabs（radix tabs）风格分段器：track 连体浅灰背景，激活项浮起 */
+  .uh-fmp-segmented {
+    display: flex;
+    gap: 4px;
+    margin: 8px 14px 0;
+    padding: 4px; /* track 内边距（对齐 tabs-list p-1） */
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+  }
+  .uh-fmp-seg-item {
+    flex: 1;
+    box-sizing: border-box;
+    padding: 6px 0;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #666666;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .uh-fmp-seg-active {
+    /* 激活块：主色 #0E1731 + 白字 + 轻投影 */
+    background: #0E1731;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(14, 23, 49, 0.35);
+  }
+  .uh-fmp-apply-body {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px 14px;
+    overflow: hidden;
+  }
+  .uh-fmp-apply-panels {
+    flex: 1;
+    min-height: 0;
+    max-height: 40vh; /* 内容区最大高度 40vh + 滚动 */
+    overflow-y: auto;
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: rgba(120, 130, 150, 0.4) transparent;
+  }
+  .uh-fmp-apply-panels::-webkit-scrollbar {
+    width: 6px;
+  }
+  .uh-fmp-apply-panels::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .uh-fmp-apply-panels::-webkit-scrollbar-thumb {
+    background: rgba(120, 130, 150, 0.4);
+    border-radius: 3px;
+  }
+  .uh-fmp-apply-panels::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 130, 150, 0.6);
+  }
+  .uh-fmp-apply-footer {
+    flex-shrink: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+  /* 预览图动态行 */
+  .uh-fmp-shot-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px; /* 预览图行之间上下间距 */
+  }
+  .uh-fmp-shot-input {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #1a1a1a;
+    outline: none;
+    font-family: inherit;
+    background: #ffffff;
+  }
+  .uh-fmp-shot-input:focus {
+    border-color: #37c2bc;
+  }
+  .uh-fmp-shot-remove {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.05);
+    color: #999999;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .uh-fmp-shot-remove:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #333333;
+  }
+  .uh-fmp-shot-add {
     margin-top: 2px;
   }
 
-  /* ===== 友链信息（小程序信息 + 博主信息） ===== */
+  /* ===== 友链信息（小程序信息 + 博主信息，输入框行 + 复制） ===== */
   .uh-fmp-info-card {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 6px;
     padding: 12px;
     border-radius: 10px;
     background: rgba(0, 0, 0, 0.03);
     margin-bottom: 10px;
   }
-  .uh-fmp-info-card:last-child {
-    margin-bottom: 0;
-  }
-  .uh-fmp-info-card-img {
-    width: 72px;
-    height: 72px;
-    border-radius: 12px;
-    object-fit: cover;
-  }
-  .uh-fmp-info-card-avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-  }
   .uh-fmp-info-card-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #1a1a1a;
+    margin-bottom: 2px;
   }
-  .uh-fmp-info-card-desc {
+  .uh-fmp-copy-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .uh-fmp-copy-label {
+    flex-shrink: 0;
     font-size: 12px;
-    color: #999999;
-    text-align: center;
-    word-break: break-all;
-    line-height: 1.5;
+    color: #000000; /* label 正常黑色 */
+    min-width: 64px;
+    text-align: right;
   }
-  .uh-fmp-info-card-link {
+  .uh-fmp-copy-input {
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 28px;
+    padding: 0 8px;
+    /* 只读输入框：浅白背景 + 白色边框（与玻璃弹窗背景区分） */
+    border: 1px solid #ffffff;
+    border-radius: 6px;
     font-size: 12px;
-    color: #1677ff;
-    text-decoration: none;
-    word-break: break-all;
+    color: #1a1a1a;
+    background: rgba(255, 255, 255, 0.75);
+    outline: none;
+    font-family: inherit;
   }
-  .uh-fmp-info-card-link:hover {
-    text-decoration: underline;
+  .uh-fmp-copy-input:focus {
+    border-color: #37c2bc;
+  }
+  .uh-fmp-copy-textarea {
+    height: auto;
+    min-height: 40px;
+    padding: 5px 8px;
+    line-height: 1.4;
+    resize: none;
+    font-family: inherit;
+  }
+  .uh-fmp-copy-btn {
+    flex-shrink: 0;
+    flex: none;
+    width: 60px;
+    padding: 8px 0;
+  }
+  .uh-fmp-copy-all {
+    width: 100%;
   }
   .uh-fmp-loading,
   .uh-fmp-empty {
@@ -316,13 +488,15 @@ export const styles = css`
       box-shadow: 0 16px 60px rgba(0, 0, 0, 0.35);
     }
     .uh-fmp-close {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(0, 0, 0, 0.75);
+      border-color: rgba(0, 0, 0, 0.9);
     }
     .uh-fmp-close:hover {
-      background: rgba(255, 255, 255, 0.4);
+      color: #fff;
     }
     .uh-fmp-modal {
-      background: #1c1c20;
+      background: rgba(28, 28, 32, 0.9);
+      border-color: rgba(255, 255, 255, 0.08);
     }
     .uh-fmp-modal-header {
       border-bottom-color: rgba(255, 255, 255, 0.08);
@@ -332,28 +506,61 @@ export const styles = css`
       color: #f5f5f5;
     }
     .uh-fmp-field,
-    .uh-fmp-info-card-desc {
+    .uh-fmp-copy-label {
       color: #999999;
     }
-    .uh-fmp-field input[type="text"] {
+    .uh-fmp-field input[type="text"],
+    .uh-fmp-field select,
+    .uh-fmp-field textarea {
       background: #2a2a30;
       border-color: rgba(255, 255, 255, 0.1);
       color: #f5f5f5;
     }
+    .uh-fmp-segmented {
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .uh-fmp-seg-item {
+      background: transparent;
+      color: #999999;
+    }
+    .uh-fmp-seg-active {
+      background: #0E1731;
+      color: #ffffff;
+    }
+    .uh-fmp-shot-input {
+      background: #2a2a30;
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f5;
+    }
+    .uh-fmp-shot-remove {
+      background: rgba(255, 255, 255, 0.1);
+      color: #999999;
+    }
+    .uh-fmp-apply-footer {
+      border-top-color: rgba(255, 255, 255, 0.08);
+    }
     .uh-fmp-info-card {
       background: rgba(255, 255, 255, 0.06);
     }
+    .uh-fmp-copy-input {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: #f5f5f5;
+    }
     .uh-fmp-btn {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.08);
       border-color: rgba(255, 255, 255, 0.12);
       color: #f5f5f5;
     }
     .uh-fmp-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.14);
     }
     .uh-fmp-btn-primary {
-      background: rgba(22, 119, 255, 0.9);
+      background: #0E1731;
       color: #ffffff;
+    }
+    .uh-fmp-btn-primary:hover {
+      background: #16244a;
     }
     .uh-fmp-hint {
       color: rgba(255, 255, 255, 0.4);

@@ -1,5 +1,5 @@
 /**
- * 悬浮卡片独立构建（参考 plugin-announcement packages 方案）：
+ * 悬浮卡片独立构建
  * vite lib mode（iife）产出压缩版 float-mini-profile.js + float-mini-profile.css，
  * closeBundle 时自动拷贝到插件静态目录 src/main/resources/static/floating-window/
  * （文件名与手写版一致，插件注入 URL 无需改动）。

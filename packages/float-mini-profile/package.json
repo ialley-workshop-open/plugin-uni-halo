@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "主题端悬浮卡片（小程序太阳码）——独立 vite 子工程，构建压缩产物自动拷贝至插件 static/floating-window/",
+  "description": "主题端悬浮卡片（小程序太阳码）",
   "scripts": {
-    "build": "vite build --config vite.config.lib.ts",
+    "build": "vite build",
     "dev": "vite",
     "type-check": "tsc --noEmit"
   },

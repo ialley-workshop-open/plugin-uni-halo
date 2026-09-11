@@ -19,3 +19,4 @@ export const CAPTCHA_URL = API_BASE + "/captcha/generate";
 export const LINK_LIST_URL = API_BASE + "/mini-program-links";
 export const LINK_SUBMIT_URL = API_BASE + "/mini-program-links/submissions";
 export const CONFIGS_URL = API_BASE + "/getConfigs";
+export const LINK_TYPES_URL = API_BASE + "/mini-program-links/types";
