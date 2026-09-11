@@ -113,7 +113,7 @@ const preview = (url?: string) => {
     <!-- 详情字段 -->
     <div class=":uno: grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
       <div v-if="spec.link" class=":uno: col-span-2">
-        <span class=":uno: text-gray-500">小程序地址：</span>
+        <span class=":uno: text-gray-500">应用地址：</span>
         <span class=":uno: break-all text-gray-800">{{ spec.link }}</span>
       </div>
       <div v-if="spec.authorName">
@@ -129,7 +129,7 @@ const preview = (url?: string) => {
         <span class=":uno: text-gray-800">{{ spec.email }}</span>
       </div>
       <div v-if="spec.submittedAt">
-        <span class=":uno: text-gray-500">提交时间：</span>
+        <span class=":uno: text-gray-500">申请时间：</span>
         <span class=":uno: text-gray-800">{{ formatTime(spec.submittedAt) }}</span>
       </div>
     </div>
@@ -147,14 +147,14 @@ const preview = (url?: string) => {
 
     <!-- 预览图 -->
     <div v-if="spec.screenshots?.length">
-      <div class=":uno: mb-1 text-sm text-gray-500">预览图：</div>
+      <div class=":uno: mb-2 text-sm text-gray-500">应用截图：</div>
       <div class=":uno: flex flex-wrap gap-2">
         <img
           v-for="(image, index) in spec.screenshots"
           :key="index"
           :src="image"
           alt="预览图"
-          class=":uno: h-16 w-24 cursor-pointer rounded object-cover"
+          class=":uno: h-36 w-24 block cursor-pointer rounded-lg object-contain border border-solid border-gray-100"
           @click="preview(image)"
         />
       </div>

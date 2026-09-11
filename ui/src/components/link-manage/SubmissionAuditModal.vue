@@ -107,7 +107,7 @@ const finish = () => {
         label="分组"
         type="select"
         :options="groupOptions"
-        help="审核时可调整分组"
+        help="选择一个分组"
       />
       <FormKit
         v-model="reason"

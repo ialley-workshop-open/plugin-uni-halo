@@ -104,10 +104,10 @@ const handleSave = async () => {
       <FormKit
         v-model="formState.spec.link"
         name="link"
-        label="小程序地址"
+        label="应用地址"
         type="text"
-        help="跳转链接（可选）"
-        placeholder="https://..."
+        help="小程序链接（可选）"
+        placeholder="#小程序://..."
       />
       <FormKit
         v-model="formState.spec.groupName"
