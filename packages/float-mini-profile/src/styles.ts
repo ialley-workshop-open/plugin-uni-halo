@@ -196,7 +196,7 @@ export const styles = css`
     z-index: 99999999;
   }
   .uh-fmp-edge-trigger:hover {
-    background: #0E1731;
+    background: #1A1B1D;
   }
   .uh-fmp-edge-trigger-top,
   .uh-fmp-edge-trigger-bottom {
@@ -222,9 +222,9 @@ export const styles = css`
     flex: 1;
     box-sizing: border-box;
     border: 1px solid rgba(0,0,0,0.05);
-    border-radius: 8px;
+    border-radius: 6px;
     background: #ffffff;
-    color: #0E1731;
+    color: #1A1B1D;
     font-size: 12px;
     line-height: 1;
     padding: 8px 0;
@@ -238,13 +238,12 @@ export const styles = css`
     background: #f1f5f9;
   }
   .uh-fmp-btn-primary {
-    /* 主色 #0E1731 + 白色文字 */
-    background: #0E1731;
+    background: #1A1B1D;
     border-color: transparent;
     color: #ffffff;
   }
   .uh-fmp-btn-primary:hover {
-    background: #16244a;
+    background: #1a1b1de3;
   }
   .uh-fmp-hint {
     flex-basis: 100%;
@@ -426,8 +425,8 @@ export const styles = css`
     font-family: inherit;
   }
   .uh-fmp-seg-active {
-    /* 激活块：主色 #0E1731 + 白字 + 轻投影 */
-    background: #0E1731;
+    /* 激活块：主色 #1A1B1D + 白字 + 轻投影 */
+    background: #1A1B1D;
     color: #ffffff;
     font-weight: 600;
     box-shadow: 0 1px 2px rgba(14, 23, 49, 0.35);
