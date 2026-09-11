@@ -44,6 +44,15 @@ interface LinkInfoRow {
   copyable?: boolean;
 }
 
+/** 最小化小图拖拽中间态 */
+interface MiniDotDrag {
+  startX: number;
+  startY: number;
+  left: number;
+  top: number;
+  moved: boolean;
+}
+
 /** 申请表单-基础信息字段（对齐管理端「链接管理-申请审核」新增申请表单） */
 const BASIC_FIELDS: ApplyField[] = [
   { key: "displayName", label: "小程序名称", required: true },
@@ -56,6 +65,7 @@ const BASIC_FIELDS: ApplyField[] = [
 
 /** 申请表单-作者信息字段 */
 const AUTHOR_FIELDS: ApplyField[] = [
+  { key: "avatar", label: "作者头像（图片地址）", required: false },
   { key: "authorName", label: "作者昵称", required: false },
   { key: "website", label: "作者网站", required: false },
   { key: "email", label: "邮箱（选填，用于审核结果通知）", required: false },
@@ -105,6 +115,7 @@ export class FloatMiniProfileElement extends LitElement {
     edgeTrigger: { state: true },
     edgeSide: { state: true },
     edgeTriggerStyle: { state: true },
+    miniDotStyle: { state: true },
   };
 
   declare applyOpen: boolean;
@@ -123,9 +134,12 @@ export class FloatMiniProfileElement extends LitElement {
   declare edgeTrigger: boolean;
   declare edgeSide: string;
   declare edgeTriggerStyle: string;
+  declare miniDotStyle: string;
 
   private config: FloatMiniProfileConfig;
   private dragState: DragState | null = null;
+  private miniDotDrag: MiniDotDrag | null = null;
+  private miniDotDragged = false;
 
   constructor() {
     super();
@@ -147,6 +161,7 @@ export class FloatMiniProfileElement extends LitElement {
     this.edgeTrigger = false;
     this.edgeSide = "";
     this.edgeTriggerStyle = "";
+    this.miniDotStyle = "";
   }
 
   connectedCallback(): void {
@@ -310,16 +325,17 @@ export class FloatMiniProfileElement extends LitElement {
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
     const gap = 2;
+    // 35px 长度的一半（17.5），把手中点对齐卡片边缘中点
     if (side === "left") {
-      return `left:${gap}px;top:${Math.round(cy - 22)}px;`;
+      return `left:${gap}px;top:${Math.round(cy - 17.5)}px;`;
     }
     if (side === "right") {
-      return `right:${gap}px;top:${Math.round(cy - 22)}px;`;
+      return `right:${gap}px;top:${Math.round(cy - 17.5)}px;`;
     }
     if (side === "top") {
-      return `top:${gap}px;left:${Math.round(cx - 22)}px;`;
+      return `top:${gap}px;left:${Math.round(cx - 17.5)}px;`;
     }
-    return `bottom:${gap}px;left:${Math.round(cx - 22)}px;`;
+    return `bottom:${gap}px;left:${Math.round(cx - 17.5)}px;`;
   }
 
   private onEdgeTriggerEnter(): void {
@@ -356,23 +372,75 @@ export class FloatMiniProfileElement extends LitElement {
 
   // ===== 最小化 =====
   private onMinimizeClick(): void {
+    const card = this.cardEl;
+    if (!card) {
+      return;
+    }
+    // 记录卡片当前视口位置：小图作为独立 fixed 元素定位到该处（不影响卡片样式）
+    const rect = card.getBoundingClientRect();
+    this.miniDotStyle = `left:${Math.round(rect.left)}px;top:${Math.round(rect.top)}px;`;
     this.minimized = true;
     this.edgeTrigger = false; // 最小化后隐藏贴边触发把手
     // 最小化后不再贴边（小图保持原位）
-    const card = this.cardEl;
-    if (card) {
-      card.classList.remove(
-        "uh-fmp-edge",
-        "uh-fmp-edge-left",
-        "uh-fmp-edge-right",
-        "uh-fmp-edge-top",
-        "uh-fmp-edge-bottom",
-      );
-    }
+    card.classList.remove(
+      "uh-fmp-edge",
+      "uh-fmp-edge-left",
+      "uh-fmp-edge-right",
+      "uh-fmp-edge-top",
+      "uh-fmp-edge-bottom",
+    );
   }
 
   private onRestoreClick(): void {
+    if (this.miniDotDragged) {
+      this.miniDotDragged = false;
+      return; // 刚拖拽过，忽略本次 click（防拖拽松手误触发恢复）
+    }
     this.minimized = false;
+  }
+
+  // ===== 最小化小图拖拽（独立 fixed 元素，不受 dragEnabled 约束，无条件可拖） =====
+  private onMiniDotPointerDown(e: PointerEvent): void {
+    const dot = e.currentTarget as HTMLElement;
+    const rect = dot.getBoundingClientRect();
+    this.miniDotDrag = {
+      startX: e.clientX,
+      startY: e.clientY,
+      left: rect.left,
+      top: rect.top,
+      moved: false,
+    };
+    dot.setPointerCapture(e.pointerId);
+    // 不 preventDefault：未移动时保留 click 恢复；移动后由 miniDotDragged 拦截恢复
+  }
+
+  private onMiniDotPointerMove(e: PointerEvent): void {
+    const drag = this.miniDotDrag;
+    if (!drag) {
+      return;
+    }
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (!drag.moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+      drag.moved = true; // 超过阈值视为拖拽
+    }
+    if (!drag.moved) {
+      return;
+    }
+    const dot = e.currentTarget as HTMLElement;
+    const left = Math.max(0, Math.min(drag.left + dx, window.innerWidth - dot.offsetWidth));
+    const top = Math.max(0, Math.min(drag.top + dy, window.innerHeight - dot.offsetHeight));
+    // 直接写内联样式，避免 state 重渲染干扰指针捕获
+    dot.style.left = left + "px";
+    dot.style.top = top + "px";
+  }
+
+  private onMiniDotPointerEnd(): void {
+    const drag = this.miniDotDrag;
+    if (drag?.moved) {
+      this.miniDotDragged = true; // click 处理器据此忽略本次恢复
+    }
+    this.miniDotDrag = null;
   }
 
   // ===== 关闭 =====
@@ -661,14 +729,24 @@ export class FloatMiniProfileElement extends LitElement {
                 </div>`
             : ""}
         </div>
-        ${this.minimized
-          ? html`
-              <button type="button" class="uh-fmp-mini-dot" aria-label="恢复悬浮窗" @click=${this.onRestoreClick}>
-                ${c.imageUrl ? html`<img src=${normalizeImageUrl(c.imageUrl)} alt="" />` : ""}
-                <span class="uh-fmp-mini-plus">+</span>
-              </button>`
-          : ""}
       </div>
+      ${this.minimized
+        ? html`
+            <button
+              type="button"
+              class="uh-fmp-mini-dot"
+              style=${this.miniDotStyle}
+              @click=${this.onRestoreClick}
+              @pointerdown=${this.onMiniDotPointerDown}
+              @pointermove=${this.onMiniDotPointerMove}
+              @pointerup=${this.onMiniDotPointerEnd}
+              @pointercancel=${this.onMiniDotPointerEnd}
+              aria-label="恢复悬浮窗"
+            >
+              ${c.imageUrl ? html`<img src=${normalizeImageUrl(c.imageUrl)} alt="" />` : ""}
+              <span class="uh-fmp-mini-plus">+</span>
+            </button>`
+        : ""}
       ${this.edgeTrigger
         ? html`
             <button

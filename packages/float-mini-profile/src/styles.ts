@@ -125,28 +125,25 @@ export const styles = css`
   .uh-fmp-minimize:hover {
     color: #333;
   }
-  /* 最小化态：容器玻璃背景清零，仅剩圆形小图 */
+  /* 最小化态：卡片容器整体隐藏（小图为独立 fixed 元素，不影响卡片样式） */
   .uh-fmp-minimized {
-    width: auto !important; /* 覆盖 inline 卡片宽度，小图自适应 */
-    background: transparent !important;
-    border-color: transparent !important;
-    box-shadow: none !important;
-    padding: 0 !important;
+    display: none !important;
   }
-  /* 圆形小图：hover 显示 + 覆盖层 */
+  /* 圆形小图：独立 fixed 元素（minimized 时显示在卡片原位置），hover 显示 + 覆盖层 */
   .uh-fmp-mini-dot {
     display: block;
     box-sizing: border-box;
-    width: 44px;
-    height: 44px;
+    width: 50px;
+    height: 50px;
     padding: 0;
-    border: 2px solid rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(255, 255, 255, 1);
     border-radius: 50%;
     overflow: hidden;
-    position: relative;
+    position: fixed;
+    z-index: 9999;
     cursor: pointer;
-    background: #0E1731; /* 主色兜底：无图/裂图时仍为可见圆形 */
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 16px rgba(0, 0, 0, 0.25);
   }
   .uh-fmp-mini-dot img {
     display: block;
@@ -188,23 +185,23 @@ export const styles = css`
   /* 边缘触发把手（贴边后露出的触发元素，hover 滑出、点击完全恢复） */
   .uh-fmp-edge-trigger {
     position: fixed;
-    width: 14px;
-    height: 44px;
+    width: 8px; /* 厚度 */
+    height: 35px; /* 长度（贴左/右竖把手） */
     border: none;
-    border-radius: 7px;
+    border-radius: 4px;
     padding: 0;
-    background: rgba(14, 23, 49, 0.85);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: rgb(255, 255, 255, 0.85);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
     cursor: pointer;
     z-index: 2147482999;
   }
   .uh-fmp-edge-trigger:hover {
-    background: #0E1731;
+    background: #0E1731; /* hover 深色主色 */
   }
   .uh-fmp-edge-trigger-top,
   .uh-fmp-edge-trigger-bottom {
-    width: 44px;
-    height: 14px;
+    width: 35px;
+    height: 8px;
   }
 
   /* ===== 关闭动画 ===== */
