@@ -48,26 +48,42 @@ export const styles = css`
   .uh-fmp.uh-fmp-pos-center { top: 50%; left: 50%; }
 
   /* ===== 内容 ===== */
+  .uh-fmp-main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
   .uh-fmp-img {
     display: block;
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    /* 太阳码为正方形：宽度撑满卡片，高度按 aspect-ratio 自动 */
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
     border-radius: 8px;
   }
   .uh-fmp-name {
     font-weight: 600;
     text-align: center;
+    max-width: 100%;
+    word-break: break-all;
   }
   .uh-fmp-desc {
     text-align: center;
     word-break: break-all;
   }
 
-  /* ===== 关闭按钮（右上角） ===== */
-  .uh-fmp-close {
+  /* ===== 右上角操作按钮组（最小化/关闭统一定位，任一隐藏不位移） ===== */
+  .uh-fmp-topbar {
     position: absolute;
     top: 8px;
     right: 8px;
+    display: flex;
+    gap: 4px;
+    z-index: 3;
+  }
+  .uh-fmp-close {
     width: 20px;
     height: 20px;
     display: flex;
@@ -88,20 +104,107 @@ export const styles = css`
     color: #333;
   }
 
+  /* ===== 最小化按钮（右上角按钮组内，关闭按钮左侧） ===== */
+  .uh-fmp-minimize {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.075);
+    color: #999999;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .uh-fmp-minimize:hover {
+    color: #333;
+  }
+  /* 最小化态：容器玻璃背景清零，仅剩圆形小图 */
+  .uh-fmp-minimized {
+    width: auto !important; /* 覆盖 inline 卡片宽度，小图自适应 */
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  /* 圆形小图：hover 显示 + 覆盖层 */
+  .uh-fmp-mini-dot {
+    display: block;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    background: #0E1731; /* 主色兜底：无图/裂图时仍为可见圆形 */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+  .uh-fmp-mini-dot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .uh-fmp-mini-plus {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .uh-fmp-mini-dot:hover .uh-fmp-mini-plus {
+    opacity: 1;
+  }
+
   /* ===== 拖拽 ===== */
   .uh-fmp.uh-fmp-dragging {
     transition: none !important;
     cursor: grabbing;
   }
 
-  /* ===== 贴边隐藏（JS 按最近边缘加 uh-fmp-edge-*，露出 var(--uh-fmp-edge) 宽把手） ===== */
-  .uh-fmp.uh-fmp-edge-left { transform: translateX(calc(-100% + var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge-right { transform: translateX(calc(100% - var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge-top { transform: translateY(calc(-100% + var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge-bottom { transform: translateY(calc(100% - var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge:hover,
-  .uh-fmp.uh-fmp-edge:focus-within {
-    transform: translate(0, 0);
+  /* ===== 贴边隐藏（完全隐藏 + 边缘触发把手，JS 控制 hover 类滑出） ===== */
+  .uh-fmp.uh-fmp-edge-left { transform: translateX(-100%); }
+  .uh-fmp.uh-fmp-edge-right { transform: translateX(100%); }
+  .uh-fmp.uh-fmp-edge-top { transform: translateY(-100%); }
+  .uh-fmp.uh-fmp-edge-bottom { transform: translateY(100%); }
+  .uh-fmp.uh-fmp-edge-hover {
+    transform: translate(0, 0) !important;
+  }
+  /* 边缘触发把手（贴边后露出的触发元素，hover 滑出、点击完全恢复） */
+  .uh-fmp-edge-trigger {
+    position: fixed;
+    width: 14px;
+    height: 44px;
+    border: none;
+    border-radius: 7px;
+    padding: 0;
+    background: rgba(14, 23, 49, 0.85);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 2147482999;
+  }
+  .uh-fmp-edge-trigger:hover {
+    background: #0E1731;
+  }
+  .uh-fmp-edge-trigger-top,
+  .uh-fmp-edge-trigger-bottom {
+    width: 44px;
+    height: 14px;
   }
 
   /* ===== 关闭动画 ===== */
@@ -493,6 +596,17 @@ export const styles = css`
     }
     .uh-fmp-close:hover {
       color: #fff;
+    }
+    .uh-fmp-minimize {
+      background: rgba(0, 0, 0, 0.75);
+      border-color: rgba(0, 0, 0, 0.9);
+    }
+    .uh-fmp-minimize:hover {
+      color: #fff;
+    }
+    .uh-fmp-mini-dot {
+      border-color: rgba(28, 28, 32, 0.9);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
     }
     .uh-fmp-modal {
       background: rgba(28, 28, 32, 0.9);

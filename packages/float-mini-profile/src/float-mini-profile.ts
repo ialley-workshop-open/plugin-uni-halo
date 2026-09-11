@@ -101,6 +101,10 @@ export class FloatMiniProfileElement extends LitElement {
     groupOptions: { state: true },
     applyTab: { state: true },
     screenshotRows: { state: true },
+    minimized: { state: true },
+    edgeTrigger: { state: true },
+    edgeSide: { state: true },
+    edgeTriggerStyle: { state: true },
   };
 
   declare applyOpen: boolean;
@@ -115,6 +119,10 @@ export class FloatMiniProfileElement extends LitElement {
   declare groupOptions: Array<{ value: string; label: string }>;
   declare applyTab: "basic" | "author";
   declare screenshotRows: string[];
+  declare minimized: boolean;
+  declare edgeTrigger: boolean;
+  declare edgeSide: string;
+  declare edgeTriggerStyle: string;
 
   private config: FloatMiniProfileConfig;
   private dragState: DragState | null = null;
@@ -135,6 +143,10 @@ export class FloatMiniProfileElement extends LitElement {
     this.groupOptions = [];
     this.applyTab = "basic";
     this.screenshotRows = [""];
+    this.minimized = false;
+    this.edgeTrigger = false;
+    this.edgeSide = "";
+    this.edgeTriggerStyle = "";
   }
 
   connectedCallback(): void {
@@ -191,13 +203,16 @@ export class FloatMiniProfileElement extends LitElement {
   // ===== 拖拽（Pointer Events）+ 贴边隐藏 =====
   private onPointerDown(e: PointerEvent): void {
     const target = e.target as HTMLElement | null;
-    // 关闭按钮与底部操作按钮（申请/友链信息）不触发拖拽：
+    // 操作按钮（关闭/最小化/申请/友链/恢复/贴边把手）不触发拖拽：
     // 否则 setPointerCapture + preventDefault 会干扰 click 合成事件
     if (
       target &&
       (target.closest(".uh-fmp-close") ||
+        target.closest(".uh-fmp-minimize") ||
         target.closest(".uh-fmp-actions") ||
-        target.closest(".uh-fmp-overlay"))
+        target.closest(".uh-fmp-overlay") ||
+        target.closest(".uh-fmp-mini-dot") ||
+        target.closest(".uh-fmp-edge-trigger"))
     ) {
       return;
     }
@@ -212,6 +227,7 @@ export class FloatMiniProfileElement extends LitElement {
       left: rect.left,
       top: rect.top,
     };
+    this.restoreFromEdge(); // 拖拽开始时清除贴边状态与把手
     card.classList.add("uh-fmp-dragging");
     card.style.touchAction = "none";
     card.setPointerCapture(e.pointerId);
@@ -279,8 +295,84 @@ export class FloatMiniProfileElement extends LitElement {
       }
     });
     if (side) {
+      // 清除内联 transform（拖拽 setFree 写入的 translate(0,0) 会覆盖类的贴边位移）
+      card.style.transform = "";
       card.classList.add("uh-fmp-edge", "uh-fmp-edge-" + side);
+      // 边缘触发把手：fixed 定位在对应视口边缘中点
+      this.edgeSide = side;
+      this.edgeTriggerStyle = this.buildEdgeTriggerStyle(side, rect);
+      this.edgeTrigger = true;
     }
+  }
+
+  /** 触发把手内联定位（贴左/右 → 竖把手，贴顶/底 → 横把手，对齐边缘中点） */
+  private buildEdgeTriggerStyle(side: string, rect: DOMRect): string {
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const gap = 2;
+    if (side === "left") {
+      return `left:${gap}px;top:${Math.round(cy - 22)}px;`;
+    }
+    if (side === "right") {
+      return `right:${gap}px;top:${Math.round(cy - 22)}px;`;
+    }
+    if (side === "top") {
+      return `top:${gap}px;left:${Math.round(cx - 22)}px;`;
+    }
+    return `bottom:${gap}px;left:${Math.round(cx - 22)}px;`;
+  }
+
+  private onEdgeTriggerEnter(): void {
+    const card = this.cardEl;
+    if (card) {
+      card.classList.add("uh-fmp-edge-hover");
+    }
+  }
+
+  private onEdgeTriggerLeave(): void {
+    const card = this.cardEl;
+    if (card) {
+      card.classList.remove("uh-fmp-edge-hover");
+    }
+  }
+
+  /** 点击把手：完全恢复卡片（清贴边类与把手） */
+  private restoreFromEdge(): void {
+    const card = this.cardEl;
+    this.edgeTrigger = false;
+    this.edgeSide = "";
+    this.edgeTriggerStyle = "";
+    if (card) {
+      card.classList.remove(
+        "uh-fmp-edge",
+        "uh-fmp-edge-hover",
+        "uh-fmp-edge-left",
+        "uh-fmp-edge-right",
+        "uh-fmp-edge-top",
+        "uh-fmp-edge-bottom",
+      );
+    }
+  }
+
+  // ===== 最小化 =====
+  private onMinimizeClick(): void {
+    this.minimized = true;
+    this.edgeTrigger = false; // 最小化后隐藏贴边触发把手
+    // 最小化后不再贴边（小图保持原位）
+    const card = this.cardEl;
+    if (card) {
+      card.classList.remove(
+        "uh-fmp-edge",
+        "uh-fmp-edge-left",
+        "uh-fmp-edge-right",
+        "uh-fmp-edge-top",
+        "uh-fmp-edge-bottom",
+      );
+    }
+  }
+
+  private onRestoreClick(): void {
+    this.minimized = false;
   }
 
   // ===== 关闭 =====
@@ -536,33 +628,59 @@ export class FloatMiniProfileElement extends LitElement {
       ${this.applyOpen ? this.renderApplyModal() : ""}
       ${this.linksOpen ? this.renderLinksModal() : ""}
       <div
-        class="uh-fmp"
+        class="uh-fmp ${this.minimized ? "uh-fmp-minimized" : ""}"
+        style="width:${size}px"
         @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
         @pointerup=${this.onPointerEnd}
         @pointercancel=${this.onPointerEnd}
+        @mouseleave=${this.onEdgeTriggerLeave}
       >
-        ${c.closeEnabled !== false
-          ? html`<button type="button" class="uh-fmp-close" aria-label="关闭悬浮窗" @click=${this.onCloseClick}>&times;</button>`
-          : ""}
-        ${c.imageUrl
-          ? html`<img class="uh-fmp-img" src=${c.imageUrl} alt=${c.name || "小程序太阳码"} style="width:${size}px;height:${size}px" />`
-          : ""}
-        ${c.name
-          ? html`<div class="uh-fmp-name" style="font-size:${Number(c.nameSize) || 14}px;color:${c.nameColor || "#333333"}">${c.name}</div>`
-          : ""}
-        ${c.description
-          ? html`<div class="uh-fmp-desc" style="font-size:${Number(c.descSize) || 12}px;color:${c.descColor || "#999999"}">${c.description}</div>`
-          : ""}
-        ${c.miniProgramApply
+        <div class="uh-fmp-main" ?hidden=${this.minimized}>
+          <div class="uh-fmp-topbar">
+            <button type="button" class="uh-fmp-minimize" aria-label="最小化" @click=${this.onMinimizeClick}>&minus;</button>
+            ${c.closeEnabled !== false
+              ? html`<button type="button" class="uh-fmp-close" aria-label="关闭悬浮窗" @click=${this.onCloseClick}>&times;</button>`
+              : ""}
+          </div>
+          ${c.imageUrl
+            ? html`<img class="uh-fmp-img" src=${normalizeImageUrl(c.imageUrl)} alt=${c.name || "小程序太阳码"} />`
+            : ""}
+          ${c.name
+            ? html`<div class="uh-fmp-name" style="font-size:${Number(c.nameSize) || 14}px;color:${c.nameColor || "#333333"}">${c.name}</div>`
+            : ""}
+          ${c.description
+            ? html`<div class="uh-fmp-desc" style="font-size:${Number(c.descSize) || 12}px;color:${c.descColor || "#999999"}">${c.description}</div>`
+            : ""}
+          ${c.miniProgramApply
+            ? html`
+                <div class="uh-fmp-actions">
+                  <button type="button" class="uh-fmp-btn" @click=${this.openApply}>我要申请</button>
+                  <button type="button" class="uh-fmp-btn" @click=${this.openLinks}>友链信息</button>
+                  <div class="uh-fmp-hint">小程序申请和友链信息</div>
+                </div>`
+            : ""}
+        </div>
+        ${this.minimized
           ? html`
-              <div class="uh-fmp-actions">
-                <button type="button" class="uh-fmp-btn" @click=${this.openApply}>我要申请</button>
-                <button type="button" class="uh-fmp-btn" @click=${this.openLinks}>友链信息</button>
-                <div class="uh-fmp-hint">小程序申请和友链信息</div>
-              </div>`
+              <button type="button" class="uh-fmp-mini-dot" aria-label="恢复悬浮窗" @click=${this.onRestoreClick}>
+                ${c.imageUrl ? html`<img src=${normalizeImageUrl(c.imageUrl)} alt="" />` : ""}
+                <span class="uh-fmp-mini-plus">+</span>
+              </button>`
           : ""}
       </div>
+      ${this.edgeTrigger
+        ? html`
+            <button
+              type="button"
+              class="uh-fmp-edge-trigger uh-fmp-edge-trigger-${this.edgeSide}"
+              style=${this.edgeTriggerStyle}
+              @mouseenter=${this.onEdgeTriggerEnter}
+              @mouseleave=${this.onEdgeTriggerLeave}
+              @click=${this.restoreFromEdge}
+              aria-label="展开悬浮窗"
+            ></button>`
+        : ""}
     `;
   }
 

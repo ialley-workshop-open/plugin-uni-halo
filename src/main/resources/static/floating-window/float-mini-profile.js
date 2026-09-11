@@ -40,26 +40,42 @@
   .uh-fmp.uh-fmp-pos-center { top: 50%; left: 50%; }
 
   /* ===== 内容 ===== */
+  .uh-fmp-main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
   .uh-fmp-img {
     display: block;
-    max-width: 100%;
-    height: auto;
+    width: 100%;
+    /* 太阳码为正方形：宽度撑满卡片，高度按 aspect-ratio 自动 */
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
     border-radius: 8px;
   }
   .uh-fmp-name {
     font-weight: 600;
     text-align: center;
+    max-width: 100%;
+    word-break: break-all;
   }
   .uh-fmp-desc {
     text-align: center;
     word-break: break-all;
   }
 
-  /* ===== 关闭按钮（右上角） ===== */
-  .uh-fmp-close {
+  /* ===== 右上角操作按钮组（最小化/关闭统一定位，任一隐藏不位移） ===== */
+  .uh-fmp-topbar {
     position: absolute;
     top: 8px;
     right: 8px;
+    display: flex;
+    gap: 4px;
+    z-index: 3;
+  }
+  .uh-fmp-close {
     width: 20px;
     height: 20px;
     display: flex;
@@ -80,20 +96,107 @@
     color: #333;
   }
 
+  /* ===== 最小化按钮（右上角按钮组内，关闭按钮左侧） ===== */
+  .uh-fmp-minimize {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.075);
+    color: #999999;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .uh-fmp-minimize:hover {
+    color: #333;
+  }
+  /* 最小化态：容器玻璃背景清零，仅剩圆形小图 */
+  .uh-fmp-minimized {
+    width: auto !important; /* 覆盖 inline 卡片宽度，小图自适应 */
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+  /* 圆形小图：hover 显示 + 覆盖层 */
+  .uh-fmp-mini-dot {
+    display: block;
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    background: #0E1731; /* 主色兜底：无图/裂图时仍为可见圆形 */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  }
+  .uh-fmp-mini-dot img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .uh-fmp-mini-plus {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .uh-fmp-mini-dot:hover .uh-fmp-mini-plus {
+    opacity: 1;
+  }
+
   /* ===== 拖拽 ===== */
   .uh-fmp.uh-fmp-dragging {
     transition: none !important;
     cursor: grabbing;
   }
 
-  /* ===== 贴边隐藏（JS 按最近边缘加 uh-fmp-edge-*，露出 var(--uh-fmp-edge) 宽把手） ===== */
-  .uh-fmp.uh-fmp-edge-left { transform: translateX(calc(-100% + var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge-right { transform: translateX(calc(100% - var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge-top { transform: translateY(calc(-100% + var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge-bottom { transform: translateY(calc(100% - var(--uh-fmp-edge, 24px))); }
-  .uh-fmp.uh-fmp-edge:hover,
-  .uh-fmp.uh-fmp-edge:focus-within {
-    transform: translate(0, 0);
+  /* ===== 贴边隐藏（完全隐藏 + 边缘触发把手，JS 控制 hover 类滑出） ===== */
+  .uh-fmp.uh-fmp-edge-left { transform: translateX(-100%); }
+  .uh-fmp.uh-fmp-edge-right { transform: translateX(100%); }
+  .uh-fmp.uh-fmp-edge-top { transform: translateY(-100%); }
+  .uh-fmp.uh-fmp-edge-bottom { transform: translateY(100%); }
+  .uh-fmp.uh-fmp-edge-hover {
+    transform: translate(0, 0) !important;
+  }
+  /* 边缘触发把手（贴边后露出的触发元素，hover 滑出、点击完全恢复） */
+  .uh-fmp-edge-trigger {
+    position: fixed;
+    width: 14px;
+    height: 44px;
+    border: none;
+    border-radius: 7px;
+    padding: 0;
+    background: rgba(14, 23, 49, 0.85);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 2147482999;
+  }
+  .uh-fmp-edge-trigger:hover {
+    background: #0E1731;
+  }
+  .uh-fmp-edge-trigger-top,
+  .uh-fmp-edge-trigger-bottom {
+    width: 44px;
+    height: 14px;
   }
 
   /* ===== 关闭动画 ===== */
@@ -486,6 +589,17 @@
     .uh-fmp-close:hover {
       color: #fff;
     }
+    .uh-fmp-minimize {
+      background: rgba(0, 0, 0, 0.75);
+      border-color: rgba(0, 0, 0, 0.9);
+    }
+    .uh-fmp-minimize:hover {
+      color: #fff;
+    }
+    .uh-fmp-mini-dot {
+      border-color: rgba(28, 28, 32, 0.9);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+    }
     .uh-fmp-modal {
       background: rgba(28, 28, 32, 0.9);
       border-color: rgba(255, 255, 255, 0.08);
@@ -558,28 +672,50 @@
       color: rgba(255, 255, 255, 0.4);
     }
   }
-`,Y=[{key:`displayName`,label:`小程序名称`,required:!0},{key:`miniProgramCode`,label:`太阳码图片`,required:!0},{key:`link`,label:`小程序地址`,required:!1},{key:`groupName`,label:`申请分组`,required:!1,type:`select`},{key:`description`,label:`申请描述`,required:!1,type:`textarea`},{key:`applyRemark`,label:`申请说明`,required:!1,type:`textarea`}],X=[{key:`authorName`,label:`作者昵称`,required:!1},{key:`website`,label:`作者网站`,required:!1},{key:`email`,label:`邮箱（选填，用于审核结果通知）`,required:!1}],Z=`uh-fmp-apply-draft`;function Q(e){return e?/^(https?:)?\/\//.test(e)||/^data:/i.test(e)?e:window.location.origin+(e.startsWith(`/`)?e:`/`+e):``}var De=class extends G{static{this.styles=[Ee]}static{this.properties={applyOpen:{state:!0},linksOpen:{state:!0},applySubmitting:{state:!0},captchaId:{state:!0},captchaSrc:{state:!0},linksLoading:{state:!0},linksError:{state:!0},miniInfo:{state:!0},blogger:{state:!0},groupOptions:{state:!0},applyTab:{state:!0},screenshotRows:{state:!0}}}constructor(){super(),this.dragState=null,this.config=K,this.applyOpen=!1,this.linksOpen=!1,this.applySubmitting=!1,this.captchaId=``,this.captchaSrc=``,this.linksLoading=!1,this.linksError=!1,this.miniInfo=null,this.blogger=null,this.groupOptions=[],this.applyTab=`basic`,this.screenshotRows=[``]}connectedCallback(){super.connectedCallback(),(!Te()||this.isClosed())&&this.remove()}firstUpdated(){this.applyPosition()}isClosed(){if(this.config.rememberClosed===!1)return!1;try{return localStorage.getItem(q)===`1`}catch{return!1}}get cardEl(){return this.renderRoot.querySelector(`.uh-fmp`)}applyPosition(){let e=this.cardEl;if(!e)return;let t=this.config,n=t.position||`bottom-right`;e.classList.add(`uh-fmp-pos-`+n);let r=Number(t.offsetX)||0,i=Number(t.offsetY)||0,a=n===`center`||n===`top-center`||n===`bottom-center`?`calc(-50% + `+r+`px)`:r+`px`,o=n===`center`||n===`left-center`||n===`right-center`?`calc(-50% + `+i+`px)`:i+`px`;e.style.transform=`translate(`+a+`, `+o+`)`,e.style.setProperty(`--uh-fmp-edge`,(Number(t.edgeHideDistance)||24)+`px`)}onPointerDown(e){let t=e.target;if(t&&(t.closest(`.uh-fmp-close`)||t.closest(`.uh-fmp-actions`)||t.closest(`.uh-fmp-overlay`)))return;let n=this.cardEl;if(!n)return;let r=n.getBoundingClientRect();this.dragState={startX:e.clientX,startY:e.clientY,left:r.left,top:r.top},n.classList.add(`uh-fmp-dragging`),n.style.touchAction=`none`,n.setPointerCapture(e.pointerId),e.preventDefault()}onPointerMove(e){let t=this.dragState,n=this.cardEl;if(!t||!n)return;let r=t.left+(e.clientX-t.startX),i=t.top+(e.clientY-t.startY);r=Math.max(0,Math.min(r,window.innerWidth-n.offsetWidth)),i=Math.max(0,Math.min(i,window.innerHeight-n.offsetHeight)),this.setFree(r,i)}onPointerEnd(){let e=this.cardEl;this.dragState&&e&&(this.dragState=null,e.classList.remove(`uh-fmp-dragging`),e.style.touchAction=``,this.maybeEdgeHide())}setFree(e,t){let n=this.cardEl;n&&(n.style.left=e+`px`,n.style.top=t+`px`,n.style.right=`auto`,n.style.bottom=`auto`,n.style.transform=`translate(0, 0)`,n.classList.remove(`uh-fmp-edge`))}maybeEdgeHide(){if(!this.config.edgeHideEnabled)return;let e=this.cardEl;if(!e)return;let t=e.getBoundingClientRect(),n={left:t.left,right:window.innerWidth-t.right,top:t.top,bottom:window.innerHeight-t.bottom},r=null,i=80;[`left`,`right`,`top`,`bottom`].forEach(e=>{n[e]<i&&(i=n[e],r=e)}),r&&e.classList.add(`uh-fmp-edge`,`uh-fmp-edge-`+r)}onCloseClick(){if(this.config.rememberClosed!==!1)try{localStorage.setItem(q,`1`)}catch{}let e=this.cardEl;e?(e.classList.add(`uh-fmp-closing`),setTimeout(()=>this.remove(),200)):this.remove()}onOverlayClick(e){e.target.classList.contains(`uh-fmp-overlay`)&&this.closeModals()}closeModals(){this.applyOpen=!1,this.linksOpen=!1}openApply(){this.applyOpen=!0,this.refreshCaptcha(),this.loadGroupOptions(),this.updateComplete.then(()=>this.restoreDraft())}loadGroupOptions(){fetch(Ce).then(e=>e.json()).then(e=>{Array.isArray(e)&&(this.groupOptions=e.map(e=>({value:e.name||``,label:e.displayName||e.name||`未命名`})))}).catch(()=>{})}restoreDraft(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);if(!e)return;let t=this.loadDraft();[...Y,...X].forEach(n=>{let r=e.elements.namedItem(n.key);r&&t[n.key]&&(r.value=String(t[n.key]))});let n=t.screenshots;Array.isArray(n)?this.screenshotRows=n.length?n.slice():[``]:typeof n==`string`&&n.trim()&&(this.screenshotRows=n.split(`
+`,Y=[{key:`displayName`,label:`小程序名称`,required:!0},{key:`miniProgramCode`,label:`太阳码图片`,required:!0},{key:`link`,label:`小程序地址`,required:!1},{key:`groupName`,label:`申请分组`,required:!1,type:`select`},{key:`description`,label:`申请描述`,required:!1,type:`textarea`},{key:`applyRemark`,label:`申请说明`,required:!1,type:`textarea`}],X=[{key:`authorName`,label:`作者昵称`,required:!1},{key:`website`,label:`作者网站`,required:!1},{key:`email`,label:`邮箱（选填，用于审核结果通知）`,required:!1}],Z=`uh-fmp-apply-draft`;function Q(e){return e?/^(https?:)?\/\//.test(e)||/^data:/i.test(e)?e:window.location.origin+(e.startsWith(`/`)?e:`/`+e):``}var De=class extends G{static{this.styles=[Ee]}static{this.properties={applyOpen:{state:!0},linksOpen:{state:!0},applySubmitting:{state:!0},captchaId:{state:!0},captchaSrc:{state:!0},linksLoading:{state:!0},linksError:{state:!0},miniInfo:{state:!0},blogger:{state:!0},groupOptions:{state:!0},applyTab:{state:!0},screenshotRows:{state:!0},minimized:{state:!0},edgeTrigger:{state:!0},edgeSide:{state:!0},edgeTriggerStyle:{state:!0}}}constructor(){super(),this.dragState=null,this.config=K,this.applyOpen=!1,this.linksOpen=!1,this.applySubmitting=!1,this.captchaId=``,this.captchaSrc=``,this.linksLoading=!1,this.linksError=!1,this.miniInfo=null,this.blogger=null,this.groupOptions=[],this.applyTab=`basic`,this.screenshotRows=[``],this.minimized=!1,this.edgeTrigger=!1,this.edgeSide=``,this.edgeTriggerStyle=``}connectedCallback(){super.connectedCallback(),(!Te()||this.isClosed())&&this.remove()}firstUpdated(){this.applyPosition()}isClosed(){if(this.config.rememberClosed===!1)return!1;try{return localStorage.getItem(q)===`1`}catch{return!1}}get cardEl(){return this.renderRoot.querySelector(`.uh-fmp`)}applyPosition(){let e=this.cardEl;if(!e)return;let t=this.config,n=t.position||`bottom-right`;e.classList.add(`uh-fmp-pos-`+n);let r=Number(t.offsetX)||0,i=Number(t.offsetY)||0,a=n===`center`||n===`top-center`||n===`bottom-center`?`calc(-50% + `+r+`px)`:r+`px`,o=n===`center`||n===`left-center`||n===`right-center`?`calc(-50% + `+i+`px)`:i+`px`;e.style.transform=`translate(`+a+`, `+o+`)`,e.style.setProperty(`--uh-fmp-edge`,(Number(t.edgeHideDistance)||24)+`px`)}onPointerDown(e){let t=e.target;if(t&&(t.closest(`.uh-fmp-close`)||t.closest(`.uh-fmp-minimize`)||t.closest(`.uh-fmp-actions`)||t.closest(`.uh-fmp-overlay`)||t.closest(`.uh-fmp-mini-dot`)||t.closest(`.uh-fmp-edge-trigger`)))return;let n=this.cardEl;if(!n)return;let r=n.getBoundingClientRect();this.dragState={startX:e.clientX,startY:e.clientY,left:r.left,top:r.top},this.restoreFromEdge(),n.classList.add(`uh-fmp-dragging`),n.style.touchAction=`none`,n.setPointerCapture(e.pointerId),e.preventDefault()}onPointerMove(e){let t=this.dragState,n=this.cardEl;if(!t||!n)return;let r=t.left+(e.clientX-t.startX),i=t.top+(e.clientY-t.startY);r=Math.max(0,Math.min(r,window.innerWidth-n.offsetWidth)),i=Math.max(0,Math.min(i,window.innerHeight-n.offsetHeight)),this.setFree(r,i)}onPointerEnd(){let e=this.cardEl;this.dragState&&e&&(this.dragState=null,e.classList.remove(`uh-fmp-dragging`),e.style.touchAction=``,this.maybeEdgeHide())}setFree(e,t){let n=this.cardEl;n&&(n.style.left=e+`px`,n.style.top=t+`px`,n.style.right=`auto`,n.style.bottom=`auto`,n.style.transform=`translate(0, 0)`,n.classList.remove(`uh-fmp-edge`))}maybeEdgeHide(){if(!this.config.edgeHideEnabled)return;let e=this.cardEl;if(!e)return;let t=e.getBoundingClientRect(),n={left:t.left,right:window.innerWidth-t.right,top:t.top,bottom:window.innerHeight-t.bottom},r=null,i=80;[`left`,`right`,`top`,`bottom`].forEach(e=>{n[e]<i&&(i=n[e],r=e)}),r&&(e.style.transform=``,e.classList.add(`uh-fmp-edge`,`uh-fmp-edge-`+r),this.edgeSide=r,this.edgeTriggerStyle=this.buildEdgeTriggerStyle(r,t),this.edgeTrigger=!0)}buildEdgeTriggerStyle(e,t){let n=t.left+t.width/2,r=t.top+t.height/2;return e===`left`?`left:2px;top:${Math.round(r-22)}px;`:e===`right`?`right:2px;top:${Math.round(r-22)}px;`:e===`top`?`top:2px;left:${Math.round(n-22)}px;`:`bottom:2px;left:${Math.round(n-22)}px;`}onEdgeTriggerEnter(){let e=this.cardEl;e&&e.classList.add(`uh-fmp-edge-hover`)}onEdgeTriggerLeave(){let e=this.cardEl;e&&e.classList.remove(`uh-fmp-edge-hover`)}restoreFromEdge(){let e=this.cardEl;this.edgeTrigger=!1,this.edgeSide=``,this.edgeTriggerStyle=``,e&&e.classList.remove(`uh-fmp-edge`,`uh-fmp-edge-hover`,`uh-fmp-edge-left`,`uh-fmp-edge-right`,`uh-fmp-edge-top`,`uh-fmp-edge-bottom`)}onMinimizeClick(){this.minimized=!0,this.edgeTrigger=!1;let e=this.cardEl;e&&e.classList.remove(`uh-fmp-edge`,`uh-fmp-edge-left`,`uh-fmp-edge-right`,`uh-fmp-edge-top`,`uh-fmp-edge-bottom`)}onRestoreClick(){this.minimized=!1}onCloseClick(){if(this.config.rememberClosed!==!1)try{localStorage.setItem(q,`1`)}catch{}let e=this.cardEl;e?(e.classList.add(`uh-fmp-closing`),setTimeout(()=>this.remove(),200)):this.remove()}onOverlayClick(e){e.target.classList.contains(`uh-fmp-overlay`)&&this.closeModals()}closeModals(){this.applyOpen=!1,this.linksOpen=!1}openApply(){this.applyOpen=!0,this.refreshCaptcha(),this.loadGroupOptions(),this.updateComplete.then(()=>this.restoreDraft())}loadGroupOptions(){fetch(Ce).then(e=>e.json()).then(e=>{Array.isArray(e)&&(this.groupOptions=e.map(e=>({value:e.name||``,label:e.displayName||e.name||`未命名`})))}).catch(()=>{})}restoreDraft(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);if(!e)return;let t=this.loadDraft();[...Y,...X].forEach(n=>{let r=e.elements.namedItem(n.key);r&&t[n.key]&&(r.value=String(t[n.key]))});let n=t.screenshots;Array.isArray(n)?this.screenshotRows=n.length?n.slice():[``]:typeof n==`string`&&n.trim()&&(this.screenshotRows=n.split(`
 `).map(e=>e.trim()).filter(Boolean),this.screenshotRows.length||(this.screenshotRows=[``]))}loadDraft(){try{let e=localStorage.getItem(Z);return e?JSON.parse(e):{}}catch{return{}}}saveDraft(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);if(!e)return;let t={};[...Y,...X].forEach(n=>{let r=e.elements.namedItem(n.key);t[n.key]=r?.value||``}),t.screenshots=this.screenshotRows.filter(e=>e.trim());try{localStorage.setItem(Z,JSON.stringify(t))}catch{}}clearDraft(){try{localStorage.removeItem(Z)}catch{}}resetApply(){let e=this.renderRoot.querySelector(`.uh-fmp-form`);e&&e.reset(),this.screenshotRows=[``],this.applyTab=`basic`,this.clearDraft()}onFormInput(){this.saveDraft()}refreshCaptcha(){fetch(be).then(e=>e.json()).then(e=>{e&&e.imageBase64&&this.setCaptcha(e)}).catch(()=>{})}setCaptcha(e){this.captchaId=e.id,this.captchaSrc=e.imageBase64}async onApplySubmit(e){e.preventDefault();let t=e.target;for(let e of[{key:`displayName`,message:`请填写小程序名称`,panel:`basic`},{key:`miniProgramCode`,message:`请填写太阳码图片地址`,panel:`basic`},{key:`captchaCode`,message:`请输入验证码`}]){let n=t.elements.namedItem(e.key);if(!n||!n.value.trim()){e.panel&&(this.applyTab=e.panel),alert(e.message);return}}let n={};[...Y,...X].forEach(e=>{let r=t.elements.namedItem(e.key);r&&r.value.trim()&&(n[e.key]=r.value.trim())});let r=this.screenshotRows.map(e=>e.trim()).filter(Boolean);r.length&&(n.screenshots=r);let i=(t.elements.namedItem(`captchaCode`)?.value||``).trim(),a=`?captchaId=`+encodeURIComponent(this.captchaId||``)+`&captchaCode=`+encodeURIComponent(i);this.applySubmitting=!0;try{let e=await fetch(xe+a,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify({spec:n})}),t=await e.json().catch(()=>({}));if(e.status===200||e.status===201){this.applyOpen=!1,this.clearDraft(),alert(`申请提交成功，请等待审核`);return}e.status===403&&t.captcha&&this.setCaptcha(t.captcha),alert(t.message||`提交失败，请重试`)}catch{alert(`网络异常，请稍后重试`)}finally{this.applySubmitting=!1}}openLinks(){this.linksOpen=!0,this.linksLoading=!0,this.linksError=!1,this.miniInfo=null,this.blogger=null,fetch(Se).then(e=>e.json()).then(e=>{let t=e?.pluginConfig,n=e?.authorConfig;this.miniInfo=t?.linkInfo?.miniInfo||null,this.blogger=n?.blogger||null}).catch(()=>{this.linksError=!0}).finally(()=>{this.linksLoading=!1})}render(){let e=this.config,t=Number(e.imageSize)||100;return P`
       ${this.applyOpen?this.renderApplyModal():``}
       ${this.linksOpen?this.renderLinksModal():``}
       <div
-        class="uh-fmp"
+        class="uh-fmp ${this.minimized?`uh-fmp-minimized`:``}"
+        style="width:${t}px"
         @pointerdown=${this.onPointerDown}
         @pointermove=${this.onPointerMove}
         @pointerup=${this.onPointerEnd}
         @pointercancel=${this.onPointerEnd}
+        @mouseleave=${this.onEdgeTriggerLeave}
       >
-        ${e.closeEnabled===!1?``:P`<button type="button" class="uh-fmp-close" aria-label="关闭悬浮窗" @click=${this.onCloseClick}>&times;</button>`}
-        ${e.imageUrl?P`<img class="uh-fmp-img" src=${e.imageUrl} alt=${e.name||`小程序太阳码`} style="width:${t}px;height:${t}px" />`:``}
-        ${e.name?P`<div class="uh-fmp-name" style="font-size:${Number(e.nameSize)||14}px;color:${e.nameColor||`#333333`}">${e.name}</div>`:``}
-        ${e.description?P`<div class="uh-fmp-desc" style="font-size:${Number(e.descSize)||12}px;color:${e.descColor||`#999999`}">${e.description}</div>`:``}
-        ${e.miniProgramApply?P`
-              <div class="uh-fmp-actions">
-                <button type="button" class="uh-fmp-btn" @click=${this.openApply}>我要申请</button>
-                <button type="button" class="uh-fmp-btn" @click=${this.openLinks}>友链信息</button>
-                <div class="uh-fmp-hint">小程序申请和友链信息</div>
-              </div>`:``}
+        <div class="uh-fmp-main" ?hidden=${this.minimized}>
+          <div class="uh-fmp-topbar">
+            <button type="button" class="uh-fmp-minimize" aria-label="最小化" @click=${this.onMinimizeClick}>&minus;</button>
+            ${e.closeEnabled===!1?``:P`<button type="button" class="uh-fmp-close" aria-label="关闭悬浮窗" @click=${this.onCloseClick}>&times;</button>`}
+          </div>
+          ${e.imageUrl?P`<img class="uh-fmp-img" src=${Q(e.imageUrl)} alt=${e.name||`小程序太阳码`} />`:``}
+          ${e.name?P`<div class="uh-fmp-name" style="font-size:${Number(e.nameSize)||14}px;color:${e.nameColor||`#333333`}">${e.name}</div>`:``}
+          ${e.description?P`<div class="uh-fmp-desc" style="font-size:${Number(e.descSize)||12}px;color:${e.descColor||`#999999`}">${e.description}</div>`:``}
+          ${e.miniProgramApply?P`
+                <div class="uh-fmp-actions">
+                  <button type="button" class="uh-fmp-btn" @click=${this.openApply}>我要申请</button>
+                  <button type="button" class="uh-fmp-btn" @click=${this.openLinks}>友链信息</button>
+                  <div class="uh-fmp-hint">小程序申请和友链信息</div>
+                </div>`:``}
+        </div>
+        ${this.minimized?P`
+              <button type="button" class="uh-fmp-mini-dot" aria-label="恢复悬浮窗" @click=${this.onRestoreClick}>
+                ${e.imageUrl?P`<img src=${Q(e.imageUrl)} alt="" />`:``}
+                <span class="uh-fmp-mini-plus">+</span>
+              </button>`:``}
       </div>
+      ${this.edgeTrigger?P`
+            <button
+              type="button"
+              class="uh-fmp-edge-trigger uh-fmp-edge-trigger-${this.edgeSide}"
+              style=${this.edgeTriggerStyle}
+              @mouseenter=${this.onEdgeTriggerEnter}
+              @mouseleave=${this.onEdgeTriggerLeave}
+              @click=${this.restoreFromEdge}
+              aria-label="展开悬浮窗"
+            ></button>`:``}
     `}renderApplyField(e){let t=P`<span>${e.label}${e.required?` *`:``}</span>`;return e.type===`select`?P`
         <label class="uh-fmp-field">
           ${t}
