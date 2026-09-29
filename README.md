@@ -1,3 +1,22 @@
+> [!WARNING]
+> # 仓库即将停止维护
+> 本仓库 **不再进行任何更新**，不接受 Pull Request，Issue 将会被自动关闭。
+>
+> 📌 最新代码与开发请前往新组织仓库：
+> https://github.com/uni-halo
+>
+> 新的 **【UniHalo v3.x】** 已经正式发布版本，并已上架应用市场。
+>
+> 官网主页：https://uni-halo.ialley.cn
+>
+> 应用源码：https://github.com/uni-halo/uni-halo
+> 
+> 插件源码：https://github.com/uni-halo/uni-halo-plugin
+>
+> 应用市场：https://www.halo.run/store/apps/app-aukgwe3y
+
+---
+
 # UniHalo 配置插件
 
 > 为免费开源的 `uni-halo v2.0` 微信小程序提供配套的配置插件。
